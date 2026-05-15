@@ -1,0 +1,84 @@
+import { createRxDatabase, addRxPlugin } from "rxdb";
+import { getRxStorageDexie } from "rxdb/plugins/storage-dexie";
+import { RxDBDevModePlugin } from "rxdb/plugins/dev-mode";
+import { wrappedValidateAjvStorage } from "rxdb/plugins/validate-ajv";
+import { RxDBQueryBuilderPlugin } from "rxdb/plugins/query-builder";
+import { RxDBUpdatePlugin } from "rxdb/plugins/update";
+import { RxDBMigrationSchemaPlugin } from "rxdb/plugins/migration-schema";
+import {
+  exerciseSchema,
+  workoutSessionSchema,
+  workoutTemplateSchema,
+  setSchema,
+  templateExerciseSchema,
+} from "./schemas";
+
+if (import.meta.env.DEV) addRxPlugin(RxDBDevModePlugin);
+addRxPlugin(RxDBQueryBuilderPlugin);
+addRxPlugin(RxDBUpdatePlugin);
+addRxPlugin(RxDBMigrationSchemaPlugin);
+
+let db: Awaited<ReturnType<typeof buildDatabase>> | null = null;
+
+async function buildDatabase() {
+  const storage = import.meta.env.DEV
+    ? wrappedValidateAjvStorage({ storage: getRxStorageDexie() })
+    : getRxStorageDexie();
+
+  const rxdb = await createRxDatabase({
+    name: "maxfitnes_v1",
+    storage,
+    multiInstance: false,
+    ignoreDuplicate: true,
+  });
+
+  const noopMigration = { 1: (doc: any) => doc }
+
+  await rxdb.addCollections({
+    exercises: {
+      schema: exerciseSchema,
+      migrationStrategies: {
+        1: (doc: any) => doc,
+        2: (doc: any) => ({ ...doc, target_muscle: null, secondary_muscles: null, exercise_db_id: null }),
+        3: (doc: any) => ({ ...doc, sticky_note: null }),
+      },
+    },
+    workout_sessions: {
+      schema: workoutSessionSchema,
+      migrationStrategies: {
+        1: (doc: any) => doc,
+        2: (doc: any) => ({ ...doc, is_completed: doc.is_completed ?? false }),
+      },
+    },
+    workout_templates:  {
+      schema: workoutTemplateSchema,
+      migrationStrategies: {
+        1: (doc: any) => doc,
+        2: (doc: any) => ({ ...doc, visibility: doc.visibility ?? 'private' }),
+        3: (doc: any) => ({ ...doc, folder_name: null }),
+      },
+    },
+    sets:               { schema: setSchema,              migrationStrategies: noopMigration },
+    template_exercises: {
+      schema: templateExerciseSchema,
+      migrationStrategies: {
+        1: (doc: any) => ({ ...doc, superset_group: null, rest_seconds: null }),
+      },
+    },
+  });
+
+  return rxdb;
+}
+
+export async function initDatabase() {
+  if (!db) db = await buildDatabase();
+  return db;
+}
+
+export function getDatabase() {
+  if (!db)
+    throw new Error("Database not initialized — call initDatabase() first");
+  return db;
+}
+
+export type AppDatabase = Awaited<ReturnType<typeof buildDatabase>>;

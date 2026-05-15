@@ -1,0 +1,30 @@
+# Secrets
+.env
+.env.production
+.env.staging
+
+# Node
+node_modules/
+dist/
+.cache/
+
+# Capacitor native
+android/
+ios/
+.gradle/
+
+# Docker local data — volumes contain generated secrets, never commit
+supabase/volumes/db/data/
+supabase/volumes/storage/
+supabase/volumes/api/kong.yml
+
+# Claude Code local settings (contains API keys / allowlisted commands)
+.claude/
+
+# Editors
+.vscode/settings.json
+.idea/
+*.swp
+.DS_Store
+
+.env*    

@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=DM+Sans:wght@300;400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #app { height: 100%; background: #0A0A0A; color: #F0F0F0; font-family: 'DM Sans', sans-serif; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #0A0A0A; }
+::-webkit-scrollbar-thumb { background: #2A2A2A; border-radius: 3px; }
+
+/* ── Shared table styles ── */
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.data-table th { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.15em; color: #444; text-align: left; padding: 0.6rem 1rem; border-bottom: 1px solid #1A1A1A; }
+.data-table td { padding: 0.75rem 1rem; border-bottom: 1px solid #111; color: #888; vertical-align: middle; }
+.data-table tr:hover td { background: rgba(255,255,255,0.02); }
+.data-table tr:last-child td { border-bottom: none; }
+
+/* ── Badges ── */
+.badge { display: inline-block; font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.15em; padding: 0.15rem 0.45rem; }
+.badge.free   { background: #1A1A1A; color: #555; }
+.badge.paid   { background: rgba(255,77,0,0.1); color: #FF4D00; border: 1px solid rgba(255,77,0,0.3); }
+.badge.ultra  { background: rgba(255,180,0,0.1); color: #FFB400; border: 1px solid rgba(255,180,0,0.3); }
+.badge.user    { background: #1A1A1A; color: #555; }
+.badge.trainer { background: rgba(0,136,255,0.1); color: #0088FF; border: 1px solid rgba(0,136,255,0.3); }
+.badge.admin   { background: rgba(255,77,0,0.15); color: #FF4D00; border: 1px solid rgba(255,77,0,0.4); }
+
+/* ── Form inputs ── */
+.mf-input, .mf-select, .mf-textarea {
+  background: #1A1A1A; border: 1px solid #2A2A2A; color: #F0F0F0;
+  font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+  padding: 0.6rem 0.75rem; width: 100%;
+}
+.mf-input:focus, .mf-select:focus, .mf-textarea:focus { outline: none; border-color: #FF4D00; }
+.mf-select { cursor: pointer; }
+.mf-textarea { resize: vertical; min-height: 80px; }
+.mf-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.15em; color: #555; display: block; margin-bottom: 0.35rem; }
+
+/* ── Buttons ── */
+.btn { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; letter-spacing: 0.1em; font-size: 0.88rem; padding: 0.55rem 1.25rem; border: none; cursor: pointer; transition: background 0.15s; }
+.btn-primary { background: #FF4D00; color: #fff; clip-path: polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%); }
+.btn-primary:hover { background: #e04400; }
+.btn-ghost { background: #1A1A1A; color: #888; border: 1px solid #2A2A2A; }
+.btn-ghost:hover { border-color: #444; color: #ccc; }
+.btn-danger { background: transparent; color: #FF4444; border: 1px solid rgba(255,68,68,0.3); }
+.btn-danger:hover { background: rgba(255,68,68,0.08); }
+.btn-sm { padding: 0.3rem 0.75rem; font-size: 0.75rem; }
+
+/* ── Section / card ── */
+.card { background: #111; border: 1px solid #1A1A1A; }
+.section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.2em; color: #555; margin-bottom: 0.75rem; }

@@ -1,0 +1,49 @@
+{
+  "name": "max-fitnes",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview",
+    "cap:sync": "vite build && npx cap sync",
+    "typecheck": "vue-tsc --noEmit",
+    "db:types": "npx supabase gen types typescript --db-url postgresql://postgres:postgres@127.0.0.1:54322/postgres > src/lib/database.types.ts"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.2.0",
+    "@capacitor/app": "^7.0.1",
+    "@capacitor/core": "^7.2.0",
+    "@capacitor/ios": "^7.2.0",
+    "@capacitor/local-notifications": "^8.1.0",
+    "@capacitor/network": "^7.0.1",
+    "@capacitor/preferences": "^7.0.1",
+    "@primevue/themes": "^4.3.3",
+    "@supabase/supabase-js": "^2.105.3",
+    "@vueuse/core": "^10.11.0",
+    "chart.js": "^4.4.3",
+    "date-fns": "^3.6.0",
+    "pinia": "^3.0.4",
+    "primeicons": "^7.0.0",
+    "primevue": "^4.3.3",
+    "rxdb": "^17.2.0",
+    "rxjs": "^7.8.2",
+    "uuid": "^9.0.0",
+    "vue": "^3.5.13",
+    "vue-chartjs": "^5.3.1",
+    "vue-draggable-plus": "^0.6.1",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.2.0",
+    "@types/node": "^22.0.0",
+    "@types/uuid": "^9.0.0",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/tsconfig": "^0.7.0",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5",
+    "vite-plugin-pwa": "^0.21.0",
+    "vue-tsc": "^2.2.0"
+  }
+}
