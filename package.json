@@ -4,7 +4,7 @@
   "private": true,
   "workspaces": ["mobile-app"],
   "scripts": {
-    "build": "npm run build -w mobile-app",
+    "build": "npm run build -w mobile-app && npx cap add android",
     "ionic:build": "npm run build -w mobile-app",
     "ionic:serve": "npm run dev -w mobile-app"
   }
