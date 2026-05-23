@@ -27,4 +27,5 @@ supabase/volumes/api/kong.yml
 *.swp
 .DS_Store
 
-.env*    
+.env*
+*.sql.bak
