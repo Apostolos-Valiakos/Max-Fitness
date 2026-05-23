@@ -5,7 +5,7 @@
       <div class="brand">
         <span class="brand-max">MAX</span>
         <span class="brand-fit">FITNESS</span>
-        <span class="brand-admin">ADMIN</span>
+        <span class="brand-admin">{{ auth.isTrainer ? 'TRAINER' : 'ADMIN' }}</span>
       </div>
 
       <nav class="nav">
@@ -16,13 +16,14 @@
       </nav>
 
       <div class="sidebar-footer">
-        <div class="admin-info">
-          <div class="admin-avatar">{{ initials }}</div>
+        <router-link to="/account" class="admin-info">
+          <img v-if="auth.profile?.avatar_url" :src="auth.profile.avatar_url" class="admin-avatar-img" />
+          <div v-else class="admin-avatar">{{ initials }}</div>
           <div class="admin-meta">
             <div class="admin-name">{{ auth.profile?.full_name ?? 'Admin' }}</div>
             <div class="admin-email">{{ auth.profile?.email }}</div>
           </div>
-        </div>
+        </router-link>
         <button class="signout-btn" @click="handleSignOut" title="Sign out">
           <i class="pi pi-sign-out" />
         </button>
@@ -45,15 +46,23 @@ const route  = useRoute()
 const router = useRouter()
 const auth   = useAuthStore()
 
-const navItems = [
-  { to: '/dashboard',   icon: 'pi pi-chart-bar',   label: 'Dashboard'   },
-  { to: '/users',       icon: 'pi pi-users',        label: 'Users'       },
-  { to: '/exercises',   icon: 'pi pi-bolt',         label: 'Exercises'   },
-  { to: '/trainers',    icon: 'pi pi-id-card',      label: 'Trainers'    },
-  { to: '/my-plans',    icon: 'pi pi-list',         label: 'My Plans'    },
-  { to: '/templates',   icon: 'pi pi-copy',         label: 'Templates'   },
-  { to: '/analytics',   icon: 'pi pi-chart-line',   label: 'Analytics'   },
+const adminNav = [
+  { to: '/dashboard',         icon: 'pi pi-chart-bar',    label: 'Dashboard'    },
+  { to: '/users',             icon: 'pi pi-users',        label: 'Users'        },
+  { to: '/exercises',         icon: 'pi pi-bolt',         label: 'Exercises'    },
+  { to: '/trainers',          icon: 'pi pi-id-card',      label: 'Trainers'     },
+  { to: '/my-plans',          icon: 'pi pi-list',         label: 'My Plans'     },
+  { to: '/templates',         icon: 'pi pi-copy',         label: 'Templates'    },
+  { to: '/analytics',         icon: 'pi pi-chart-line',   label: 'Analytics'    },
 ]
+
+const trainerNav = [
+  { to: '/trainer/clients',      icon: 'pi pi-users',      label: 'My Clients'   },
+  { to: '/trainer/plan-builder', icon: 'pi pi-list-check', label: 'Plan Builder' },
+  { to: '/trainer/checkins',     icon: 'pi pi-check-square', label: 'Check-ins'  },
+]
+
+const navItems = computed(() => auth.isTrainer ? trainerNav : adminNav)
 
 const initials = computed(() => {
   const name = auth.profile?.full_name ?? auth.profile?.email ?? 'A'
@@ -103,8 +112,10 @@ async function handleSignOut() {
   border-top: 1px solid #1A1A1A;
   display: flex; align-items: center; gap: 0.75rem;
 }
-.admin-info { flex: 1; display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
+.admin-info { flex: 1; display: flex; align-items: center; gap: 0.6rem; min-width: 0; text-decoration: none; cursor: pointer; border-radius: 4px; padding: 0.25rem; transition: background 0.15s; }
+.admin-info:hover { background: rgba(255,255,255,0.04); }
 .admin-avatar { width: 32px; height: 32px; background: #FF4D00; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 0.85rem; font-weight: 900; color: #fff; flex-shrink: 0; }
+.admin-avatar-img { width: 32px; height: 32px; object-fit: cover; flex-shrink: 0; }
 .admin-meta { min-width: 0; }
 .admin-name  { font-size: 0.78rem; font-weight: 500; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .admin-email { font-size: 0.65rem; color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
