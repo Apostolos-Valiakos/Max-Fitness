@@ -10,6 +10,8 @@ export interface AdminProfile {
   tier: UserTier
   full_name: string | null
   email: string
+  avatar_url: string | null
+  bio: string | null
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -17,7 +19,9 @@ export const useAuthStore = defineStore('auth', () => {
   const profile = ref<AdminProfile | null>(null)
   const loading = ref(true)
 
-  const isAdmin = computed(() => profile.value?.role === 'admin')
+  const isAdmin   = computed(() => profile.value?.role === 'admin')
+  const isTrainer = computed(() => profile.value?.role === 'trainer')
+  const isStaff   = computed(() => profile.value?.role === 'admin' || profile.value?.role === 'trainer')
 
   async function init() {
     loading.value = true
@@ -38,12 +42,39 @@ export const useAuthStore = defineStore('auth', () => {
   async function fetchProfile(authUser: User) {
     const { data } = await supabase
       .from('profiles')
-      .select('id, role, tier, full_name')
+      .select('id, role, tier, full_name, avatar_url, bio')
       .eq('id', authUser.id)
       .single()
     if (data) {
       profile.value = { ...data, email: authUser.email ?? '' } as AdminProfile
     }
+  }
+
+  async function updateProfile(updates: { full_name?: string | null; avatar_url?: string | null; bio?: string | null }) {
+    if (!user.value) return
+    const { error } = await supabase.from('profiles').update(updates).eq('id', user.value.id)
+    if (!error && profile.value) profile.value = { ...profile.value, ...updates }
+  }
+
+  async function uploadAvatar(file: File): Promise<string | null> {
+    if (!user.value) return null
+    const ext  = file.name.split('.').pop() ?? 'jpg'
+    const path = `${user.value.id}/avatar.${ext}`
+    const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
+    if (error) return null
+    const { data } = supabase.storage.from('avatars').getPublicUrl(path)
+    // Bust cache so the browser fetches the new image
+    return data.publicUrl + '?t=' + Date.now()
+  }
+
+  async function changePassword(currentPassword: string, newPassword: string): Promise<string | null> {
+    const { error: signInErr } = await supabase.auth.signInWithPassword({
+      email: profile.value?.email ?? '',
+      password: currentPassword,
+    })
+    if (signInErr) return 'Current password is incorrect.'
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    return error?.message ?? null
   }
 
   async function signOut() {
@@ -52,5 +83,5 @@ export const useAuthStore = defineStore('auth', () => {
     profile.value = null
   }
 
-  return { user, profile, loading, isAdmin, init, signOut }
+  return { user, profile, loading, isAdmin, isTrainer, isStaff, init, updateProfile, uploadAvatar, changePassword, signOut }
 })
