@@ -1,0 +1,7 @@
+{
+  "name": "max-fitness",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue"
+}
