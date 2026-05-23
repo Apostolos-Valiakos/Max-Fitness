@@ -73,6 +73,34 @@
       </div>
     </Dialog>
 
+    <!-- ── MY PROGRAM (trainer-assigned plans) ──────────────────── -->
+    <template v-if="trainerTemplates.length > 0">
+      <div class="section-label" style="margin-top:1.5rem">MY PROGRAM</div>
+      <div class="template-list">
+        <div v-for="t in trainerTemplates" :key="t.id" class="template-card trainer-card">
+          <div class="t-body" @click="router.push('/templates/'+t.id)">
+            <div class="t-name-row">
+              <div class="t-name">{{ t.name }}</div>
+              <span class="t-trainer-badge">TRAINER</span>
+            </div>
+            <div class="t-meta">
+              <span v-if="t.notes" class="t-note">{{ t.notes }}</span>
+              <span class="t-ex-count" v-if="exerciseCounts[t.id] != null">
+                {{ exerciseCounts[t.id] }} exercise{{ exerciseCounts[t.id] !== 1 ? 's' : '' }}
+              </span>
+              <span class="t-trainer-by" v-if="t.assigned_by && creatorNames[t.assigned_by]">
+                by {{ creatorNames[t.assigned_by] }}
+              </span>
+            </div>
+          </div>
+          <div class="t-actions">
+            <button class="t-action" @click.stop="startWorkout(t)" title="Start workout"><i class="pi pi-play" /></button>
+            <button class="t-action" @click.stop="router.push('/templates/'+t.id)" title="View"><i class="pi pi-eye" /></button>
+          </div>
+        </div>
+      </div>
+    </template>
+
     <!-- ── PROGRAMS (public library templates not owned by me) ────── -->
     <template v-if="libraryTemplates.length > 0">
       <div class="section-label" style="margin-top:1.5rem">PROGRAMS</div>
@@ -170,8 +198,11 @@ const newFolderName    = ref('')
 const myTemplates = computed(() =>
   templates.templates.filter(t => t.owner_id === auth.user?.id)
 )
+const trainerTemplates = computed(() =>
+  templates.templates.filter(t => !!t.assigned_by && t.owner_id !== auth.user?.id)
+)
 const libraryTemplates = computed(() =>
-  templates.templates.filter(t => t.is_public && t.owner_id !== auth.user?.id)
+  templates.templates.filter(t => t.is_public && t.owner_id !== auth.user?.id && !t.assigned_by)
 )
 
 // Group myTemplates by folder_name: null → ungrouped (shown without header)
@@ -228,9 +259,10 @@ watch(() => templates.templates, async (list) => {
       exerciseCounts.value[t.id] = tes.length
     }
   }
-  const unknownIds = [...new Set(
-    list.map(t => t.owner_id).filter(id => id !== auth.user?.id && !creatorNames.value[id])
-  )]
+  const unknownIds = [...new Set([
+    ...list.map(t => t.owner_id),
+    ...list.map(t => t.assigned_by).filter(Boolean) as string[],
+  ].filter(id => id !== auth.user?.id && !creatorNames.value[id]))]
   if (unknownIds.length) {
     const { data } = await supabase.from('profiles').select('id, full_name').in('id', unknownIds)
     for (const p of data ?? []) creatorNames.value[p.id] = p.full_name ?? 'Unknown'
@@ -282,6 +314,7 @@ async function handleDuplicate(templateId: string) {
 .template-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.5rem; }
 .template-card { display: flex; align-items: center; gap: 0.75rem; background: #111; border: 1px solid #1A1A1A; padding: 1rem; clip-path: polygon(0 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%); }
 .library-card { border-color: rgba(255,180,0,0.15); }
+.trainer-card { border-color: rgba(255,180,0,0.25); background: rgba(255,180,0,0.03); }
 
 .t-body { flex: 1; min-width: 0; cursor: pointer; }
 .t-name-row { display: flex; align-items: center; gap: 0.5rem; }
@@ -292,6 +325,7 @@ async function handleDuplicate(templateId: string) {
 .t-meta { display: flex; flex-direction: column; gap: 0.1rem; margin-top: 0.15rem; }
 .t-note { font-size: 0.72rem; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .t-ex-count { font-size: 0.7rem; color: #444; }
+.t-trainer-by { font-size: 0.68rem; color: #7a6200; }
 
 .t-actions { display: flex; gap: 0.3rem; }
 .t-action { background: #1A1A1A; border: 1px solid #2A2A2A; color: #666; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem; transition: all 0.15s; }

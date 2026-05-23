@@ -11,13 +11,13 @@ export const useTemplateStore = defineStore('templates', () => {
   const isLoading  = ref(false)
   const FREE_LIMIT = 3
 
-  function subscribeToTemplates(userId: string) {
+  function subscribeToTemplates(_userId: string) {
     const db = getDatabase()
+    // No local selector — RLS guarantees only authorized templates are replicated.
+    // Trainer-assigned plans (owner_id = trainer, assigned_by != null) arrive via
+    // the "workout_templates: client reads trainer-assigned" RLS policy.
     db.workout_templates
-      .find({
-        selector: { $or: [{ owner_id: { $eq: userId } }, { is_public: { $eq: true } }] },
-        sort: [{ updated_at: 'desc' }],
-      })
+      .find({ sort: [{ updated_at: 'desc' }] })
       .$.subscribe(docs => { templates.value = docs.map(d => d.toJSON()).filter(d => !d._deleted) })
   }
 
