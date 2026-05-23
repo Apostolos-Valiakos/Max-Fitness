@@ -21,7 +21,8 @@
 
       <div v-for="trainer in trainers" :key="trainer.id" class="trainer-block card">
         <div class="trainer-header">
-          <div class="trainer-avatar">{{ initials(trainer) }}</div>
+          <img v-if="trainer.avatar_url" :src="trainer.avatar_url" class="trainer-avatar-img" />
+          <div v-else class="trainer-avatar">{{ initials(trainer) }}</div>
           <div class="trainer-info">
             <div class="trainer-name">{{ trainer.full_name ?? '—' }}</div>
             <div class="trainer-email">{{ trainer.email }}</div>
@@ -45,7 +46,7 @@
                 <td><span class="badge" :class="client.tier">{{ client.tier.toUpperCase() }}</span></td>
                 <td class="td-muted">{{ fmtDate(client.assigned_at) }}</td>
                 <td>
-                  <button class="btn btn-danger btn-sm" @click="removeAssignment(client.assignment_id, trainer.id)">
+                  <button class="btn btn-danger btn-sm" @click="removeAssignment(client.assignment_id, trainer.id, client.id)">
                     <i class="pi pi-times" />
                   </button>
                 </td>
@@ -144,19 +145,28 @@ async function load() {
 
 async function handleAssign() {
   assignError.value = ''
-  const { error } = await supabase.from('trainer_assignments').insert({
-    trainer_id: assignForm.trainerId,
-    client_id:  assignForm.clientId,
-    is_active:  true,
-  })
+  const { error } = await supabase
+    .from('trainer_assignments')
+    .upsert(
+      { trainer_id: assignForm.trainerId, client_id: assignForm.clientId, is_active: true },
+      { onConflict: 'trainer_id,client_id' }
+    )
   if (error) { assignError.value = error.message; return }
   showAssignPanel.value = false
   assignForm.trainerId = ''; assignForm.clientId = ''
   await load()
 }
 
-async function removeAssignment(assignmentId: string, trainerId: string) {
-  await supabase.from('trainer_assignments').update({ is_active: false }).eq('id', assignmentId)
+async function removeAssignment(assignmentId: string, trainerId: string, clientId: string) {
+  await Promise.all([
+    supabase.from('trainer_assignments').delete().eq('id', assignmentId),
+    supabase.from('checkin_assignments')
+      .update({ is_active: false, updated_at: new Date().toISOString() })
+      .eq('trainer_id', trainerId).eq('client_id', clientId),
+    supabase.from('trainer_plan_assignments')
+      .update({ is_active: false, updated_at: new Date().toISOString() })
+      .eq('trainer_id', trainerId).eq('client_id', clientId),
+  ])
   const trainer = trainers.value.find(t => t.id === trainerId)
   if (trainer) trainer.clients = trainer.clients.filter(c => c.assignment_id !== assignmentId)
 }
@@ -182,6 +192,7 @@ async function demoteTrainer(trainer: TrainerRow) {
 .trainer-block { margin-bottom: 1rem; overflow: hidden; }
 .trainer-header { display: flex; align-items: center; gap: 0.75rem; padding: 1.25rem; border-bottom: 1px solid #1A1A1A; }
 .trainer-avatar { width: 38px; height: 38px; background: rgba(0,136,255,0.1); border: 1px solid rgba(0,136,255,0.2); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 0.88rem; font-weight: 900; color: #0088FF; flex-shrink: 0; }
+.trainer-avatar-img { width: 38px; height: 38px; object-fit: cover; flex-shrink: 0; }
 .trainer-info  { flex: 1; }
 .trainer-name  { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 800; color: #F0F0F0; }
 .trainer-email { font-size: 0.72rem; color: #555; }

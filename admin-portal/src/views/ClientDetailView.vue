@@ -6,7 +6,8 @@
       <div class="client-header">
         <router-link to="/users" class="back-link"><i class="pi pi-arrow-left" /> Users</router-link>
         <div class="client-hero">
-          <div class="client-avatar">{{ avatarInitials }}</div>
+          <img v-if="profile?.avatar_url" :src="profile.avatar_url" class="client-avatar-img" />
+          <div v-else class="client-avatar">{{ avatarInitials }}</div>
           <div>
             <h1 class="page-title">{{ profile?.full_name ?? 'Unknown' }}</h1>
             <div class="client-meta">
@@ -295,6 +296,7 @@ onMounted(async () => {
 .back-link:hover { color: #888; }
 .client-hero { display: flex; align-items: center; gap: 1.25rem; }
 .client-avatar { width: 56px; height: 56px; background: #FF4D00; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 1.5rem; font-weight: 900; color: #fff; flex-shrink: 0; }
+.client-avatar-img { width: 56px; height: 56px; object-fit: cover; flex-shrink: 0; }
 .page-title { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 900; color: #F0F0F0; letter-spacing: 0.05em; line-height: 1; }
 .client-meta { font-size: 0.78rem; color: #555; margin-top: 0.3rem; display: flex; align-items: center; gap: 0.5rem; }
 

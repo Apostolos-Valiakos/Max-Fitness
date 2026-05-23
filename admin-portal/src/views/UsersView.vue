@@ -40,7 +40,8 @@
           <tr v-for="u in paginated" :key="u.id">
             <td>
               <div class="user-cell">
-                <div class="user-avatar">{{ initials(u) }}</div>
+                <img v-if="u.avatar_url" :src="u.avatar_url" class="user-avatar-img" />
+                <div v-else class="user-avatar">{{ initials(u) }}</div>
                 <div>
                   <div class="user-name">{{ u.full_name ?? '—' }}</div>
                   <div class="user-email">{{ u.email }}</div>
@@ -197,6 +198,7 @@ async function handleDelete() {
 
 .user-cell  { display: flex; align-items: center; gap: 0.75rem; }
 .user-avatar { width: 30px; height: 30px; background: #1A1A1A; border: 1px solid #2A2A2A; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; font-weight: 800; color: #666; flex-shrink: 0; }
+.user-avatar-img { width: 30px; height: 30px; object-fit: cover; flex-shrink: 0; }
 .user-name  { font-size: 0.85rem; color: #C0C0C0; font-weight: 500; }
 .user-email { font-size: 0.72rem; color: #555; margin-top: 0.05rem; }
 .td-muted   { color: #444; font-size: 0.78rem; }
