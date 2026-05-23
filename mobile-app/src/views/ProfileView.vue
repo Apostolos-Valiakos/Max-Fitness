@@ -6,26 +6,32 @@
 
     <!-- Avatar + name -->
     <div class="profile-hero">
-      <div class="avatar">{{ initials }}</div>
+      <div class="avatar-wrap" @click="triggerAvatarPick">
+        <img v-if="auth.profile?.avatar_url" :src="auth.profile.avatar_url" class="avatar-img" />
+        <div v-else class="avatar">{{ initials }}</div>
+        <div class="avatar-overlay"><i class="pi pi-camera" /></div>
+        <input ref="avatarInput" type="file" accept="image/jpeg,image/png,image/webp" class="avatar-file-input" @change="handleAvatarChange" />
+      </div>
       <div class="profile-info">
         <div class="profile-name">{{ auth.profile?.full_name ?? 'Athlete' }}</div>
         <div class="profile-email">{{ auth.user?.email }}</div>
         <div class="tier-pill" :class="auth.profile?.tier">{{ auth.profile?.tier?.toUpperCase() }}</div>
+        <div v-if="avatarUploading" class="avatar-status">Uploading photo…</div>
       </div>
     </div>
 
-    <!-- Trainer (ultra only) -->
-    <section v-if="auth.isUltra" class="section">
+    <!-- Trainer (any user with an active trainer assignment) -->
+    <section v-if="profileStore.trainer" class="section">
       <h2 class="section-title">MY TRAINER</h2>
-      <div class="trainer-card" v-if="profileStore.trainer">
-        <div class="trainer-avatar">{{ trainerInitials }}</div>
+      <div class="trainer-card">
+        <img v-if="profileStore.trainer.avatar_url" :src="profileStore.trainer.avatar_url" class="trainer-avatar-img" />
+        <div v-else class="trainer-avatar">{{ trainerInitials }}</div>
         <div class="trainer-info">
           <div class="trainer-name">{{ profileStore.trainer.full_name ?? 'Your Trainer' }}</div>
           <div class="trainer-label">Personal Trainer</div>
+          <div v-if="profileStore.trainer.bio" class="trainer-bio">{{ profileStore.trainer.bio }}</div>
         </div>
-        <div class="trainer-badge">ULTRA</div>
       </div>
-      <div v-else class="trainer-empty">No trainer assigned yet.</div>
     </section>
 
     <!-- Bodyweight -->
@@ -45,7 +51,25 @@
       <h2 class="section-title">EDIT PROFILE</h2>
       <div class="edit-form">
         <div class="field"><label>FULL NAME</label><InputText v-model="editName" class="mf-input" /></div>
+        <div class="field"><label>EMAIL</label><InputText :value="auth.user?.email" class="mf-input" disabled /></div>
+        <div class="field"><label>BIO</label><textarea v-model="editBio" class="bw-input bio-textarea" rows="3" placeholder="Short description…" maxlength="280" /></div>
+        <div v-if="profileSaved" class="save-ok"><i class="pi pi-check" /> Saved.</div>
         <button class="save-btn" @click="handleSave">SAVE CHANGES</button>
+      </div>
+    </section>
+
+    <!-- Change password -->
+    <section class="section">
+      <h2 class="section-title">CHANGE PASSWORD</h2>
+      <div class="edit-form">
+        <div class="field"><label>CURRENT PASSWORD</label><input v-model="pwCurrent" class="bw-input" type="password" autocomplete="current-password" /></div>
+        <div class="field"><label>NEW PASSWORD</label><input v-model="pwNew" class="bw-input" type="password" autocomplete="new-password" /></div>
+        <div class="field"><label>CONFIRM NEW PASSWORD</label><input v-model="pwConfirm" class="bw-input" type="password" autocomplete="new-password" /></div>
+        <div v-if="pwError" class="pw-error"><i class="pi pi-exclamation-triangle" /> {{ pwError }}</div>
+        <div v-if="pwSaved" class="save-ok"><i class="pi pi-check" /> Password updated.</div>
+        <button class="save-btn" @click="handleChangePassword" :disabled="pwSaving || !pwCurrent || !pwNew || !pwConfirm">
+          {{ pwSaving ? 'Updating…' : 'UPDATE PASSWORD' }}
+        </button>
       </div>
     </section>
 
@@ -158,10 +182,20 @@ const auth         = useAuthStore()
 const profileStore = useProfileStore()
 const settings     = useUserSettingsStore()
 
-const editName      = ref(auth.profile?.full_name ?? '')
-const bwInput       = ref<number | null>(null)
+const editName        = ref(auth.profile?.full_name ?? '')
+const editBio         = ref(auth.profile?.bio ?? '')
+const profileSaved    = ref(false)
+const avatarInput     = ref<HTMLInputElement | null>(null)
+const avatarUploading = ref(false)
+const bwInput         = ref<number | null>(null)
 const showCustomBar = ref(false)
 const customBarInput = ref<number>(settings.barWeightKg)
+const pwCurrent  = ref('')
+const pwNew      = ref('')
+const pwConfirm  = ref('')
+const pwError    = ref('')
+const pwSaved    = ref(false)
+const pwSaving   = ref(false)
 
 const initials = computed(() => {
   const name = auth.profile?.full_name ?? auth.user?.email ?? 'A'
@@ -178,10 +212,11 @@ const memberSince = computed(() => {
 
 onMounted(async () => {
   editName.value = auth.profile?.full_name ?? ''
+  editBio.value  = auth.profile?.bio ?? ''
   await settings.load()
   if (auth.user?.id) {
     await profileStore.fetchBodyweightLog(auth.user.id)
-    if (auth.isUltra) await profileStore.fetchTrainerAssignment(auth.user.id)
+    await profileStore.fetchTrainerAssignment(auth.user.id)
   }
 })
 
@@ -196,8 +231,35 @@ function applyCustomBar() {
   showCustomBar.value = false
 }
 
+function triggerAvatarPick() { avatarInput.value?.click() }
+
+async function handleAvatarChange(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  avatarUploading.value = true
+  const url = await auth.uploadAvatar(file)
+  if (url) await auth.updateProfile({ avatar_url: url })
+  avatarUploading.value = false
+  ;(e.target as HTMLInputElement).value = ''
+}
+
 async function handleSave() {
-  await auth.updateProfile({ full_name: editName.value })
+  await auth.updateProfile({ full_name: editName.value, bio: editBio.value.trim() || null })
+  profileSaved.value = true
+  setTimeout(() => { profileSaved.value = false }, 2500)
+}
+
+async function handleChangePassword() {
+  pwError.value = ''; pwSaved.value = false
+  if (pwNew.value !== pwConfirm.value) { pwError.value = 'New passwords do not match.'; return }
+  if (pwNew.value.length < 6) { pwError.value = 'Password must be at least 6 characters.'; return }
+  pwSaving.value = true
+  const err = await auth.changePassword(pwCurrent.value, pwNew.value)
+  pwSaving.value = false
+  if (err) { pwError.value = err; return }
+  pwSaved.value = true
+  pwCurrent.value = ''; pwNew.value = ''; pwConfirm.value = ''
+  setTimeout(() => { pwSaved.value = false }, 3000)
 }
 
 async function handleLogBW() {
@@ -218,7 +280,13 @@ async function handleSignOut() {
 .view-header { margin-bottom: 1.5rem; }
 .view-title { font-family: 'Barlow Condensed',sans-serif; font-size: 1.8rem; font-weight: 900; color: #F0F0F0; }
 .profile-hero { display: flex; align-items: center; gap: 1.25rem; margin-bottom: 2rem; padding: 1.25rem; background: #111; border: 1px solid #1A1A1A; clip-path: polygon(0 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%); }
-.avatar { width: 60px; height: 60px; background: #FF4D00; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed',sans-serif; font-size: 1.4rem; font-weight: 900; color: #fff; flex-shrink: 0; clip-path: polygon(0 0,100% 0,100% 75%,85% 100%,0 100%); }
+.avatar-wrap { position: relative; width: 60px; height: 60px; cursor: pointer; flex-shrink: 0; }
+.avatar-img { width: 60px; height: 60px; object-fit: cover; display: block; clip-path: polygon(0 0,100% 0,100% 75%,85% 100%,0 100%); }
+.avatar { width: 60px; height: 60px; background: #FF4D00; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed',sans-serif; font-size: 1.4rem; font-weight: 900; color: #fff; clip-path: polygon(0 0,100% 0,100% 75%,85% 100%,0 100%); }
+.avatar-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1rem; opacity: 0; transition: opacity 0.15s; clip-path: polygon(0 0,100% 0,100% 75%,85% 100%,0 100%); }
+.avatar-wrap:active .avatar-overlay { opacity: 1; }
+.avatar-file-input { display: none; }
+.avatar-status { font-size: 0.68rem; color: #FF4D00; margin-top: 0.25rem; }
 .profile-name { font-family: 'Barlow Condensed',sans-serif; font-size: 1.3rem; font-weight: 800; color: #F0F0F0; }
 .profile-email { font-size: 0.75rem; color: #555; margin-bottom: 0.4rem; }
 .tier-pill { display: inline-block; padding: 0.2rem 0.5rem; font-family: 'Barlow Condensed',sans-serif; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.2em; }
@@ -227,13 +295,15 @@ async function handleSignOut() {
 .tier-pill.ultra { background: rgba(255,180,0,0.1); color: #FFB400; border: 1px solid rgba(255,180,0,0.3); }
 .section { margin-bottom: 2rem; }
 .section-title { font-family: 'Barlow Condensed',sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; color: #555; margin-bottom: 0.75rem; }
-.trainer-card { display: flex; align-items: center; gap: 1rem; background: rgba(255,180,0,0.04); border: 1px solid rgba(255,180,0,0.2); padding: 1rem; }
+.trainer-card { display: flex; align-items: flex-start; gap: 1rem; background: rgba(255,180,0,0.04); border: 1px solid rgba(255,180,0,0.2); padding: 1rem; }
+.trainer-avatar-img { width: 44px; height: 44px; object-fit: cover; flex-shrink: 0; border: 1px solid rgba(255,180,0,0.3); }
 .trainer-avatar { width: 44px; height: 44px; background: rgba(255,180,0,0.15); border: 1px solid rgba(255,180,0,0.3); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed',sans-serif; font-size: 1rem; font-weight: 900; color: #FFB400; flex-shrink: 0; }
 .trainer-info { flex: 1; }
 .trainer-name  { font-family: 'Barlow Condensed',sans-serif; font-size: 1rem; font-weight: 800; color: #F0F0F0; }
 .trainer-label { font-size: 0.68rem; color: #555; margin-top: 0.1rem; text-transform: uppercase; letter-spacing: 0.08em; }
-.trainer-badge { font-family: 'Barlow Condensed',sans-serif; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.2em; color: #FFB400; background: rgba(255,180,0,0.1); border: 1px solid rgba(255,180,0,0.3); padding: 0.2rem 0.5rem; }
+.trainer-bio   { font-size: 0.78rem; color: #666; margin-top: 0.5rem; line-height: 1.4; }
 .trainer-empty { font-size: 0.82rem; color: #444; padding: 0.75rem 0; }
+.bio-textarea  { resize: vertical; min-height: 72px; font-family: inherit; line-height: 1.5; width: 100%; }
 .bw-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
 .bw-input { flex: 1; background: #111; border: 1px solid #2A2A2A; color: #F0F0F0; font-family: 'DM Sans',sans-serif; font-size: 1rem; padding: 0.65rem 0.75rem; }
 .bw-input:focus { outline: none; border-color: #FF4D00; }
@@ -245,6 +315,8 @@ async function handleSignOut() {
 .field label { font-family: 'Barlow Condensed',sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.2em; color: #555; }
 :deep(.mf-input.p-inputtext) { width: 100%; background: #111 !important; border: 1px solid #2A2A2A !important; border-radius: 0 !important; color: #F0F0F0 !important; font-size: 0.9rem !important; padding: 0.65rem 0.75rem !important; }
 :deep(.mf-input.p-inputtext:focus) { border-color: #FF4D00 !important; box-shadow: none !important; }
+.save-ok  { font-size: 0.78rem; color: #00A651; display: flex; align-items: center; gap: 0.35rem; }
+.pw-error { font-size: 0.78rem; color: #FF4D00; display: flex; align-items: center; gap: 0.35rem; }
 .save-btn { background: #111; border: 1px solid #FF4D00; color: #FF4D00; font-family: 'Barlow Condensed',sans-serif; font-weight: 700; letter-spacing: 0.1em; padding: 0.7rem; cursor: pointer; transition: background 0.15s; }
 .save-btn:active { background: rgba(255,77,0,0.1); }
 .settings-list { background: #111; border: 1px solid #1A1A1A; }

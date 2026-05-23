@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { supabase } from '@/lib/supabase'
 
 export interface BodyweightEntry { date: string; kg: number }
-export interface TrainerInfo { id: string; full_name: string | null; email: string | null }
+export interface TrainerInfo { id: string; full_name: string | null; email: string | null; avatar_url: string | null; bio: string | null }
 
 export const useProfileStore = defineStore('profile', () => {
   const bodyweightLog = ref<BodyweightEntry[]>([])
@@ -31,13 +31,13 @@ export const useProfileStore = defineStore('profile', () => {
   async function fetchTrainerAssignment(userId: string) {
     const { data } = await supabase
       .from('trainer_assignments')
-      .select('trainer_id, profiles!trainer_assignments_trainer_id_fkey(id, full_name)')
+      .select('trainer_id, profiles!trainer_assignments_trainer_id_fkey(id, full_name, avatar_url, bio)')
       .eq('client_id', userId)
       .eq('is_active', true)
       .maybeSingle()
     if (data?.profiles) {
       const p = data.profiles as any
-      trainer.value = { id: p.id, full_name: p.full_name, email: null }
+      trainer.value = { id: p.id, full_name: p.full_name, email: null, avatar_url: p.avatar_url ?? null, bio: p.bio ?? null }
     } else {
       trainer.value = null
     }
