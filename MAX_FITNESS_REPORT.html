@@ -1,0 +1,1140 @@
+<!doctype html>
+<html lang="el">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Max Fitness — Τεχνική & Οικονομική Αναφορά</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@300;400;500;600&display=swap");
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --orange: #ff4d00;
+        --dark: #111111;
+        --gray: #555;
+        --light: #f7f7f7;
+        --border: #e0e0e0;
+        --green: #00a651;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        font-size: 10.5pt;
+        color: #222;
+        background: #fff;
+        line-height: 1.6;
+      }
+
+      /* ── Page breaks ── */
+      .page-break {
+        page-break-before: always;
+        break-before: page;
+      }
+      .no-break {
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+
+      /* ── Cover ── */
+      .cover {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 60px 64px 48px;
+        background: var(--dark);
+        color: #fff;
+        page-break-after: always;
+        break-after: page;
+      }
+      .cover-logo {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 52pt;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        line-height: 1;
+      }
+      .cover-logo span {
+        color: var(--orange);
+      }
+      .cover-tagline {
+        font-size: 9.5pt;
+        color: #888;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        margin-top: 6px;
+      }
+      .cover-divider {
+        width: 64px;
+        height: 3px;
+        background: var(--orange);
+        margin: 40px 0;
+      }
+      .cover-title {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 28pt;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #fff;
+        line-height: 1.15;
+      }
+      .cover-sub {
+        font-size: 11pt;
+        color: #aaa;
+        margin-top: 12px;
+        font-weight: 300;
+      }
+      .cover-meta {
+        border-top: 1px solid #2a2a2a;
+        padding-top: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+      }
+      .cover-dev-name {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 14pt;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: 0.06em;
+      }
+      .cover-dev-title {
+        font-size: 8.5pt;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        margin-top: 2px;
+      }
+      .cover-date {
+        font-size: 9pt;
+        color: #555;
+        text-align: right;
+      }
+
+      /* ── Body layout ── */
+      .content {
+        padding: 52px 64px;
+      }
+
+      /* ── Section headings ── */
+      .section-num {
+        font-size: 8pt;
+        color: var(--orange);
+        font-weight: 600;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+      h2 {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 20pt;
+        font-weight: 900;
+        letter-spacing: 0.06em;
+        color: var(--dark);
+        text-transform: uppercase;
+        margin-bottom: 4px;
+        line-height: 1;
+      }
+      .h2-rule {
+        height: 2px;
+        background: linear-gradient(to right, var(--orange), transparent);
+        margin-bottom: 20px;
+        margin-top: 6px;
+      }
+      h3 {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 13pt;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--dark);
+        margin: 24px 0 10px;
+      }
+      h4 {
+        font-size: 9.5pt;
+        font-weight: 600;
+        color: var(--orange);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        margin: 16px 0 6px;
+      }
+
+      p {
+        margin-bottom: 10px;
+        color: #333;
+      }
+
+      /* ── Feature list ── */
+      .feature-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px 24px;
+        margin-bottom: 16px;
+      }
+      .feature-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 9.5pt;
+        color: #333;
+        padding: 8px 10px;
+        background: var(--light);
+        border-left: 3px solid var(--orange);
+      }
+      .feature-item strong {
+        color: var(--dark);
+      }
+      .fi-icon {
+        color: var(--orange);
+        font-size: 10pt;
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+
+      /* ── Role badge ── */
+      .role-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .role-badge {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 8pt;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        padding: 3px 10px;
+        border: 1px solid;
+      }
+      .role-badge.admin {
+        color: var(--orange);
+        border-color: var(--orange);
+        background: rgba(255, 77, 0, 0.06);
+      }
+      .role-badge.trainer {
+        color: #4da6ff;
+        border-color: #4da6ff;
+        background: rgba(77, 166, 255, 0.06);
+      }
+      .role-badge.client {
+        color: var(--green);
+        border-color: var(--green);
+        background: rgba(0, 166, 81, 0.06);
+      }
+
+      /* ── Tech table ── */
+      .tech-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+      .tech-card {
+        border: 1px solid var(--border);
+        padding: 12px 14px;
+      }
+      .tech-name {
+        font-weight: 600;
+        font-size: 9.5pt;
+        color: var(--dark);
+      }
+      .tech-desc {
+        font-size: 8.5pt;
+        color: #777;
+        margin-top: 2px;
+      }
+
+      /* ── Info box ── */
+      .info-box {
+        border-left: 4px solid var(--orange);
+        background: var(--light);
+        padding: 14px 18px;
+        margin: 16px 0;
+        font-size: 9.5pt;
+        color: #444;
+      }
+      .info-box strong {
+        color: var(--dark);
+      }
+
+      /* ── Financial ── */
+      .financial-section {
+        background: var(--dark);
+        color: #fff;
+        padding: 52px 64px;
+        page-break-before: always;
+        break-before: page;
+      }
+      .financial-section h2 {
+        color: #fff;
+      }
+      .financial-section h3 {
+        color: #eee;
+        border-bottom: 1px solid #2a2a2a;
+        padding-bottom: 6px;
+      }
+      .financial-section h4 {
+        color: var(--orange);
+      }
+      .financial-section p {
+        color: #aaa;
+      }
+      .financial-section .h2-rule {
+        background: linear-gradient(to right, var(--orange), #2a2a2a);
+      }
+
+      .pricing-cards {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin: 20px 0;
+      }
+      .pricing-card {
+        border: 1px solid #2a2a2a;
+        padding: 24px;
+        position: relative;
+      }
+      .pricing-card.recommended {
+        border-color: var(--orange);
+      }
+      .rec-badge {
+        position: absolute;
+        top: -11px;
+        left: 20px;
+        background: var(--orange);
+        color: #fff;
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 7.5pt;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        padding: 2px 10px;
+        text-transform: uppercase;
+      }
+      .pricing-card-title {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 14pt;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #fff;
+        margin-bottom: 6px;
+      }
+      .pricing-card-subtitle {
+        font-size: 8.5pt;
+        color: #777;
+        margin-bottom: 16px;
+      }
+      .pricing-amount {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 28pt;
+        font-weight: 900;
+        color: var(--orange);
+        line-height: 1;
+      }
+      .pricing-amount span {
+        font-size: 12pt;
+        color: #888;
+        font-weight: 400;
+      }
+
+      .price-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 7px 0;
+        border-bottom: 1px solid #1e1e1e;
+        font-size: 9pt;
+      }
+      .price-row:last-child {
+        border-bottom: none;
+      }
+      .price-row .label {
+        color: #888;
+      }
+      .price-row .value {
+        color: #fff;
+        font-weight: 500;
+      }
+      .price-row .value.highlight {
+        color: var(--orange);
+        font-weight: 700;
+      }
+      .price-row .value.green {
+        color: var(--green);
+        font-weight: 700;
+      }
+
+      .scenario-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 9pt;
+        margin-top: 10px;
+      }
+      .scenario-table th {
+        background: #1a1a1a;
+        color: #888;
+        text-align: left;
+        padding: 8px 10px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 7.5pt;
+      }
+      .scenario-table td {
+        padding: 8px 10px;
+        border-bottom: 1px solid #1e1e1e;
+        color: #ccc;
+      }
+      .scenario-table td.highlight {
+        color: var(--orange);
+        font-weight: 600;
+      }
+      .scenario-table td.green {
+        color: var(--green);
+        font-weight: 600;
+      }
+
+      .recommendation-box {
+        border: 2px solid var(--orange);
+        padding: 24px;
+        margin-top: 28px;
+        background: rgba(255, 77, 0, 0.05);
+      }
+      .rec-title {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 12pt;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--orange);
+        margin-bottom: 12px;
+      }
+      .rec-text {
+        font-size: 9.5pt;
+        color: #bbb;
+        line-height: 1.7;
+      }
+      .rec-text strong {
+        color: #fff;
+      }
+
+      .signature-block {
+        margin-top: 48px;
+        border-top: 1px solid #2a2a2a;
+        padding-top: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        font-size: 9pt;
+        color: #555;
+      }
+      .sig-name {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 12pt;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: 0.06em;
+      }
+      .sig-title {
+        color: #666;
+        margin-top: 2px;
+        font-size: 8.5pt;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      /* ── Print ── */
+      @media print {
+        @page {
+          size: A4;
+          margin: 0;
+        }
+        body {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        .cover {
+          min-height: 100vh;
+        }
+        .no-print {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ════════════════════════════════════════════════════════════ COVER -->
+    <div class="cover">
+      <div>
+        <div class="cover-logo"><span>MAX</span>FITNESS</div>
+        <div class="cover-tagline">
+          Ολοκληρωμένη Πλατφόρμα Διαχείρισης Γυμναστηρίου
+        </div>
+        <div class="cover-divider"></div>
+        <div class="cover-title">
+          Τεχνική Παρουσίαση &<br />Οικονομική Ανάλυση
+        </div>
+        <div class="cover-sub">
+          Αναλυτική περιγραφή λειτουργιών, αρχιτεκτονικής και μοντέλου
+          κοστολόγησης
+        </div>
+      </div>
+      <div class="cover-meta">
+        <div>
+          <div class="cover-dev-name">Apostolos Valiakos</div>
+          <div class="cover-dev-title">Full-Stack Developer</div>
+        </div>
+        <div class="cover-date">
+          Μάιος 2026<br />
+          Έκδοση 1.0
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════ BODY -->
+    <div class="content">
+      <!-- ── 1. Εισαγωγή ── -->
+      <div class="section-num">01</div>
+      <h2>Εισαγωγή</h2>
+      <div class="h2-rule"></div>
+
+      <p>
+        Το <strong>Max Fitness</strong> είναι μια ολοκληρωμένη ψηφιακή πλατφόρμα
+        σχεδιασμένη αποκλειστικά για τις ανάγκες σύγχρονων γυμναστηρίων.
+        Αποτελείται από τρία αλληλένδετα συστήματα: μια
+        <strong>πύλη διαχείρισης</strong> για τους υπευθύνους του γυμναστηρίου,
+        μια <strong>πύλη προπονητή</strong> για τους personal trainers, και μια
+        <strong>εφαρμογή κινητού</strong> για τους πελάτες.
+      </p>
+      <p>
+        Ο στόχος της πλατφόρμας είναι να ψηφιοποιήσει πλήρως τη σχέση
+        γυμναστηρίου–προπονητή–πελάτη: παρακολούθηση προπονήσεων, ανάθεση και
+        διαχείριση προγραμμάτων άσκησης, εβδομαδιαία check-ins με φωτογραφίες,
+        παρακολούθηση σωματικών μετρήσεων και εκτενής ανάλυση στατιστικών.
+      </p>
+
+      <div class="info-box">
+        <strong>Τι λύνει:</strong> Αντικαθιστά spreadsheets, WhatsApp ομάδες και
+        χαρτί–μολύβι με ένα ενιαίο, ασφαλές σύστημα που εξοικονομεί χρόνο στον
+        προπονητή, αυξάνει τη διατηρησιμότητα πελατών και δίνει στον διαχειριστή
+        πλήρη εικόνα της επιχείρησης σε πραγματικό χρόνο.
+      </div>
+
+      <!-- ── 2. Τεχνολογίες ── -->
+      <div class="section-num" style="margin-top: 36px">02</div>
+      <h2>Τεχνολογίες & Αρχιτεκτονική</h2>
+      <div class="h2-rule"></div>
+
+      <p>
+        Η πλατφόρμα χτίστηκε με σύγχρονες, production-ready τεχνολογίες που
+        εξασφαλίζουν αξιοπιστία, επεκτασιμότητα και μακροχρόνια συντηρησιμότητα.
+      </p>
+
+      <div class="tech-grid">
+        <div class="tech-card">
+          <div class="tech-name">Vue.js 3 + TypeScript</div>
+          <div class="tech-desc">
+            Frontend framework για admin portal & trainer portal. Πλήρης
+            type-safety με TypeScript.
+          </div>
+        </div>
+        <div class="tech-card">
+          <div class="tech-name">Supabase (Backend)</div>
+          <div class="tech-desc">
+            PostgreSQL βάση δεδομένων, authentication, αποθήκευση αρχείων,
+            real-time subscriptions.
+          </div>
+        </div>
+        <div class="tech-card">
+          <div class="tech-name">Row Level Security</div>
+          <div class="tech-desc">
+            Πολιτικές ασφαλείας σε επίπεδο βάσης δεδομένων: κάθε ρόλος βλέπει
+            μόνο τα δικά του δεδομένα.
+          </div>
+        </div>
+        <div class="tech-card">
+          <div class="tech-name">RxDB (Offline-First)</div>
+          <div class="tech-desc">
+            Τοπική βάση δεδομένων στην εφαρμογή κινητού. Λειτουργεί και χωρίς
+            internet, συγχρονίζει όταν επιστρέψει σύνδεση.
+          </div>
+        </div>
+        <div class="tech-card">
+          <div class="tech-name">Supabase Storage</div>
+          <div class="tech-desc">
+            Ασφαλής αποθήκευση φωτογραφιών check-in και avatars με υπογεγραμμένα
+            URLs.
+          </div>
+        </div>
+        <div class="tech-card">
+          <div class="tech-name">Chart.js + date-fns</div>
+          <div class="tech-desc">
+            Διαδραστικά γραφήματα για analytics και χρονοσειρές δεδομένων.
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 3. Λειτουργίες ── -->
+      <div class="section-num" style="margin-top: 36px">03</div>
+      <h2>Λειτουργίες Πλατφόρμας</h2>
+      <div class="h2-rule"></div>
+
+      <!-- 3.1 Admin -->
+      <div class="role-header">
+        <h3 style="margin: 0">3.1 Πύλη Διαχειριστή</h3>
+        <span class="role-badge admin">ADMIN</span>
+      </div>
+      <p>
+        Ο διαχειριστής έχει πλήρη εικόνα και έλεγχο όλης της επιχείρησης μέσω
+        web browser.
+      </p>
+
+      <h4>Dashboard & Analytics</h4>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            <strong>Overview:</strong> Συνολικοί χρήστες, sessions, όγκος (kg),
+            ενεργοί αυτή την εβδομάδα
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            <strong>Growth:</strong> Νέες εγγραφές ανά μήνα, retention 7/30/90
+            ημερών, churn χρηστών
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            <strong>Revenue:</strong> Εκτιμώμενα μηνιαία έσοδα ανά tier, ανάλυση
+            συνδρομών
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            <strong>Engagement:</strong> Μέση διάρκεια session, peak
+            ώρες/ημέρες, όγκος ανά εβδομάδα
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            <strong>Trainers:</strong> Ποσοστό ολοκλήρωσης check-in, μέσος
+            χρόνος απάντησης ανά προπονητή
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            <strong>Content:</strong> Δημοφιλέστερες ασκήσεις/προγράμματα,
+            ανάλυση ανά μυϊκή ομάδα
+          </div>
+        </div>
+      </div>
+
+      <h4>Διαχείριση Χρηστών</h4>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Πλήρης λίστα χρηστών με αναζήτηση, φίλτρα ανά ρόλο/tier και
+            pagination
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Ανύψωση χρήστη σε trainer ή admin απευθείας από το interface
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Αλλαγή subscription tier (free → paid → ultra) για κάθε χρήστη
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Λεπτομερής προφίλ πελάτη: στατιστικά προπονήσεων, PRs, σωματικές
+            μετρήσεις
+          </div>
+        </div>
+      </div>
+
+      <h4>Διαχείριση Προπονητών</h4>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Ανάθεση πελατών σε προπονητές (many-to-many, με αυτόματο
+            de-activation παλαιών αναθέσεων)
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>Εποπτεία των πελατών κάθε προπονητή και μαζική διαχείριση</div>
+        </div>
+      </div>
+
+      <h4>Βιβλιοθήκη Ασκήσεων & Templates</h4>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Διαχείριση παγκόσμιας βιβλιοθήκης ασκήσεων (muscle group, equipment,
+            οδηγίες)
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Δημιουργία προτύπων προγραμμάτων άσκησης για όλους τους χρήστες
+          </div>
+        </div>
+      </div>
+
+      <!-- 3.2 Trainer -->
+      <div class="role-header" style="margin-top: 28px">
+        <h3 style="margin: 0">3.2 Πύλη Προπονητή</h3>
+        <span class="role-badge trainer">TRAINER</span>
+      </div>
+      <p>
+        Ο προπονητής έχει τα δικά του εργαλεία, αποκλειστικά για τους
+        ανατεθειμένους πελάτες του.
+      </p>
+
+      <h4>Διαχείριση Πελατών</h4>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Λίστα πελατών με αριθμό sessions και εκκρεμή check-ins σε πραγματικό
+            χρόνο
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Αναλυτική σελίδα προόδου κάθε πελάτη: γραφήματα, PRs, σωματικές
+            μετρήσεις
+          </div>
+        </div>
+      </div>
+
+      <h4>Plan Builder</h4>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Δημιουργία εξατομικευμένων προγραμμάτων άσκησης για κάθε πελάτη
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Ανάθεση προγράμματος σε πελάτη — εμφανίζεται αυτόματα στο κινητό του
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Drag-and-drop σειρά ασκήσεων, supersets, αριθμός series,
+            επαναλήψεις, ξεκούραση
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Αλλαγές στο πρόγραμμα ενημερώνονται αυτόματα στον πελάτη χωρίς
+            επανάθεση
+          </div>
+        </div>
+      </div>
+
+      <h4>Σύστημα Check-In</h4>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Δημιουργία ερωτηματολογίων check-in με τύπους ερωτήσεων: κείμενο,
+            αριθμός, slider, επιλογή, φωτογραφία
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Ανάθεση check-in σε πελάτη με συχνότητα: εβδομαδιαία, δεκαπενθήμερη,
+            μηνιαία ή χειροκίνητη
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Προβολή απαντήσεων και φωτογραφιών πελάτη με δυνατότητα
+            εγγεγραμμένων ασφαλών URLs
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Απάντηση προπονητή στον πελάτη απευθείας μέσα στο check-in — ορατή
+            στην εφαρμογή κινητού
+          </div>
+        </div>
+      </div>
+
+      <!-- 3.3 Mobile -->
+      <div class="role-header no-break" style="margin-top: 28px">
+        <h3 style="margin: 0">3.3 Εφαρμογή Κινητού (Πελάτες)</h3>
+        <span class="role-badge client">CLIENT</span>
+      </div>
+      <p>
+        Η εφαρμογή κινητού είναι offline-first: λειτουργεί χωρίς σύνδεση
+        internet και συγχρονίζεται αυτόματα όταν υπάρχει δίκτυο.
+      </p>
+
+      <h4>Παρακολούθηση Προπονήσεων</h4>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Έναρξη προπόνησης από template ή ελεύθερης μορφής, καταγραφή
+            series/βάρος/επαναλήψεις
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Αυτόματη παρακολούθηση προσωπικών ρεκόρ (PRs) ανά άσκηση και αριθμό
+            επαναλήψεων
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Χρονόμετρο ξεκούρασης, σημειώσεις ανά άσκηση, sticky notes για
+            ασκήσεις
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>Ιστορικό προπονήσεων με πλήρη δεδομένα και στατιστικά</div>
+        </div>
+      </div>
+
+      <h4>Πρόγραμμα Προπονητή (MY PROGRAM)</h4>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Εμφάνιση ανατεθειμένου προγράμματος από τον προπονητή σε ξεχωριστή
+            ενότητα
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Αυτόματη ενημέρωση όταν ο προπονητής τροποποιεί το πρόγραμμα
+          </div>
+        </div>
+      </div>
+
+      <h4>Σωματικές Μετρήσεις & Σωματικό Βάρος</h4>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Καταγραφή μετρήσεων: βάρος, λίπος%, στήθος, μέση, ισχία, χέρια,
+            μηρούς
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>Γράφημα εξέλιξης σωματικού βάρους (90 ημέρες)</div>
+        </div>
+      </div>
+
+      <h4>Check-In & Επικοινωνία με Προπονητή</h4>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Συμπλήρωση εβδομαδιαίου check-in με κείμενο, αριθμητικές απαντήσεις
+            και φωτογραφίες
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>Προβολή ιστορικού check-ins και απαντήσεων του προπονητή</div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Εμφάνιση στοιχείων ανατεθειμένου προπονητή (φωτογραφία, bio,
+            ονοματεπώνυμο)
+          </div>
+        </div>
+      </div>
+
+      <h4>Προφίλ & Ρυθμίσεις</h4>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Επεξεργασία προφίλ: ονοματεπώνυμο, φωτογραφία, σύντομη βιογραφία
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>Αλλαγή κωδικού πρόσβασης με επιβεβαίωση τρέχοντος κωδικού</div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Επιλογή μονάδας βάρους (kg / lbs), ρύθμιση βάρους μπάρας και
+            διαθέσιμων δίσκων
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 4. Ασφάλεια ── -->
+      <div class="section-num" style="margin-top: 36px">04</div>
+      <h2>Ασφάλεια & Υποδομή</h2>
+      <div class="h2-rule"></div>
+
+      <div class="feature-grid">
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            <strong>Row Level Security (RLS):</strong> Κάθε χρήστης βλέπει
+            αποκλειστικά τα δικά του δεδομένα — σε επίπεδο βάσης, όχι μόνο
+            κώδικα
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            <strong>JWT Authentication:</strong> Ασφαλής είσοδος με
+            κρυπτογραφημένα tokens που λήγουν αυτόματα
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            <strong>Role-Based Access:</strong> Τρία επίπεδα δικαιωμάτων (admin
+            / trainer / user) με αυστηρό διαχωρισμό
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            <strong>Ασφαλής Αποθήκευση:</strong> Φωτογραφίες check-in σε private
+            bucket με signed URLs που λήγουν σε 1 ώρα
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            <strong>Offline Encryption:</strong> Τοπικά δεδομένα κινητού
+            αποθηκεύονται κρυπτογραφημένα στη συσκευή
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            <strong>Scalable Infrastructure:</strong> Supabase cloud — αυτόματη
+            κλιμάκωση χωρίς διαχείριση servers
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /content -->
+
+    <!-- ════════════════════════════════════════════════════════ FINANCIAL -->
+    <div class="financial-section">
+      <div class="section-num" style="color: #555">05</div>
+      <h2>Οικονομική Ανάλυση</h2>
+      <div class="h2-rule"></div>
+
+      <p style="margin-bottom: 24px">
+        Παρακάτω παρουσιάζονται δύο εναλλακτικά μοντέλα τιμολόγησης. Και τα δύο
+        καλύπτουν πλήρως την ανάπτυξη, την εγκατάσταση και την παροχή υπηρεσιών
+        συντήρησης.
+      </p>
+
+      <div class="pricing-cards">
+        <!-- Option A -->
+        <div class="pricing-card no-break">
+          <div class="pricing-card-title">Επιλογή Α — Εφάπαξ</div>
+          <div class="pricing-card-subtitle">
+            Μία πληρωμή, πλήρης ιδιοκτησία κώδικα
+          </div>
+          <div class="pricing-amount">€9.500 <span>εφάπαξ</span></div>
+          <div style="margin-top: 20px">
+            <div class="price-row">
+              <span class="label">Ανάπτυξη & Design</span
+              ><span class="value">περιλαμβάνεται</span>
+            </div>
+            <div class="price-row">
+              <span class="label">Εγκατάσταση & Configuration</span
+              ><span class="value">περιλαμβάνεται</span>
+            </div>
+            <div class="price-row">
+              <span class="label">Εκπαίδευση διαχειριστή</span
+              ><span class="value">περιλαμβάνεται</span>
+            </div>
+            <div class="price-row">
+              <span class="label">Εγγύηση bugs (3 μήνες)</span
+              ><span class="value">περιλαμβάνεται</span>
+            </div>
+            <div class="price-row">
+              <span class="label">Μηνιαία συντήρηση / updates</span
+              ><span class="value highlight">+ €250/μήνα</span>
+            </div>
+            <div class="price-row">
+              <span class="label">Κόστος έτους 1</span
+              ><span class="value highlight">€12.500</span>
+            </div>
+            <div class="price-row">
+              <span class="label">Κόστος από έτος 2+</span
+              ><span class="value">€3.000/έτος</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Option B -->
+        <div class="pricing-card recommended no-break">
+          <div class="rec-badge">✦ Συνιστάται</div>
+          <div class="pricing-card-title">Επιλογή Β — Ποσοστό Εσόδων</div>
+          <div class="pricing-card-subtitle">
+            Χαμηλό upfront, επαναλαμβανόμενο μοντέλο ανάπτυξης
+          </div>
+          <div class="pricing-amount">4% <span>μηνιαίων εσόδων</span></div>
+          <div style="margin-top: 20px">
+            <div class="price-row">
+              <span class="label">Εφάπαξ setup fee</span
+              ><span class="value highlight">€1.500</span>
+            </div>
+            <div class="price-row">
+              <span class="label">Ελάχιστο μηνιαίο ποσό</span
+              ><span class="value">€150/μήνα</span>
+            </div>
+            <div class="price-row">
+              <span class="label">Συντήρηση & νέες λειτουργίες</span
+              ><span class="value green">περιλαμβάνεται</span>
+            </div>
+            <div class="price-row">
+              <span class="label">SLA support</span
+              ><span class="value green">περιλαμβάνεται</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scenario table -->
+      <h3 style="margin-top: 28px">Ανάλυση Σεναρίων — Επιλογή Β (4% εσόδων)</h3>
+      <p style="margin-bottom: 10px">
+        Για γυμναστήριο με μηνιαία έσοδα €5.000 – €20.000+:
+      </p>
+      <table class="scenario-table">
+        <thead>
+          <tr>
+            <th>Μηνιαία Έσοδα Γυμναστηρίου</th>
+            <th>4% Ποσοστό</th>
+            <th>Ετήσιο Κόστος</th>
+            <th>ROI (εξοικ. χρόνου)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>€5.000 / μήνα</td>
+            <td class="highlight">€200</td>
+            <td>€3.900 (incl. setup)</td>
+            <td class="green">~8–10 ώρες/μήνα</td>
+          </tr>
+          <tr>
+            <td>€8.000 / μήνα</td>
+            <td class="highlight">€320</td>
+            <td>€5.340 (incl. setup)</td>
+            <td class="green">~12–15 ώρες/μήνα</td>
+          </tr>
+          <tr>
+            <td>€12.000 / μήνα</td>
+            <td class="highlight">€480</td>
+            <td>€7.260 (incl. setup)</td>
+            <td class="green">~15–20 ώρες/μήνα</td>
+          </tr>
+          <tr>
+            <td>€20.000+ / μήνα</td>
+            <td class="highlight">€800+</td>
+            <td>€11.100+ (incl. setup)</td>
+            <td class="green">~20+ ώρες/μήνα</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div
+        class="info-box"
+        style="
+          background: #1a1a1a;
+          border-color: var(--orange);
+          color: #aaa;
+          margin-top: 16px;
+        "
+      >
+        <strong style="color: #fff">Σημείωση:</strong> Ο υπολογισμός ROI
+        βασίζεται στην εξοικονόμηση χρόνου προπονητών και διαχειριστή από
+        χειροκίνητη παρακολούθηση προγραμμάτων, check-ins και επικοινωνίας
+        (εκτίμηση: €15–20/ώρα).
+      </div>
+
+      <!-- Recommendation -->
+      <div class="recommendation-box no-break">
+        <div class="rec-title">✦ Σύσταση — Επιλογή Β: Ποσοστό Εσόδων</div>
+        <div class="rec-text">
+          Το μοντέλο ποσοστού εσόδων εξυπηρετεί καλύτερα
+          <strong>και τα δύο μέρη</strong>. Για το γυμναστήριο, αντικαθιστά ένα
+          μεγάλο εφάπαξ κόστος με ένα προβλέψιμο, μικρό μηνιαίο ποσό — και το
+          κόστος δικαιολογείται πλήρως από την αξία που παράγει. Για τον
+          developer, δημιουργεί σταθερό, επαναλαμβανόμενο εισόδημα που
+          κινητοποιεί τη συνεχή βελτίωση της πλατφόρμας.<br /><br />
+          Το <strong>minimum των €150/μήνα</strong> εξασφαλίζει τη βιωσιμότητα
+          της συντήρησης ακόμα και σε δύσκολους μήνες, ενώ το ποσοστό
+          κλιμακώνεται φυσικά με την ανάπτυξη της επιχείρησης — χωρίς ανώτατο
+          όριο.<br /><br />
+          Πρακτικά: για ένα γυμναστήριο με €10.000 μηνιαία έσοδα, το κόστος της
+          πλατφόρμας ανέρχεται σε <strong>€400/μήνα</strong> — ποσό που
+          αντισταθμίζεται πλήρως από την εξοικονόμηση χρόνου και την αύξηση της
+          διατηρησιμότητας πελατών — αντί για εφάπαξ κόστος ανάπτυξης.
+        </div>
+      </div>
+
+      <!-- Signature -->
+      <div class="signature-block">
+        <div>
+          <div class="sig-name">Apostolos Valiakos</div>
+          <div class="sig-title">Full-Stack Developer</div>
+        </div>
+        <div style="text-align: right; color: #444">
+          Η παρούσα αναφορά είναι εμπιστευτική<br />
+          και απευθύνεται αποκλειστικά στον παραλήπτη.<br />
+          Μάιος 2026
+        </div>
+      </div>
+    </div>
+    <!-- /financial-section -->
+  </body>
+</html>
