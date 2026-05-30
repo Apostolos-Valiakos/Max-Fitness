@@ -3,7 +3,16 @@
     <!-- Header -->
     <div class="workout-header">
       <div class="header-left">
-        <div class="session-name">{{ workout.activeSession?.name }}</div>
+        <div v-if="!renamingSession" class="session-name" @click="startRename">{{ workout.activeSession?.name }}</div>
+        <input
+          v-else
+          ref="renameInputEl"
+          class="session-name-input"
+          v-model="renameValue"
+          @blur="saveRename"
+          @keydown.enter.prevent="saveRename"
+          @keydown.escape="renamingSession = false"
+        />
         <div v-if="currentExercise" class="header-progress">
           <span class="prog-name">{{ currentExercise.exerciseName }}</span>
           <span class="prog-sep"> · </span>
@@ -29,25 +38,10 @@
       >
         <!-- Exercise header -->
         <div class="ex-header">
-          <div class="ex-name">{{ ex.exerciseName }}</div>
+          <div class="ex-name" @click="openInfo(ex.exerciseId)">{{ ex.exerciseName }}</div>
           <div class="ex-actions">
-            <button class="ex-action-btn" @click="openInfo(ex.exerciseId)" title="Exercise info">
-              <i class="pi pi-info-circle" />
-            </button>
-            <button class="ex-action-btn" @click="openRestSettings(ex.exerciseId)" title="Rest time">
-              <i class="pi pi-clock" />
-            </button>
-            <button
-              v-if="ex.sets.some(s => s.set_type === 'working' && s.weight_kg)"
-              class="ex-action-btn" @click="workout.addWarmupSets(ex.exerciseId)" title="Add warm-up sets"
-            >
-              <i class="pi pi-sun" />
-            </button>
-            <button class="ex-action-btn" @click="openReplace(ex.exerciseId)" title="Replace exercise">
-              <i class="pi pi-sync" />
-            </button>
-            <button class="ex-action-btn ex-remove" @click="workout.removeExercise(ex.exerciseId)" title="Remove">
-              <i class="pi pi-times" />
+            <button class="ex-dots-btn" @click="contextMenuFor = ex.exerciseId" title="Options">
+              <i class="pi pi-ellipsis-v" />
             </button>
           </div>
         </div>
@@ -85,9 +79,10 @@
             @update="(u) => workout.updateSet(set.id, u)"
             @delete="handleDeleteSet(set.id)"
             @complete="handleSetComplete(ex.exerciseId, set)"
+            @uncomplete="handleSetUncomplete(set.id)"
             @openPlates="(kg) => openPlates(kg)"
           />
-          <RestTimerInline v-if="restingAfterSetId === set.id" />
+          <RestTimerInline v-if="restTimer.activeSetId.value === set.id" />
         </template>
 
         <!-- Add set -->
@@ -160,37 +155,79 @@
       </div>
     </div>
 
-    <!-- Finish confirm dialog -->
-    <Dialog v-model:visible="confirmFinish" modal header="Finish Workout?" :style="{ width: '90vw', maxWidth: '360px' }" class="mf-dialog">
-      <div class="dialog-body">
-        <div class="dialog-stat"><span>Duration</span><strong>{{ workout.elapsedFormatted }}</strong></div>
-        <div class="dialog-stat"><span>Exercises</span><strong>{{ workout.activeExercises.length }}</strong></div>
-        <div class="dialog-stat"><span>Sets</span><strong>{{ workout.totalSets }}</strong></div>
-        <div class="dialog-stat"><span>Volume</span><strong>{{ Math.round(workout.totalVolume).toLocaleString() }} {{ units.label.value }}</strong></div>
-        <textarea v-model="sessionNotes" class="notes-input" placeholder="Add a note (optional)..." rows="3" />
+    <!-- Exercise context menu -->
+    <div v-if="contextMenuFor" class="ctx-backdrop" @click.self="contextMenuFor = null">
+      <div class="ctx-sheet">
+        <div class="ctx-handle" @click="contextMenuFor = null" />
+        <div class="ctx-title">{{ workout.activeExercises.find(e => e.exerciseId === contextMenuFor)?.exerciseName }}</div>
+        <button class="ctx-item" @click="ctxInfo">
+          <i class="pi pi-info-circle ctx-icon" /> Exercise info
+        </button>
+        <button
+          v-if="workout.activeExercises.find(e => e.exerciseId === contextMenuFor)?.sets.some(s => s.set_type === 'working' && s.weight_kg)"
+          class="ctx-item"
+          @click="ctxWarmup"
+        >
+          <i class="pi pi-sun ctx-icon" /> Add warm-up sets
+        </button>
+        <button class="ctx-item" @click="ctxNote">
+          <i class="pi pi-pencil ctx-icon" /> Add note
+        </button>
+        <button class="ctx-item" @click="ctxRest">
+          <i class="pi pi-clock ctx-icon" /> Update rest timers
+        </button>
+        <button class="ctx-item" @click="ctxReplace">
+          <i class="pi pi-sync ctx-icon" /> Replace exercise
+        </button>
+        <div class="ctx-divider" />
+        <button class="ctx-item ctx-danger" @click="ctxRemove">
+          <i class="pi pi-times ctx-icon" /> Remove exercise
+        </button>
       </div>
-      <div class="dialog-actions">
-        <button class="dialog-btn discard" @click="startDiscard">Discard</button>
-        <button class="dialog-btn cancel" @click="confirmFinish = false">Continue</button>
-        <button class="dialog-btn finish" @click="handleFinish">Save</button>
-      </div>
-    </Dialog>
+    </div>
 
-    <!-- Discard confirm -->
-    <Dialog v-model:visible="confirmDiscard" modal header="Discard Workout?" :style="{ width: '90vw', maxWidth: '360px' }" class="mf-dialog">
-      <p style="color:#888;font-size:0.85rem;margin-bottom:1.5rem;">All sets will be lost. This cannot be undone.</p>
-      <div class="dialog-actions">
-        <button class="dialog-btn cancel" @click="confirmDiscard = false">Keep it</button>
-        <button class="dialog-btn discard-confirm" @click="handleDiscard">Discard</button>
+    <!-- Finish confirm modal -->
+    <div v-if="confirmFinish" class="modal-backdrop" @click.self="confirmFinish = false">
+      <div class="modal-box">
+        <div class="modal-header">
+          <div class="modal-title">Finish Workout?</div>
+          <button class="modal-close" @click="confirmFinish = false"><i class="pi pi-times" /></button>
+        </div>
+        <div class="dialog-body">
+          <div class="dialog-stat"><span>Duration</span><strong>{{ workout.elapsedFormatted }}</strong></div>
+          <div class="dialog-stat"><span>Exercises</span><strong>{{ workout.activeExercises.length }}</strong></div>
+          <div class="dialog-stat"><span>Sets</span><strong>{{ workout.totalSets }}</strong></div>
+          <div class="dialog-stat"><span>Volume</span><strong>{{ Math.round(workout.totalVolume).toLocaleString() }} {{ units.label.value }}</strong></div>
+          <textarea v-model="sessionNotes" class="notes-input" placeholder="Add a note (optional)..." rows="3" />
+        </div>
+        <div class="dialog-actions">
+          <button class="dialog-btn discard" @click="startDiscard">Discard</button>
+          <button class="dialog-btn cancel" @click="confirmFinish = false">Continue</button>
+          <button class="dialog-btn finish" @click="handleFinish">Save</button>
+        </div>
       </div>
-    </Dialog>
+    </div>
+
+    <!-- Discard confirm modal -->
+    <div v-if="confirmDiscard" class="modal-backdrop" @click.self="confirmDiscard = false">
+      <div class="modal-box">
+        <div class="modal-header">
+          <div class="modal-title">Discard Workout?</div>
+          <button class="modal-close" @click="confirmDiscard = false"><i class="pi pi-times" /></button>
+        </div>
+        <p class="modal-sub">All sets will be lost. This cannot be undone.</p>
+        <div class="dialog-actions">
+          <button class="dialog-btn cancel" @click="confirmDiscard = false">Keep it</button>
+          <button class="dialog-btn discard-confirm" @click="handleDiscard">Discard</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
-import Dialog from 'primevue/dialog'
 import { useWorkoutStore }          from '@/stores/workoutStore'
 import type { ActiveSet }           from '@/stores/workoutStore'
 import { useExerciseStore }         from '@/stores/exerciseStore'
@@ -211,15 +248,30 @@ const restTimer     = useRestTimer()
 const exSettings    = useExerciseSettings()
 const units         = useUnits()
 
+const renamingSession = ref(false)
+const renameValue     = ref('')
+const renameInputEl   = ref<HTMLInputElement | null>(null)
+
+async function startRename() {
+  renameValue.value    = workout.activeSession?.name ?? ''
+  renamingSession.value = true
+  await nextTick()
+  renameInputEl.value?.select()
+}
+
+async function saveRename() {
+  renamingSession.value = false
+  if (renameValue.value.trim()) await workout.renameSession(renameValue.value)
+}
+
 const confirmFinish   = ref(false)
 const confirmDiscard  = ref(false)
 const sessionNotes    = ref('')
 const prevPerformance = ref<Record<string, PreviousPerformance | null>>({})
 
-// Inline rest timer — tracks which set row shows the bar
-const restingAfterSetId = ref<string | null>(null)
+// Inline rest timer — activeSetId lives in the singleton so it survives remounts
 watch(() => restTimer.isFinished.value, finished => {
-  if (finished) setTimeout(() => { restingAfterSetId.value = null }, 2000)
+  if (finished) setTimeout(() => { restTimer.setActive(null) }, 2000)
 })
 
 // Header progress tracking
@@ -255,6 +307,47 @@ function openInfo(exerciseId: string) {
 
 function openReplace(exerciseId: string) {
   router.push({ path: '/workout/exercise-picker', query: { replaceId: exerciseId } })
+}
+
+// Exercise context menu
+const contextMenuFor = ref<string | null>(null)
+
+function ctxInfo() {
+  const id = contextMenuFor.value!
+  contextMenuFor.value = null
+  openInfo(id)
+}
+function ctxWarmup() {
+  const id = contextMenuFor.value!
+  contextMenuFor.value = null
+  workout.addWarmupSets(id)
+}
+function ctxNote() {
+  const id = contextMenuFor.value!
+  contextMenuFor.value = null
+  // Focus the notes textarea for that exercise block
+  nextTick(() => {
+    const blocks = document.querySelectorAll('.exercise-block')
+    const exList = workout.activeExercises
+    const idx    = exList.findIndex(e => e.exerciseId === id)
+    const ta     = blocks[idx]?.querySelector<HTMLTextAreaElement>('.ex-notes-ta')
+    ta?.focus()
+  })
+}
+function ctxRest() {
+  const id = contextMenuFor.value!
+  contextMenuFor.value = null
+  openRestSettings(id)
+}
+function ctxReplace() {
+  const id = contextMenuFor.value!
+  contextMenuFor.value = null
+  openReplace(id)
+}
+function ctxRemove() {
+  const id = contextMenuFor.value!
+  contextMenuFor.value = null
+  workout.removeExercise(id)
 }
 
 onMounted(async () => {
@@ -301,10 +394,9 @@ async function handleSetComplete(exerciseId: string, set: ActiveSet) {
     if (pr) workout.updateSet(set.id, { isPR: true })
   }
   currentExerciseId.value = exerciseId
-  restingAfterSetId.value = set.id
   const ex   = workout.activeExercises.find(e => e.exerciseId === exerciseId)
   const secs = ex?.restSeconds ?? exSettings.getRestTime(exerciseId, set.set_type as any)
-  restTimer.start(secs)
+  restTimer.start(secs, set.id)
 }
 
 async function handleAddSet(exerciseId: string, exerciseName: string) {
@@ -323,6 +415,12 @@ async function handleAddSet(exerciseId: string, exerciseName: string) {
     if (isPR) set.isPR = true
   }
   prevPerformance.value[exerciseId] = await getPreviousPerformance(exerciseId, workout.activeSession!.id)
+}
+
+function handleSetUncomplete(setId: string) {
+  if (restTimer.activeSetId.value === setId) {
+    restTimer.skip()
+  }
 }
 
 async function handleDeleteSet(setId: string) {
@@ -350,15 +448,24 @@ async function handleDiscard() {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=DM+Sans:wght@300;400;500&display=swap');
-.view { background: #0A0A0A; min-height: 100dvh; color: #F0F0F0; font-family: 'DM Sans',sans-serif; padding-bottom: 5rem; }
+.view { background: #0A0A0A; min-height: 100dvh; color: #F0F0F0; font-family: 'DM Sans',sans-serif; padding-bottom: 5rem; padding-top: env(safe-area-inset-top, 0px); }
 
 .workout-header {
-  position: sticky; top: 0; z-index: 50;
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50;
   display: flex; justify-content: space-between; align-items: center;
   background: #0A0A0A; border-bottom: 1px solid #1A1A1A;
   padding: 0.75rem 1rem;
 }
-.session-name  { font-family: 'Barlow Condensed',sans-serif; font-size: 1rem; font-weight: 800; color: #F0F0F0; letter-spacing: 0.05em; }
+.session-name {
+  font-family: 'Barlow Condensed',sans-serif; font-size: 1rem; font-weight: 800; color: #F0F0F0; letter-spacing: 0.05em;
+  cursor: pointer;
+}
+.session-name:active { color: #FF4D00; }
+.session-name-input {
+  font-family: 'Barlow Condensed',sans-serif; font-size: 1rem; font-weight: 800; letter-spacing: 0.05em;
+  color: #F0F0F0; background: transparent; border: none; border-bottom: 1px solid #FF4D00;
+  outline: none; width: 130px; padding: 0;
+}
 .session-timer { font-family: 'Barlow Condensed',sans-serif; font-size: 1.4rem; font-weight: 900; color: #FF4D00; line-height: 1; }
 .header-progress { display: flex; align-items: baseline; gap: 0; line-height: 1.1; }
 .prog-name   { font-family: 'Barlow Condensed',sans-serif; font-size: 0.9rem; font-weight: 700; color: #F0F0F0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
@@ -383,11 +490,45 @@ async function handleDiscard() {
 
 .ex-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
 .ex-name   { font-family: 'Barlow Condensed',sans-serif; font-size: 1.1rem; font-weight: 800; color: #F0F0F0; letter-spacing: 0.03em; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; }
-.ex-link   { font-size: 0.7rem; color: #444; }
+.ex-link   { font-size: 0.7rem; color: #777; }
 .ex-actions { display: flex; align-items: center; gap: 0.1rem; }
-.ex-action-btn { background: none; border: none; color: #333; cursor: pointer; padding: 0.3rem; font-size: 0.8rem; transition: color 0.15s; }
-.ex-action-btn:active { color: #FF4D00; }
-.ex-action-btn.ex-remove:active { color: #FF4444; }
+.ex-dots-btn { background: none; border: none; color: #666; cursor: pointer; padding: 0.4rem 0.5rem; font-size: 0.9rem; transition: color 0.15s; }
+.ex-dots-btn:active { color: #FF4D00; }
+
+/* Exercise context menu */
+.ctx-backdrop {
+  position: fixed; inset: 0; z-index: 150;
+  background: rgba(0,0,0,0.6);
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.ctx-sheet {
+  width: 100%; max-width: 520px;
+  background: #111; border-top: 2px solid #FF4D00;
+  padding-bottom: env(safe-area-inset-bottom, 1rem);
+}
+.ctx-handle {
+  width: 36px; height: 4px; background: #2A2A2A; border-radius: 2px;
+  margin: 0.6rem auto 0; cursor: pointer;
+}
+.ctx-title {
+  font-family: 'Barlow Condensed',sans-serif; font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.15em; color: #555; text-transform: uppercase;
+  padding: 0.65rem 1rem 0.5rem;
+}
+.ctx-item {
+  width: 100%; background: none; border: none; border-top: 1px solid #1A1A1A;
+  display: flex; align-items: center; gap: 0.85rem;
+  padding: 0.9rem 1.25rem;
+  font-family: 'Barlow Condensed',sans-serif; font-size: 1rem; font-weight: 700;
+  color: #E0E0E0; cursor: pointer; text-align: left;
+  transition: background 0.1s, color 0.1s;
+}
+.ctx-item:active { background: rgba(255,77,0,0.08); color: #FF4D00; }
+.ctx-item.ctx-danger { color: #FF4444; }
+.ctx-item.ctx-danger:active { background: rgba(255,68,68,0.08); color: #FF4444; }
+.ctx-icon { font-size: 0.9rem; color: #555; flex-shrink: 0; width: 16px; text-align: center; }
+.ctx-item:active .ctx-icon { color: inherit; }
+.ctx-divider { height: 1px; background: #2A2A2A; margin: 0.25rem 0; }
 
 /* Headers grid matches SetRow: 28px 52px 1fr 1fr 36px */
 .set-headers {
@@ -398,7 +539,7 @@ async function handleDiscard() {
   border-bottom: 1px solid #1A1A1A;
   margin-bottom: 0.2rem;
 }
-.set-headers span { font-family: 'Barlow Condensed',sans-serif; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; color: #444; text-align: center; }
+.set-headers span { font-family: 'Barlow Condensed',sans-serif; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; color: #777; text-align: center; }
 
 .ex-hint {
   display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;
@@ -417,7 +558,7 @@ async function handleDiscard() {
   padding: 0.5rem 0.6rem; resize: none; box-sizing: border-box;
   margin-top: 0.5rem;
 }
-.ex-notes-ta::placeholder { color: #2A2A2A; }
+.ex-notes-ta::placeholder { color: #555; }
 .ex-notes-ta:focus { outline: none; border-color: #2A2A2A; color: #F0F0F0; }
 
 .add-set-btn {
@@ -451,7 +592,7 @@ async function handleDiscard() {
   padding: 1.25rem 1rem 2rem;
 }
 .rest-sheet-title { font-family: 'Barlow Condensed',sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.15em; color: #555; margin-bottom: 0.75rem; }
-.rest-sub { font-family: 'Barlow Condensed',sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.15em; color: #444; margin-bottom: 0.4rem; }
+.rest-sub { font-family: 'Barlow Condensed',sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.15em; color: #777; margin-bottom: 0.4rem; }
 .rest-presets { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.6rem; }
 .rest-presets-sm .rest-preset { font-size: 0.7rem; padding: 0.25rem 0.5rem; }
 .rest-type-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.35rem; }
@@ -471,22 +612,43 @@ async function handleDiscard() {
 }
 
 /* Dialog overrides */
-:deep(.mf-dialog .p-dialog)         { background: #111 !important; border: 1px solid #2A2A2A !important; border-radius: 0 !important; }
-:deep(.mf-dialog .p-dialog-header)  { background: #111 !important; color: #F0F0F0 !important; font-family: 'Barlow Condensed',sans-serif !important; font-weight: 800 !important; letter-spacing: 0.05em !important; border-bottom: 1px solid #1A1A1A !important; padding: 1rem 1.25rem !important; }
-:deep(.mf-dialog .p-dialog-content) { background: #111 !important; padding: 1.25rem !important; }
+/* Custom modals (replaces PrimeVue Dialog) */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.75);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1rem;
+}
+.modal-box {
+  width: 100%; max-width: 360px;
+  background: #111; border: 1px solid #2A2A2A; border-top: 2px solid #FF4D00;
+}
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.25rem; border-bottom: 1px solid #1A1A1A;
+}
+.modal-title {
+  font-family: 'Barlow Condensed',sans-serif; font-size: 1.1rem; font-weight: 800;
+  color: #F0F0F0; letter-spacing: 0.05em;
+}
+.modal-close {
+  background: none; border: none; color: #555; cursor: pointer; font-size: 0.85rem; padding: 0.1rem;
+}
+.modal-close:active { color: #FF4D00; }
+.modal-sub { color: #888; font-size: 0.85rem; padding: 1.25rem 1.25rem 0; margin: 0; line-height: 1.4; }
 
-.dialog-body { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; }
+.dialog-body { display: flex; flex-direction: column; gap: 0.75rem; padding: 1.25rem 1.25rem 0; }
 .notes-input { width: 100%; background: #1A1A1A; border: 1px solid #2A2A2A; color: #F0F0F0; font-family: 'DM Sans',sans-serif; font-size: 0.82rem; padding: 0.6rem 0.75rem; resize: none; box-sizing: border-box; }
 .notes-input:focus { outline: none; border-color: #FF4D00; }
-.notes-input::placeholder { color: #444; }
+.notes-input::placeholder { color: #666; }
 .dialog-stat { display: flex; justify-content: space-between; font-size: 0.85rem; }
-.dialog-stat span   { color: #666; }
+.dialog-stat span   { color: #888; }
 .dialog-stat strong { color: #F0F0F0; font-family: 'Barlow Condensed',sans-serif; font-size: 1rem; font-weight: 800; }
 
-.dialog-actions { display: flex; gap: 0.5rem; }
+.dialog-actions { display: flex; gap: 0.5rem; padding: 1.25rem; }
 .dialog-btn { flex: 1; border: none; font-family: 'Barlow Condensed',sans-serif; font-weight: 700; letter-spacing: 0.1em; font-size: 0.9rem; padding: 0.75rem; cursor: pointer; transition: background 0.15s; }
 .dialog-btn.cancel       { background: #1A1A1A; color: #888; }
 .dialog-btn.finish       { background: #FF4D00; color: #fff; clip-path: polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%); }
-.dialog-btn.discard      { background: transparent; color: #FF4444; border: 1px solid rgba(255,68,68,0.3); font-size: 0.8rem; }
-.dialog-btn.discard-confirm { background: #3A0000; color: #FF4D00; border: 1px solid rgba(255,77,0,0.3); }
+.dialog-btn.discard      { background: transparent; color: #FF4444; border: 1px solid rgba(255,68,68,0.3); font-size: 0.8rem; flex: 0 0 auto; }
+.dialog-btn.discard-confirm { background: #3A0000; color: #FF4444; border: 1px solid rgba(255,68,68,0.3); }
 </style>

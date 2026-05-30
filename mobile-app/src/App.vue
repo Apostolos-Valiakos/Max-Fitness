@@ -10,9 +10,30 @@
 
 <script setup lang="ts">
 import Toast from 'primevue/toast'
+import { onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
+import { useRestTimer } from '@/composables/useRestTimer'
 
-const auth = useAuthStore()
+const auth      = useAuthStore()
+const restTimer = useRestTimer()
+
+// Resync rest timer after app comes back from background (browser tab or native)
+function onVisibilityChange() {
+  if (document.visibilityState === 'visible') restTimer.resync()
+}
+
+onMounted(async () => {
+  document.addEventListener('visibilitychange', onVisibilityChange)
+  // Capacitor native foreground event
+  try {
+    const { App } = await import('@capacitor/app')
+    App.addListener('appStateChange', ({ isActive }) => { if (isActive) restTimer.resync() })
+  } catch {}
+})
+
+onUnmounted(() => {
+  document.removeEventListener('visibilitychange', onVisibilityChange)
+})
 </script>
 
 <style>

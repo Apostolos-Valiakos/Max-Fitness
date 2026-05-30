@@ -6,6 +6,11 @@ const total       = ref(90)
 const isRunning   = ref(false)
 const isFinished  = ref(false)
 const isMinimized = ref(false)
+// Tracks which set triggered the rest — survives WorkoutActiveView remounts
+const activeSetId = ref<string | null>(null)
+
+// Wall-clock anchor: rest finishes at this absolute timestamp
+let endTime = 0
 let interval: ReturnType<typeof setInterval> | null = null
 let pendingNotifId = 0
 
@@ -37,11 +42,10 @@ async function _scheduleNotif(seconds: number) {
       const res = await LocalNotifications.requestPermissions()
       if (res.display !== 'granted') return
     }
-    // Cancel any pending notification from previous timer
     if (pendingNotifId) {
       await LocalNotifications.cancel({ notifications: [{ id: pendingNotifId }] }).catch(() => {})
     }
-    pendingNotifId = Date.now() % 100000 // unique enough
+    pendingNotifId = Date.now() % 100000
     await LocalNotifications.schedule({
       notifications: [{
         id:       pendingNotifId,
@@ -67,29 +71,46 @@ function _clearInterval() {
   if (interval) { clearInterval(interval); interval = null }
 }
 
+// Wall-clock tick: derive remaining from endTime so background pauses don't drift
 function _tick() {
-  if (remaining.value <= 0) {
+  const now  = Date.now()
+  const secs = Math.max(0, Math.ceil((endTime - now) / 1000))
+  remaining.value = secs
+  if (secs <= 0) {
     _clearInterval()
     isRunning.value   = false
     isFinished.value  = true
     isMinimized.value = false
     _beep()
     try { navigator.vibrate?.([200, 100, 200]) } catch {}
-  } else {
-    remaining.value--
   }
 }
 
-function start(seconds?: number) {
+// Resync after coming back from background — call on app foreground
+function resync() {
+  if (!isRunning.value) return
+  const secs = Math.max(0, Math.ceil((endTime - Date.now()) / 1000))
+  if (secs <= 0) {
+    _tick() // trigger finish immediately
+  } else {
+    remaining.value = secs
+  }
+}
+
+function start(seconds?: number, setId?: string) {
   _clearInterval()
   total.value       = seconds ?? total.value
+  endTime           = Date.now() + total.value * 1000
   remaining.value   = total.value
   isRunning.value   = true
   isFinished.value  = false
   isMinimized.value = false
+  if (setId !== undefined) activeSetId.value = setId
   interval = setInterval(_tick, 1000)
   _scheduleNotif(total.value)
 }
+
+function setActive(setId: string | null) { activeSetId.value = setId }
 
 function minimize() { isMinimized.value = true }
 function expand()   { isMinimized.value = false }
@@ -101,20 +122,25 @@ function skip() {
   isRunning.value   = false
   isFinished.value  = false
   isMinimized.value = false
+  activeSetId.value = null
 }
 
 function addTime(seconds: number) {
-  remaining.value  = Math.max(0, remaining.value + seconds)
-  total.value      = Math.max(total.value, remaining.value)
-  isFinished.value = false
+  const newRemaining = Math.max(0, remaining.value + seconds)
+  endTime           = Date.now() + newRemaining * 1000
+  remaining.value   = newRemaining
+  total.value       = Math.max(total.value, newRemaining)
+  isFinished.value  = false
   if (!isRunning.value) {
     isRunning.value = true
     interval = setInterval(_tick, 1000)
   }
-  // Reschedule with updated time
-  _cancelNotif().then(() => _scheduleNotif(remaining.value))
+  _cancelNotif().then(() => _scheduleNotif(newRemaining))
 }
 
 export function useRestTimer() {
-  return { remaining, total, isRunning, isFinished, isMinimized, progress, formatted, start, skip, minimize, expand, addTime }
+  return {
+    remaining, total, isRunning, isFinished, isMinimized, activeSetId, progress, formatted,
+    start, skip, setActive, minimize, expand, addTime, resync,
+  }
 }
