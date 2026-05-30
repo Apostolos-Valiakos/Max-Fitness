@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 import { getDatabase } from '@/lib/rxdb/database'
-import { supabase } from '@/lib/supabase'
 import type { WorkoutTemplateDocument, TemplateExerciseDocument } from '@/lib/rxdb/schemas'
 import { useAuthStore } from './authStore'
 
@@ -29,7 +28,7 @@ export const useTemplateStore = defineStore('templates', () => {
 
   async function createTemplate(name: string, notes?: string): Promise<WorkoutTemplateDocument | null> {
     if (!canCreate()) return null
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = useAuthStore().user
     if (!user) return null
     const db = getDatabase(); const now = new Date().toISOString()
     const tmpl: WorkoutTemplateDocument = { id: uuidv4(), owner_id: user.id, assigned_by: null, name, notes: notes ?? null, is_public: false, visibility: 'private', updated_at: now, folder_name: null }
@@ -123,7 +122,7 @@ export const useTemplateStore = defineStore('templates', () => {
   }
 
   async function duplicateTemplate(templateId: string): Promise<string> {
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = useAuthStore().user
     if (!user) throw new Error('Not authenticated')
     const original = templates.value.find(t => t.id === templateId)
     if (!original) throw new Error('Template not found')

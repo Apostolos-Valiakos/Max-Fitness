@@ -61,5 +61,14 @@ export const useHistoryStore = defineStore('history', () => {
   function getWeeklyCount()  { return sessions.value.filter(s => isThisWeek(new Date(s.started_at))).length }
   function getMonthlyCount() { return sessions.value.filter(s => isThisMonth(new Date(s.started_at))).length }
 
-  return { sessions, isLoading, canLoadMore, subscribeToSessions, loadMore, getSessionWithSets, getCurrentStreak, getWeeklyCount, getMonthlyCount }
+  async function renameSession(sessionId: string, name: string) {
+    const trimmed = name.trim()
+    if (!trimmed) return
+    const db = getDatabase()
+    await db.workout_sessions.findOne(sessionId).update({ $set: { name: trimmed, updated_at: new Date().toISOString() } })
+    const idx = sessions.value.findIndex(s => s.id === sessionId)
+    if (idx !== -1) sessions.value[idx] = { ...sessions.value[idx], name: trimmed }
+  }
+
+  return { sessions, isLoading, canLoadMore, subscribeToSessions, loadMore, getSessionWithSets, getCurrentStreak, getWeeklyCount, getMonthlyCount, renameSession }
 })

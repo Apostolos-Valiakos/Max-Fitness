@@ -27,7 +27,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isOffline = ref(false)
 
   const isAdmin   = computed(() => profile.value?.role === 'admin')
-  const isTrainer = computed(() => profile.value?.role === 'trainer')
+  const isTrainer = computed(() => profile.value?.role === 'trainer' || profile.value?.role === 'admin')
   const isFree    = computed(() => profile.value?.tier === 'free')
   const isUltra   = computed(() => profile.value?.tier === 'ultra')
 
@@ -46,9 +46,17 @@ export const useAuthStore = defineStore('auth', () => {
 
     if (session?.user) {
       user.value = session.user
-      await fetchProfile(session.user.id)
-      await _cacheAuth()
-      isOffline.value = false
+      const { connected } = await Network.getStatus()
+      if (connected) {
+        await fetchProfile(session.user.id)
+        await _cacheAuth()
+        isOffline.value = false
+      } else {
+        // Offline but have a valid local session — load cached profile
+        await _loadCachedAuth()
+        // Keep user from the real session (has full JWT data), only override profile
+        user.value = session.user
+      }
     } else {
       const { connected } = await Network.getStatus()
       if (!connected) {

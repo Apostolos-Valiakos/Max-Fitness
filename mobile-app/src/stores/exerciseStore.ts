@@ -108,17 +108,19 @@ export const useExerciseStore = defineStore('exercises', () => {
     const now = new Date().toISOString()
     const trimmed = note.trim() || null
 
-    const { error } = await supabase
-      .from('exercises')
-      .update({ sticky_note: trimmed, updated_at: now })
-      .eq('id', exerciseId)
-    if (error) throw error
-
+    // Write locally first so it works offline; sync picks it up later
     const doc = await db.exercises.findOne(exerciseId).exec()
     if (doc) await doc.patch({ sticky_note: trimmed, updated_at: now })
 
     const local = exercises.value.find(e => e.id === exerciseId)
     if (local) local.sticky_note = trimmed
+
+    // Best-effort remote write — silently ignored if offline
+    supabase
+      .from('exercises')
+      .update({ sticky_note: trimmed, updated_at: now })
+      .eq('id', exerciseId)
+      .then((_res: unknown) => {}, () => {})
   }
 
   // ── Exercise volume history for chart ─────────────────────────────────────

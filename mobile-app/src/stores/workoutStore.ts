@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 import { getDatabase } from '@/lib/rxdb/database'
 import { supabase } from '@/lib/supabase'
+import { useAuthStore } from './authStore'
 import { getPreviousPerformance } from '@/composables/usePreviousPerformance'
 import type { WorkoutSessionDocument, SetDocument } from '@/lib/rxdb/schemas'
 
@@ -50,7 +51,7 @@ export const useWorkoutStore = defineStore('workout', () => {
   }
 
   async function startSession(name: string, templateId?: string) {
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = useAuthStore().user
     if (!user) throw new Error('Not authenticated')
     const db  = getDatabase()
     const now = new Date().toISOString()
@@ -273,7 +274,7 @@ export const useWorkoutStore = defineStore('workout', () => {
   }
 
   async function recoverSession() {
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = useAuthStore().user
     if (!user) return
     const db        = getDatabase()
     const unfinished = await db.workout_sessions
@@ -331,11 +332,20 @@ export const useWorkoutStore = defineStore('workout', () => {
     }
   }
 
+  async function renameSession(name: string) {
+    if (!activeSession.value) return
+    const trimmed = name.trim()
+    if (!trimmed) return
+    const db = getDatabase()
+    await db.workout_sessions.findOne(activeSession.value.id).update({ $set: { name: trimmed, updated_at: new Date().toISOString() } })
+    activeSession.value = { ...activeSession.value, name: trimmed }
+  }
+
   return {
     activeSession, activeExercises, elapsedSeconds, elapsedFormatted,
     hasActiveSession, totalSets, totalVolume, isFinishing, usedTemplateId,
     startSession, addExercise, removeExercise, logSet, updateSet, markSetDone,
     deleteSet, updateExerciseNotes, addWarmupSets, replaceExercise,
-    finishSession, discardSession, recoverSession, duplicateSession,
+    finishSession, discardSession, recoverSession, duplicateSession, renameSession,
   }
 })
