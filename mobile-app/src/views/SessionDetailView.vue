@@ -3,7 +3,16 @@
     <div class="view-header">
       <button class="back-btn" @click="router.back()"><i class="pi pi-arrow-left" /></button>
       <div class="header-body">
-        <h1 class="session-name">{{ session?.name }}</h1>
+        <h1 v-if="!renamingSession" class="session-name" :class="{ editable: isOwner }" @click="isOwner && startRename()">{{ session?.name }}</h1>
+        <input
+          v-else
+          ref="renameInputEl"
+          class="session-name session-name-input"
+          v-model="renameValue"
+          @blur="saveRename"
+          @keydown.enter.prevent="saveRename"
+          @keydown.escape="renamingSession = false"
+        />
         <div class="session-date">{{ formattedDate }}</div>
       </div>
     </div>
@@ -74,11 +83,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useHistoryStore } from '@/stores/historyStore'
 import { useWorkoutStore } from '@/stores/workoutStore'
 import { useTrainerStore } from '@/stores/trainerStore'
+import { useAuthStore }    from '@/stores/authStore'
 import { getDatabase }     from '@/lib/rxdb/database'
 import { format }          from 'date-fns'
 import type { SetDocument } from '@/lib/rxdb/schemas'
@@ -88,10 +98,33 @@ const router  = useRouter()
 const history = useHistoryStore()
 const workout = useWorkoutStore()
 const trainerStore = useTrainerStore()
+const auth    = useAuthStore()
+
 const session  = ref<any>(null)
+const isOwner  = computed(() => !!session.value && session.value.user_id === auth.user?.id)
 const loading  = ref(true)
 const repeating = ref(false)
 const feedback = ref<{ id: string; content: string; trainer_id: string } | null>(null)
+
+const renamingSession = ref(false)
+const renameValue     = ref('')
+const renameInputEl   = ref<HTMLInputElement | null>(null)
+
+async function startRename() {
+  renameValue.value     = session.value?.name ?? ''
+  renamingSession.value = true
+  await nextTick()
+  renameInputEl.value?.select()
+}
+
+async function saveRename() {
+  renamingSession.value = false
+  const name = renameValue.value.trim()
+  if (name && session.value) {
+    await history.renameSession(props.id, name)
+    session.value = { ...session.value, name }
+  }
+}
 
 const formattedDate = computed(() => session.value ? format(new Date(session.value.started_at), 'EEEE, MMMM d yyyy') : '')
 const duration      = computed(() => {
@@ -141,6 +174,9 @@ async function handleRepeat() {
 .view-header { display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 1.5rem; }
 .back-btn { background: none; border: none; color: #666; cursor: pointer; font-size: 1rem; padding-top: 0.25rem; flex-shrink: 0; }
 .session-name { font-family: 'Barlow Condensed',sans-serif; font-size: 1.4rem; font-weight: 900; color: #F0F0F0; line-height: 1.1; }
+.session-name.editable { cursor: pointer; }
+.session-name.editable:active { color: #FF4D00; }
+.session-name-input { background: transparent; border: none; border-bottom: 1px solid #FF4D00; outline: none; width: 100%; padding: 0; }
 .session-date { font-size: 0.72rem; color: #555; margin-top: 0.25rem; }
 .loading { text-align: center; padding: 4rem; color: #555; }
 .stats-strip { display: flex; align-items: center; background: #111; border: 1px solid #1A1A1A; padding: 1rem; margin-bottom: 1.5rem; }
@@ -154,7 +190,7 @@ async function handleRepeat() {
 .sets-table { width: 100%; }
 .table-header, .table-row { display: grid; grid-template-columns: 32px 40px 1fr 1fr 1fr; gap: 0.25rem; padding: 0.3rem 0; }
 .table-header { border-bottom: 1px solid #1A1A1A; margin-bottom: 0.25rem; }
-.table-header span { font-family: 'Barlow Condensed',sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; color: #444; text-align: center; }
+.table-header span { font-family: 'Barlow Condensed',sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; color: #777; text-align: center; }
 .table-row span { font-size: 0.82rem; color: #888; text-align: center; }
 .type-badge { font-family: 'Barlow Condensed',sans-serif; font-weight: 800; font-size: 0.8rem; }
 .type-badge.warmup  { color: #4488FF; }
