@@ -20,9 +20,9 @@
 
         <!-- Scrollable content -->
         <div class="sheet-body">
-          <!-- GIF -->
+          <!-- Animation (cross-fades 2 frames for static datasets, passes through for real GIFs) -->
           <div v-if="exercise.image_url" class="gif-wrap">
-            <img :src="exercise.image_url" :alt="exercise.name" class="ex-gif" loading="lazy" />
+            <ExerciseAnimation :imageUrl="exercise.image_url" :alt="exercise.name" />
           </div>
 
           <!-- Secondary muscles -->
@@ -63,6 +63,7 @@ import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { getDatabase } from '@/lib/rxdb/database'
 import type { ExerciseDocument } from '@/lib/rxdb/schemas'
+import ExerciseAnimation from '@/components/ExerciseAnimation.vue'
 
 const props = defineProps<{
   visible: boolean
@@ -168,7 +169,7 @@ function openDetail() {
 
 .section-label {
   font-family: 'Barlow Condensed',sans-serif; font-size: 0.62rem; font-weight: 700;
-  letter-spacing: 0.2em; color: #444; margin-bottom: 0.5rem;
+  letter-spacing: 0.2em; color: #777; margin-bottom: 0.5rem;
 }
 
 .muscle-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; }
@@ -193,7 +194,7 @@ function openDetail() {
 
 .step-text { flex: 1; }
 
-.no-info { color: #444; font-size: 0.8rem; text-align: center; padding: 2rem 0; }
+.no-info { color: #777; font-size: 0.8rem; text-align: center; padding: 2rem 0; }
 
 .detail-btn {
   width: 100%; background: transparent; border: none; border-top: 1px solid #1A1A1A;

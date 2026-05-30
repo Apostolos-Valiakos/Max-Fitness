@@ -24,7 +24,7 @@
     <div v-if="activeTab === 'ABOUT'" class="tab-content">
 
       <div v-if="exercise?.image_url" class="gif-wrap">
-        <img :src="exercise.image_url" :alt="exercise?.name" class="ex-gif" loading="lazy" />
+        <ExerciseAnimation :imageUrl="exercise.image_url" :alt="exercise?.name" />
       </div>
 
       <div v-if="exercise?.secondary_muscles?.length" class="section">
@@ -124,7 +124,8 @@ import { useExerciseStore }    from '@/stores/exerciseStore'
 import { useAuthStore }        from '@/stores/authStore'
 import { useExerciseSettings } from '@/composables/useExerciseSettings'
 import { getExercisePR, getRepRecords, type PR, type RepRecord } from '@/composables/usePersonalRecords'
-import VolumeChart    from '@/components/VolumeChart.vue'
+import VolumeChart        from '@/components/VolumeChart.vue'
+import ExerciseAnimation  from '@/components/ExerciseAnimation.vue'
 import StrengthChart  from '@/components/StrengthChart.vue'
 import MaxWeightChart from '@/components/MaxWeightChart.vue'
 import { format } from 'date-fns'
@@ -256,7 +257,7 @@ function addToWorkout() {
 /* Records */
 .records-wrap { display: flex; flex-direction: column; gap: 0; }
 .rec-header { display: grid; grid-template-columns: 52px 1fr 1fr 1fr; padding: 0.35rem 0.5rem; border-bottom: 1px solid #1A1A1A; }
-.rec-header span { font-family: 'Barlow Condensed',sans-serif; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; color: #444; }
+.rec-header span { font-family: 'Barlow Condensed',sans-serif; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; color: #777; }
 .rec-row { display: grid; grid-template-columns: 52px 1fr 1fr 1fr; padding: 0.65rem 0.5rem; border-bottom: 1px solid #0D0D0D; align-items: center; }
 .rec-row:hover { background: #111; }
 .rep-badge { font-family: 'Barlow Condensed',sans-serif; font-size: 0.85rem; font-weight: 800; color: #FF4D00; }
@@ -264,7 +265,7 @@ function addToWorkout() {
 .rec-e1rm { font-size: 0.78rem; color: #FFB400; }
 .rec-date { font-size: 0.7rem; color: #555; }
 
-.empty-state { text-align: center; padding: 3rem 1rem; color: #444; font-size: 0.85rem; }
+.empty-state { text-align: center; padding: 3rem 1rem; color: #777; font-size: 0.85rem; }
 
 .add-to-workout-btn { width: calc(100% - 2rem); margin: 1.5rem 1rem 0; background: #FF4D00; border: none; color: #fff; font-family: 'Barlow Condensed',sans-serif; font-size: 1rem; font-weight: 800; letter-spacing: 0.1em; padding: 1rem; cursor: pointer; clip-path: polygon(0 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%); display: block; }
 .add-to-workout-btn:active { background: #CC3D00; }
