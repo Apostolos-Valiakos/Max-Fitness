@@ -1,190 +1,204 @@
 /**
- * Local dev helper: fetch exercises from ExerciseDB and upsert into Supabase.
- * Works with Node 16+. New API format: no gifUrl, has description/difficulty/category.
- * Usage: node scripts/sync-exercises.mjs
+ * sync-exercises.mjs — One-shot exercise seeder
+ *
+ * Source: yuhonas/free-exercise-db (GitHub, no API key needed)
+ *   https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json
+ *   ~873 exercises, static JPG images hosted on GitHub CDN.
+ *
+ * Usage:  node scripts/sync-exercises.mjs
+ *
+ * Prerequisites: psql must be installed.
+ * DB: Supabase CLI local dev at 127.0.0.1:54322.
  */
 
-import https from "https";
-import http from "http";
+import https        from 'https'
+import { execSync } from 'child_process'
+import { writeFileSync, unlinkSync } from 'fs'
+import { tmpdir }   from 'os'
+import { join }     from 'path'
 
-const SUPABASE_URL = "http://127.0.0.1:54321";
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const EXERCISEDB_KEY = "e84f114ff5msheb95998f4d14cd3p10355djsned24844c4ede";
-const EXERCISEDB_HOST = "exercisedb.p.rapidapi.com";
-const BATCH_SIZE = 100;
+const DATA_URL = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json'
+const IMG_BASE = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises'
+const DB_URL   = 'postgresql://postgres:postgres@127.0.0.1:54322/postgres'
 
-// ── HTTP helpers ──────────────────────────────────────────────────────────────
+// ── Mappings to our DB enums ──────────────────────────────────────────────────
 
-function get(url, headers = {}) {
-  return new Promise((resolve, reject) => {
-    https
-      .get(url, { headers }, (res) => {
-        let data = "";
-        res.on("data", (chunk) => (data += chunk));
-        res.on("end", () => resolve({ status: res.statusCode, body: data }));
-      })
-      .on("error", reject);
-  });
+// body_part enum: chest | back | shoulders | biceps | triceps | forearms |
+//                 quads | hamstrings | glutes | calves | core | full_body
+const MUSCLE_TO_BODY_PART = {
+  abdominals:        'core',
+  obliques:          'core',
+  abductors:         'quads',
+  adductors:         'quads',
+  'hip flexors':     'quads',
+  'it band':         'quads',
+  quadriceps:        'quads',
+  hamstrings:        'hamstrings',
+  glutes:            'glutes',
+  piriformis:        'glutes',
+  calves:            'calves',
+  soleus:            'calves',
+  'tibialis anterior': 'calves',
+  chest:             'chest',
+  lats:              'back',
+  'lower back':      'back',
+  'middle back':     'back',
+  rhomboids:         'back',
+  traps:             'back',
+  shoulders:         'shoulders',
+  biceps:            'biceps',
+  brachialis:        'biceps',
+  triceps:           'triceps',
+  forearms:          'forearms',
+  brachioradialis:   'forearms',
+  neck:              'full_body',
 }
 
-function post(path, body, headers = {}) {
-  return new Promise((resolve, reject) => {
-    const data = JSON.stringify(body);
-    const req = http.request(
-      {
-        hostname: "127.0.0.1",
-        port: 54321,
-        path,
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Content-Length": Buffer.byteLength(data),
-          ...headers,
-        },
-      },
-      (res) => {
-        let out = "";
-        res.on("data", (c) => (out += c));
-        res.on("end", () => resolve({ status: res.statusCode, body: out }));
-      },
-    );
-    req.on("error", reject);
-    req.write(data);
-    req.end();
-  });
-}
-
-// ── Fetch all exercises (paginate to handle free-tier limits) ─────────────────
-
-console.log("Fetching exercises from ExerciseDB...");
-
-const exercises = [];
-const PAGE_SIZE = 10;
-let offset = 0;
-
-while (true) {
-  const { status, body } = await get(
-    `https://${EXERCISEDB_HOST}/exercises?limit=${PAGE_SIZE}&offset=${offset}`,
-    { "x-rapidapi-key": EXERCISEDB_KEY, "x-rapidapi-host": EXERCISEDB_HOST },
-  );
-
-  if (status !== 200) {
-    console.error(`ExerciseDB error ${status}: ${body}`);
-    process.exit(1);
+function mapBodyPart(primaryMuscles) {
+  for (const m of (primaryMuscles ?? [])) {
+    const mapped = MUSCLE_TO_BODY_PART[m.toLowerCase()]
+    if (mapped) return mapped
   }
-
-  const page = JSON.parse(body);
-  if (!page.length) break;
-
-  exercises.push(...page);
-  process.stdout.write(`\rFetched ${exercises.length} exercises...`);
-
-  if (page.length < PAGE_SIZE) break;
-  offset += PAGE_SIZE;
+  console.warn(`  Unknown primaryMuscles ${JSON.stringify(primaryMuscles)} → full_body`)
+  return 'full_body'
 }
 
-// Deduplicate by exercise_db_id (API occasionally returns duplicates across pages)
-const seen = new Set();
-const unique = exercises.filter((e) => {
-  if (seen.has(e.id)) return false;
-  seen.add(e.id);
-  return true;
-});
-console.log(
-  `\nFetched ${exercises.length} total (${unique.length} unique). Upserting to Supabase...`,
-);
-const deduplicated = unique;
+// equipment enum: barbell | dumbbell | cable | machine | bodyweight |
+//                 kettlebell | band | other
+const EQUIP_MAP = {
+  'body only':     'bodyweight',
+  'barbell':       'barbell',
+  'e-z curl bar':  'barbell',
+  'dumbbell':      'dumbbell',
+  'cable':         'cable',
+  'kettlebells':   'kettlebell',
+  'bands':         'band',
+  'machine':       'machine',
+  'medicine ball': 'other',
+  'exercise ball': 'other',
+  'foam roll':     'other',
+  'other':         'other',
+}
 
-const now = new Date().toISOString();
+function mapEquipment(equipment) {
+  return EQUIP_MAP[(equipment ?? '').toLowerCase()] ?? 'other'
+}
 
-// New API: no gifUrl. description is a summary, instructions is a step array.
-// We store description as the first line of instructions so it shows in the UI.
-const rows = deduplicated.map((e) => ({
-  name: e.name,
-  body_part: e.bodyPart,
-  equipment: e.equipment,
-  image_url: e.gifUrl ?? null,
-  instructions: [e.description, ...e.instructions].filter(Boolean).join("\n"),
-  target_muscle: e.target,
-  secondary_muscles: e.secondaryMuscles,
-  exercise_db_id: e.id,
-  is_custom: false,
-  created_by: null,
-  updated_at: now,
-}));
+// ── HTTPS fetch helper ────────────────────────────────────────────────────────
+function fetchJSON(url) {
+  return new Promise((resolve, reject) => {
+    https.get(url, res => {
+      let data = ''
+      res.on('data', c => data += c)
+      res.on('end', () => {
+        if (res.statusCode !== 200) {
+          reject(new Error(`HTTP ${res.statusCode} from ${url}`))
+        } else {
+          resolve(JSON.parse(data))
+        }
+      })
+    }).on('error', reject)
+  })
+}
 
-// ── Sync via psql to handle FK constraints cleanly ────────────────────────────
-// Strategy: UPDATE existing rows matched by (name, equipment), INSERT the rest.
+// ── SQL helpers ───────────────────────────────────────────────────────────────
+const esc     = v => v == null ? 'NULL' : `'${String(v).replace(/'/g, "''")}'`
+const escJson = v => v == null ? 'NULL' : `'${JSON.stringify(v).replace(/'/g, "''")}'::jsonb`
 
-import { execSync } from "child_process";
-import { writeFileSync, unlinkSync } from "fs";
-import { tmpdir } from "os";
-import { join } from "path";
+// ── Main ──────────────────────────────────────────────────────────────────────
+console.log('Fetching exercises from free-exercise-db (GitHub)...')
+const raw = await fetchJSON(DATA_URL)
+console.log(`Received ${raw.length} exercises. Mapping to schema...`)
 
-const DB_URL = "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
-const tmpFile = join(tmpdir(), "exercises_seed.sql");
+const rows = raw.map(e => {
+  const bodyPart    = mapBodyPart(e.primaryMuscles)
+  const equipment   = mapEquipment(e.equipment)
+  const imageUrl    = e.images?.[0] ? `${IMG_BASE}/${e.id}/${e.images[0].split('/').pop()}` : null
+  const instructions = Array.isArray(e.instructions) ? e.instructions.join('\n') : null
+  const targetMuscle = e.primaryMuscles?.[0] ?? null
 
-const lines = [];
-lines.push("BEGIN;");
+  return {
+    name:              e.name,
+    body_part:         bodyPart,
+    equipment:         equipment,
+    image_url:         imageUrl,
+    instructions:      instructions,
+    target_muscle:     targetMuscle,
+    secondary_muscles: e.secondaryMuscles?.length ? e.secondaryMuscles : null,
+    exercise_db_id:    `gh_${e.id}`,  // prefix to avoid clashing with old RapidAPI IDs
+  }
+})
+
+console.log(`Building SQL for ${rows.length} exercises...`)
+
+const now   = new Date().toISOString()
+const lines = ['BEGIN;']
 
 for (const row of rows) {
-  const esc = (v) =>
-    v == null ? "NULL" : `'${String(v).replace(/'/g, "''")}'`;
-  const arrEsc = (arr) =>
-    arr == null
-      ? "NULL"
-      : `ARRAY[${arr.map((v) => `'${String(v).replace(/'/g, "''")}'`).join(",")}]::text[]`;
-
-  lines.push(`
-INSERT INTO public.exercises
-  (name, body_part, equipment, image_url, instructions, target_muscle, secondary_muscles, exercise_db_id, is_custom, created_by, updated_at)
-VALUES
-  (${esc(row.name)}, ${esc(row.body_part)}, ${esc(row.equipment)}, ${esc(row.image_url)},
-   ${esc(row.instructions)}, ${esc(row.target_muscle)}, ${arrEsc(row.secondary_muscles)},
-   ${esc(row.exercise_db_id)}, false, NULL, ${esc(row.updated_at)})
-ON CONFLICT (exercise_db_id) DO UPDATE SET
-  name = EXCLUDED.name,
-  body_part = EXCLUDED.body_part,
-  equipment = EXCLUDED.equipment,
-  image_url = EXCLUDED.image_url,
-  instructions = EXCLUDED.instructions,
-  target_muscle = EXCLUDED.target_muscle,
-  secondary_muscles = EXCLUDED.secondary_muscles,
-  updated_at = EXCLUDED.updated_at;`);
-
-  // Also update any existing placeholder row with matching name+equipment
+  // Phase 1: attach exercise_db_id to any existing row matched by name+equipment
+  // (preserves the existing UUID so workout history stays intact)
   lines.push(`
 UPDATE public.exercises SET
-  exercise_db_id = ${esc(row.exercise_db_id)},
-  image_url = ${esc(row.image_url)},
-  instructions = ${esc(row.instructions)},
-  target_muscle = ${esc(row.target_muscle)},
-  secondary_muscles = ${arrEsc(row.secondary_muscles)},
-  updated_at = ${esc(row.updated_at)}
+  exercise_db_id    = ${esc(row.exercise_db_id)},
+  image_url         = ${esc(row.image_url)},
+  instructions      = COALESCE(${esc(row.instructions)}, instructions),
+  target_muscle     = ${esc(row.target_muscle)},
+  secondary_muscles = ${escJson(row.secondary_muscles)},
+  updated_at        = ${esc(now)}
 WHERE exercise_db_id IS NULL
   AND is_custom = false
-  AND lower(name) = lower(${esc(row.name)})
-  AND lower(equipment) = lower(${esc(row.equipment)});`);
+  AND created_by IS NULL
+  AND lower(name)      = lower(${esc(row.name)})
+  AND lower(equipment) = lower(${esc(row.equipment)});`)
+
+  // Phase 2: insert only if no row with this name+equipment exists yet
+  lines.push(`
+INSERT INTO public.exercises
+  (name, body_part, equipment, image_url, instructions,
+   target_muscle, secondary_muscles, exercise_db_id,
+   is_custom, created_by, updated_at)
+SELECT
+  ${esc(row.name)}, ${esc(row.body_part)}, ${esc(row.equipment)},
+  ${esc(row.image_url)}, ${esc(row.instructions)},
+  ${esc(row.target_muscle)}, ${escJson(row.secondary_muscles)}, ${esc(row.exercise_db_id)},
+  false, NULL, ${esc(now)}
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.exercises
+  WHERE lower(name) = lower(${esc(row.name)})
+    AND lower(equipment) = lower(${esc(row.equipment)})
+    AND created_by IS NULL
+    AND is_custom = false
+)
+ON CONFLICT (exercise_db_id) DO UPDATE SET
+  image_url         = EXCLUDED.image_url,
+  instructions      = EXCLUDED.instructions,
+  target_muscle     = EXCLUDED.target_muscle,
+  secondary_muscles = EXCLUDED.secondary_muscles,
+  updated_at        = EXCLUDED.updated_at;`)
 }
 
-lines.push("COMMIT;");
+lines.push('COMMIT;')
 
-writeFileSync(tmpFile, lines.join("\n"));
+const tmpFile = join(tmpdir(), 'exercises_seed.sql')
+writeFileSync(tmpFile, lines.join('\n'))
 
-console.log(`Running psql sync for ${rows.length} exercises...`);
+console.log('Running psql upsert...')
 try {
-  execSync(`psql "${DB_URL}" -f "${tmpFile}" -q`, { stdio: "pipe" });
+  execSync(`psql "${DB_URL}" -f "${tmpFile}" -q`, {
+    stdio: 'pipe',
+    env: { ...process.env, PGPASSWORD: 'postgres' },
+  })
 } catch (e) {
-  console.error("psql error:", e.stderr?.toString());
-  process.exit(1);
+  console.error('psql error:\n', e.stderr?.toString() ?? e.message)
+  process.exit(1)
 } finally {
-  unlinkSync(tmpFile);
+  unlinkSync(tmpFile)
 }
 
-// Verify count
 const count = execSync(
   `psql "${DB_URL}" -t -c "SELECT COUNT(*) FROM public.exercises WHERE is_custom = false;"`,
-)
-  .toString()
-  .trim();
-console.log(`Done! ${count} global exercises now in DB.`);
+  { env: { ...process.env, PGPASSWORD: 'postgres' } }
+).toString().trim()
+
+console.log(`\nDone! ${count.trim()} global exercises now in the database.`)
+console.log('Images load from GitHub CDN — online required to display them.')
