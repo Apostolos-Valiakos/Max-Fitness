@@ -156,6 +156,17 @@
       </div>
     </section>
 
+    <!-- Admin panel link -->
+    <section v-if="auth.isAdmin" class="section">
+      <h2 class="section-title">ADMIN</h2>
+      <div class="settings-list">
+        <div class="settings-row link-row" @click="router.push('/admin')">
+          <span><i class="pi pi-shield" style="margin-right:0.4rem;color:#FF4D00" />Admin Panel</span>
+          <i class="pi pi-chevron-right settings-arrow" />
+        </div>
+      </div>
+    </section>
+
     <!-- Sign out -->
     <button class="signout-btn" @click="handleSignOut">
       <i class="pi pi-sign-out" /> SIGN OUT
@@ -302,7 +313,7 @@ async function handleSignOut() {
 .trainer-name  { font-family: 'Barlow Condensed',sans-serif; font-size: 1rem; font-weight: 800; color: #F0F0F0; }
 .trainer-label { font-size: 0.68rem; color: #555; margin-top: 0.1rem; text-transform: uppercase; letter-spacing: 0.08em; }
 .trainer-bio   { font-size: 0.78rem; color: #666; margin-top: 0.5rem; line-height: 1.4; }
-.trainer-empty { font-size: 0.82rem; color: #444; padding: 0.75rem 0; }
+.trainer-empty { font-size: 0.82rem; color: #777; padding: 0.75rem 0; }
 .bio-textarea  { resize: vertical; min-height: 72px; font-family: inherit; line-height: 1.5; width: 100%; }
 .bw-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
 .bw-input { flex: 1; background: #111; border: 1px solid #2A2A2A; color: #F0F0F0; font-family: 'DM Sans',sans-serif; font-size: 1rem; padding: 0.65rem 0.75rem; }
@@ -336,7 +347,7 @@ async function handleSignOut() {
 .bar-pick { display: flex; gap: 0.25rem; flex-wrap: wrap; }
 .bar-btn { background: #1A1A1A; border: 1px solid #2A2A2A; color: #555; font-family: 'Barlow Condensed',sans-serif; font-size: 0.72rem; font-weight: 700; padding: 0.25rem 0.6rem; cursor: pointer; transition: all 0.15s; }
 .bar-btn.active { background: rgba(255,77,0,0.1); border-color: #FF4D00; color: #FF4D00; }
-.section-sub { font-size: 0.72rem; color: #444; margin-bottom: 0.6rem; margin-top: -0.4rem; }
+.section-sub { font-size: 0.72rem; color: #777; margin-bottom: 0.6rem; margin-top: -0.4rem; }
 .plate-grid { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 .plate-chip { background: #1A1A1A; border: 1px solid #2A2A2A; color: #555; font-family: 'Barlow Condensed',sans-serif; font-size: 0.82rem; font-weight: 700; padding: 0.35rem 0.75rem; cursor: pointer; transition: all 0.15s; min-width: 52px; text-align: center; }
 .plate-chip.active { background: rgba(255,77,0,0.1); border-color: #FF4D00; color: #FF4D00; }

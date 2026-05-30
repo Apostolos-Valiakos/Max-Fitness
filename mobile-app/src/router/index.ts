@@ -30,6 +30,7 @@ const router = createRouter({
         { path: 'trainer/plans',   name: 'TrainerPlans',    component: () => import('@/views/trainer/TrainerPlanBuilderView.vue') },
         { path: 'trainer/checkin', name: 'TrainerCheckin',  component: () => import('@/views/trainer/TrainerCheckinView.vue') },
         { path: 'trainer/client/:clientId', name: 'TrainerClient', component: () => import('@/views/trainer/TrainerClientDetailView.vue'), props: true },
+        { path: 'admin',           name: 'Admin',           component: () => import('@/views/AdminView.vue'), meta: { requiresAdmin: true } },
       ],
     },
     {
@@ -58,6 +59,7 @@ router.beforeEach((to) => {
   const loggedIn = !!auth.user
   if (to.meta.requiresAuth && !loggedIn) return { name: 'Auth' }
   if (to.meta.requiresGuest && loggedIn)  return { name: 'Dashboard' }
+  if (to.meta.requiresAdmin && auth.profile?.role !== 'admin') return { name: 'Dashboard' }
 })
 
 export default router
