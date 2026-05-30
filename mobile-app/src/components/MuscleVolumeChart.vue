@@ -61,5 +61,5 @@ watch(days, load, { immediate: true })
 .window-btn { background: #1A1A1A; border: 1px solid #2A2A2A; color: #555; font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; font-weight: 700; padding: 0.2rem 0.6rem; cursor: pointer; letter-spacing: 0.1em; }
 .window-btn.active { border-color: #FF4D00; color: #FF4D00; }
 .chart-wrap  { height: 200px; position: relative; }
-.chart-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: #444; font-size: 0.8rem; }
+.chart-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: #777; font-size: 0.8rem; }
 </style>

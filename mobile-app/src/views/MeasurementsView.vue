@@ -135,5 +135,5 @@ async function handleLog() {
 .m-table td { color: #888; text-align: right; padding: 0.4rem 0.4rem; border-bottom: 1px solid #111; }
 .m-table td.date-cell { text-align: left; color: #555; font-size: 0.68rem; white-space: nowrap; }
 .m-table tr:hover td { background: #111; }
-.empty-state { text-align: center; padding: 3rem 1rem; color: #444; font-size: 0.85rem; }
+.empty-state { text-align: center; padding: 3rem 1rem; color: #777; font-size: 0.85rem; }
 </style>

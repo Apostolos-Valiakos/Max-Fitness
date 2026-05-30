@@ -349,10 +349,10 @@ async function handleSubmit() {
 .view-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
 .back-btn { background: none; border: none; color: #666; cursor: pointer; font-size: 1rem; padding: 0; }
 .view-title { font-family: 'Barlow Condensed',sans-serif; font-size: 1.8rem; font-weight: 900; color: #F0F0F0; }
-.section-label { font-family: 'Barlow Condensed',sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em; color: #444; margin-bottom: 0.6rem; }
+.section-label { font-family: 'Barlow Condensed',sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em; color: #777; margin-bottom: 0.6rem; }
 
-.empty-state { text-align: center; padding: 4rem 1rem; color: #444; }
-.no-pending { font-size: 0.82rem; color: #444; display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 0; margin-bottom: 0.5rem; }
+.empty-state { text-align: center; padding: 4rem 1rem; color: #777; }
+.no-pending { font-size: 0.82rem; color: #777; display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 0; margin-bottom: 0.5rem; }
 .no-pending .pi { color: #2A5A2A; }
 
 /* Pending assignments */
@@ -363,7 +363,7 @@ async function handleSubmit() {
 .a-info { display: flex; flex-direction: column; gap: 0.2rem; }
 .a-name { font-family: 'Barlow Condensed',sans-serif; font-size: 1.1rem; font-weight: 800; color: #F0F0F0; }
 .a-due  { font-size: 0.72rem; color: #FF4D00; }
-.a-arrow { color: #444; font-size: 0.8rem; }
+.a-arrow { color: #777; font-size: 0.8rem; }
 
 /* Past submissions */
 .submission-list { display: flex; flex-direction: column; gap: 0.5rem; }
@@ -384,12 +384,12 @@ async function handleSubmit() {
 
 .sub-photos { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
 .sub-photo  { width: 72px; height: 72px; object-fit: cover; border: 1px solid #2A2A2A; }
-.photos-gone { font-size: 0.72rem; color: #444; margin-top: 0.5rem; display: flex; align-items: center; gap: 0.35rem; }
+.photos-gone { font-size: 0.72rem; color: #777; margin-top: 0.5rem; display: flex; align-items: center; gap: 0.35rem; }
 
 .trainer-reply { margin-top: 0.875rem; background: rgba(0,166,81,0.06); border: 1px solid rgba(0,166,81,0.2); border-left: 3px solid #00A651; padding: 0.75rem; }
 .reply-label { font-family: 'Barlow Condensed',sans-serif; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.2em; color: #00A651; margin-bottom: 0.4rem; }
 .reply-text  { font-size: 0.85rem; color: #C0C0C0; line-height: 1.5; white-space: pre-wrap; }
-.reply-date  { font-size: 0.65rem; color: #444; margin-top: 0.35rem; }
+.reply-date  { font-size: 0.65rem; color: #777; margin-top: 0.35rem; }
 
 /* Form */
 .form-title { font-family: 'Barlow Condensed',sans-serif; font-size: 1.4rem; font-weight: 900; color: #F0F0F0; margin-bottom: 1.5rem; }
@@ -411,7 +411,7 @@ async function handleSubmit() {
 .photo-pick-btn { display: inline-flex; align-items: center; gap: 0.5rem; background: #1A1A1A; border: 1px dashed #2A2A2A; color: #888; font-size: 0.85rem; padding: 0.75rem 1rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
 .photo-pick-btn:active { border-color: #FF4D00; color: #FF4D00; }
 .photo-input-hidden { display: none; }
-.photo-limit { font-size: 0.68rem; color: #444; }
+.photo-limit { font-size: 0.68rem; color: #777; }
 .photo-previews { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .photo-thumb-wrap { position: relative; width: 80px; height: 80px; }
 .photo-thumb { width: 80px; height: 80px; object-fit: cover; border: 1px solid #2A2A2A; display: block; }

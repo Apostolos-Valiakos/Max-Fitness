@@ -167,6 +167,6 @@ onMounted(async () => {
 .see-all { font-size: 0.72rem; color: #FF4D00; text-decoration: none; }
 .chart-card { background: #111; border: 1px solid #1A1A1A; padding: 1rem; }
 .sessions-list { display: flex; flex-direction: column; gap: 0.5rem; }
-.empty-state { text-align: center; padding: 2rem 1rem; color: #444; }
+.empty-state { text-align: center; padding: 2rem 1rem; color: #777; }
 .cta-btn { background: #FF4D00; border: none; color: #fff; font-family: 'Barlow Condensed',sans-serif; font-weight: 700; letter-spacing: 0.1em; padding: 0.75rem 1.5rem; cursor: pointer; margin-top: 1rem; clip-path: polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%); }
 </style>

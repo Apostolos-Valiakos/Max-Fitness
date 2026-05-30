@@ -78,10 +78,10 @@ onMounted(() => trainer.fetchClients())
 }
 .plans-btn:hover { color: #FF4D00; border-color: #FF4D00; }
 
-.loading-state { text-align: center; padding: 3rem; color: #444; }
-.empty-state   { text-align: center; padding: 4rem 2rem; color: #444; }
-.empty-icon    { font-size: 2.5rem; color: #2A2A2A; display: block; margin-bottom: 1rem; }
-.empty-sub     { font-size: 0.75rem; margin-top: 0.5rem; color: #333; }
+.loading-state { text-align: center; padding: 3rem; color: #777; }
+.empty-state   { text-align: center; padding: 4rem 2rem; color: #777; }
+.empty-icon    { font-size: 2.5rem; color: #555; display: block; margin-bottom: 1rem; }
+.empty-sub     { font-size: 0.75rem; margin-top: 0.5rem; color: #666; }
 
 .client-list { display: flex; flex-direction: column; gap: 1px; padding: 0.5rem 0; }
 
@@ -112,6 +112,6 @@ onMounted(() => trainer.fetchClients())
 .tier-chip.paid   { color: #4DA6FF; border-color: rgba(77,166,255,0.3); background: rgba(77,166,255,0.08); }
 .tier-chip.ultra  { color: #FFD700; border-color: rgba(255,215,0,0.3); background: rgba(255,215,0,0.08); }
 .last-session  { font-size: 0.7rem; color: #555; }
-.no-session    { color: #333; }
-.chevron       { color: #333; font-size: 0.8rem; }
+.no-session    { color: #666; }
+.chevron       { color: #666; font-size: 0.8rem; }
 </style>

@@ -46,12 +46,12 @@ const duration = computed(() => {
 .session-card:active { border-color: #FF4D00; }
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
 .card-date { font-size: 0.72rem; color: #666; text-transform: uppercase; letter-spacing: 0.1em; }
-.card-duration { font-size: 0.72rem; color: #444; }
+.card-duration { font-size: 0.72rem; color: #777; }
 .card-name { font-family: 'Barlow Condensed', sans-serif; font-size: 1.2rem; font-weight: 700; color: #F0F0F0; margin-bottom: 0.6rem; }
 .card-exercises { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.75rem; }
 .exercise-chip { background: #1A1A1A; border: 1px solid #2A2A2A; padding: 0.2rem 0.5rem; font-size: 0.68rem; color: #888; }
 .exercise-chip.more { color: #FF4D00; border-color: #FF4D00; }
 .card-footer { display: flex; justify-content: space-between; align-items: center; }
 .card-vol { font-size: 0.72rem; color: #555; }
-.card-arrow { color: #333; font-size: 0.75rem; }
+.card-arrow { color: #666; font-size: 0.75rem; }
 </style>

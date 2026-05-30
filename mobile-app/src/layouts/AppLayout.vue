@@ -50,6 +50,7 @@ const workout = useWorkoutStore()
 .app-shell {
   display: flex; flex-direction: column;
   min-height: 100dvh; background: #0A0A0A; position: relative;
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 .active-banner {

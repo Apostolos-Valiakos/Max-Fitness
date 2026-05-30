@@ -366,7 +366,7 @@ async function addExercise(ex: Exercise) {
   color: #666; font-family: 'DM Sans',sans-serif; font-size: 0.8rem;
   padding: 0.3rem 0; box-sizing: border-box;
 }
-.template-notes-input::placeholder { color: #2A2A2A; }
+.template-notes-input::placeholder { color: #555; }
 .template-notes-input:focus { outline: none; border-bottom-color: #333; }
 .template-notes-display { padding: 0.6rem 1rem; font-size: 0.8rem; color: #555; }
 
@@ -378,7 +378,7 @@ async function addExercise(ex: Exercise) {
   clip-path: polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%);
 }
 .drag-handle {
-  color: #333; cursor: grab; padding: 0.25rem 0.1rem; flex-shrink: 0;
+  color: #666; cursor: grab; padding: 0.25rem 0.1rem; flex-shrink: 0;
   touch-action: none; font-size: 0.85rem; margin-top: 0.15rem;
 }
 .drag-handle:active { color: #FF4D00; cursor: grabbing; }
@@ -407,15 +407,15 @@ async function addExercise(ex: Exercise) {
   color: #888; font-family: 'DM Sans',sans-serif; font-size: 0.78rem;
   padding: 0.2rem 0; box-sizing: border-box;
 }
-.ex-note-input::placeholder { color: #2A2A2A; }
+.ex-note-input::placeholder { color: #555; }
 .ex-note-input:focus { outline: none; border-bottom-color: #333; color: #F0F0F0; }
 
-.remove-btn { background: none; border: none; color: #2A2A2A; cursor: pointer; padding: 0.2rem; font-size: 0.75rem; flex-shrink: 0; margin-top: 0.1rem; }
+.remove-btn { background: none; border: none; color: #555; cursor: pointer; padding: 0.2rem; font-size: 0.75rem; flex-shrink: 0; margin-top: 0.1rem; }
 .remove-btn:active { color: #FF4444; }
 
 /* Empty */
-.empty-state { text-align: center; padding: 3rem 1rem; color: #444; }
-.empty-icon  { font-size: 2.5rem; color: #2A2A2A; display: block; margin-bottom: 0.75rem; }
+.empty-state { text-align: center; padding: 3rem 1rem; color: #777; }
+.empty-icon  { font-size: 2.5rem; color: #555; display: block; margin-bottom: 0.75rem; }
 
 /* Add exercise button */
 .add-ex-btn {
@@ -473,7 +473,7 @@ async function addExercise(ex: Exercise) {
 .picker-close { background: none; border: none; color: #555; font-size: 1rem; cursor: pointer; }
 .picker-close:active { color: #FF4D00; }
 .picker-search-row { position: relative; padding: 0 1rem 0.5rem; flex-shrink: 0; }
-.search-icon { position: absolute; left: 1.75rem; top: 50%; transform: translateY(-50%); color: #444; font-size: 0.85rem; }
+.search-icon { position: absolute; left: 1.75rem; top: 50%; transform: translateY(-50%); color: #777; font-size: 0.85rem; }
 .picker-search { width: 100%; background: #1A1A1A; border: 1px solid #2A2A2A; color: #F0F0F0; font-family: 'DM Sans',sans-serif; font-size: 0.9rem; padding: 0.6rem 0.75rem 0.6rem 2.25rem; box-sizing: border-box; }
 .picker-search:focus { outline: none; border-color: #FF4D00; }
 .picker-filters { display: flex; gap: 0.4rem; overflow-x: auto; padding: 0 1rem 0.6rem; scrollbar-width: none; flex-shrink: 0; }
@@ -485,5 +485,5 @@ async function addExercise(ex: Exercise) {
 .picker-ex-row:active { background: rgba(255,77,0,0.05); }
 .picker-ex-name { font-family: 'Barlow Condensed',sans-serif; font-size: 1rem; font-weight: 700; color: #F0F0F0; }
 .picker-ex-meta { font-size: 0.7rem; color: #555; margin-top: 0.1rem; text-transform: capitalize; }
-.picker-empty { text-align: center; color: #444; padding: 2rem; font-size: 0.85rem; }
+.picker-empty { text-align: center; color: #777; padding: 2rem; font-size: 0.85rem; }
 </style>

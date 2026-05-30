@@ -20,5 +20,5 @@ const chartOptions = { responsive: true, maintainAspectRatio: false, plugins: { 
 
 <style scoped>
 .chart-wrap { height: 160px; position: relative; }
-.chart-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: #444; font-size: 0.8rem; }
+.chart-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: #777; font-size: 0.8rem; }
 </style>

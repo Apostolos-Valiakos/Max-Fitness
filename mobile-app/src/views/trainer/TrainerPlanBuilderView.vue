@@ -169,8 +169,8 @@ onMounted(async () => {
 .view-title { flex: 1; font-family: 'Barlow Condensed', sans-serif; font-size: 1.4rem; font-weight: 900; color: #F0F0F0; letter-spacing: 0.05em; }
 .add-plan-btn { background: #FF4D00; border: none; color: #fff; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; }
 
-.empty-state { text-align: center; padding: 4rem 2rem; color: #444; }
-.empty-icon  { font-size: 2.5rem; color: #2A2A2A; display: block; margin-bottom: 1rem; }
+.empty-state { text-align: center; padding: 4rem 2rem; color: #777; }
+.empty-icon  { font-size: 2.5rem; color: #555; display: block; margin-bottom: 1rem; }
 .cta-btn { margin-top: 1rem; background: #FF4D00; border: none; color: #fff; padding: 0.6rem 1.25rem; font-family: 'Barlow Condensed', sans-serif; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.08em; cursor: pointer; }
 
 .plan-list { display: flex; flex-direction: column; gap: 1px; padding: 0.75rem 0; }
@@ -185,11 +185,11 @@ onMounted(async () => {
 
 .weekly-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; padding: 0.75rem; }
 .day-slot { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.day-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.58rem; font-weight: 700; color: #444; letter-spacing: 0.05em; text-align: center; }
+.day-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.58rem; font-weight: 700; color: #777; letter-spacing: 0.05em; text-align: center; }
 
 .day-add {
   width: 100%; aspect-ratio: 1; border: 1px dashed #2A2A2A; background: #0A0A0A;
-  color: #333; display: flex; align-items: center; justify-content: center;
+  color: #666; display: flex; align-items: center; justify-content: center;
   cursor: pointer; font-size: 0.7rem; transition: border-color 0.15s, color 0.15s;
 }
 .day-add:hover { border-color: #FF4D00; color: #FF4D00; }
@@ -227,5 +227,5 @@ onMounted(async () => {
 .picker-list { max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; }
 .picker-row { padding: 0.875rem; border-bottom: 1px solid #1A1A1A; cursor: pointer; color: #E0E0E0; font-size: 0.9rem; }
 .picker-row:hover { background: #1A1A1A; color: #FF4D00; }
-.tab-empty { text-align: center; padding: 2rem; color: #444; font-size: 0.85rem; }
+.tab-empty { text-align: center; padding: 2rem; color: #777; font-size: 0.85rem; }
 </style>

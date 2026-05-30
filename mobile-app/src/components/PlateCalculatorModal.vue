@@ -264,7 +264,7 @@ function plateStyle(kg: number): Record<string, string> {
 /* Plate list */
 .section-label {
   font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem;
-  font-weight: 700; letter-spacing: 0.1em; color: #444;
+  font-weight: 700; letter-spacing: 0.1em; color: #777;
   margin-bottom: 0.5rem;
 }
 .plate-list {
@@ -284,6 +284,6 @@ function plateStyle(kg: number): Record<string, string> {
   font-family: 'Barlow Condensed', sans-serif; font-size: 1rem;
   font-weight: 700; color: #888;
 }
-.plate-empty { font-size: 0.85rem; color: #444; text-align: center; padding: 0.5rem 0; }
+.plate-empty { font-size: 0.85rem; color: #777; text-align: center; padding: 0.5rem 0; }
 .plate-remainder { font-size: 0.75rem; color: #FF8C00; margin-top: 0.25rem; }
 </style>

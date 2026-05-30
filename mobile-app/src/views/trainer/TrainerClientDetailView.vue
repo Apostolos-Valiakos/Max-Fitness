@@ -275,8 +275,8 @@ onMounted(async () => {
 .tab { flex: 1; padding: 0.75rem; background: none; border: none; color: #555; cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; transition: color 0.15s; }
 .tab.active { color: #FF4D00; border-bottom: 2px solid #FF4D00; }
 
-.tab-loading { text-align: center; padding: 3rem; color: #444; }
-.tab-empty { text-align: center; padding: 2rem; color: #444; font-size: 0.85rem; }
+.tab-loading { text-align: center; padding: 3rem; color: #777; }
+.tab-empty { text-align: center; padding: 2rem; color: #777; font-size: 0.85rem; }
 
 /* History */
 .session-list { display: flex; flex-direction: column; }
@@ -324,11 +324,11 @@ onMounted(async () => {
 .kpi-card { background: #111; border: 1px solid #1A1A1A; padding: 0.875rem; }
 .kpi-val { font-family: 'Barlow Condensed', sans-serif; font-size: 1.6rem; font-weight: 900; color: #F0F0F0; }
 .kpi-lbl { font-size: 0.62rem; color: #555; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.2rem; }
-.section-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; font-weight: 700; color: #444; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.75rem; }
+.section-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; font-weight: 700; color: #777; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.75rem; }
 .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 80px; }
 .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; }
 .bar-fill { width: 100%; min-height: 2px; background: rgba(255,77,0,0.6); transition: height 0.3s; }
-.bar-lbl { font-size: 0.55rem; color: #444; }
+.bar-lbl { font-size: 0.55rem; color: #777; }
 
 /* Plans */
 .plans-content { padding: 1rem; }

@@ -80,7 +80,7 @@ async function handleAdd(ex: ExerciseDocument) {
 .back-btn { background: none; border: none; color: #666; cursor: pointer; font-size: 1rem; }
 .view-title { font-family: 'Barlow Condensed',sans-serif; font-size: 1.2rem; font-weight: 900; letter-spacing: 0.05em; }
 .search-bar { position: relative; margin: 0 1rem 0.75rem; }
-.search-icon { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #444; font-size: 0.85rem; }
+.search-icon { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #777; font-size: 0.85rem; }
 .search-input { width: 100%; background: #111; border: 1px solid #2A2A2A; color: #F0F0F0; font-family: 'DM Sans',sans-serif; font-size: 0.9rem; padding: 0.65rem 0.75rem 0.65rem 2.25rem; }
 .search-input:focus { outline: none; border-color: #FF4D00; }
 .filters { display: flex; gap: 0.4rem; overflow-x: auto; padding: 0 1rem 0.75rem; scrollbar-width: none; }
@@ -88,5 +88,5 @@ async function handleAdd(ex: ExerciseDocument) {
 .filter-chip { flex-shrink: 0; background: #111; border: 1px solid #2A2A2A; color: #555; font-family: 'Barlow Condensed',sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; padding: 0.3rem 0.7rem; cursor: pointer; text-transform: uppercase; transition: all 0.15s; white-space: nowrap; }
 .filter-chip.active { background: rgba(255,77,0,0.1); border-color: #FF4D00; color: #FF4D00; }
 .results { display: flex; flex-direction: column; gap: 1px; padding: 0 1rem; }
-.empty { text-align: center; color: #444; padding: 2rem; font-size: 0.85rem; }
+.empty { text-align: center; color: #777; padding: 2rem; font-size: 0.85rem; }
 </style>

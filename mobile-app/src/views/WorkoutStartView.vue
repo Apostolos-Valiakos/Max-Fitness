@@ -203,10 +203,10 @@ async function startFromTemplate(t: WorkoutTemplateDocument) {
 .t-creator { font-size: 0.65rem; color: #FF4D00; opacity: 0.7; margin-top: 0.1rem; }
 .t-exercises { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.5rem; }
 .t-ex-chip { font-size: 0.65rem; color: #555; background: #1A1A1A; border: 1px solid #2A2A2A; padding: 0.15rem 0.45rem; white-space: nowrap; }
-.t-ex-more { font-size: 0.65rem; color: #444; align-self: center; }
+.t-ex-more { font-size: 0.65rem; color: #777; align-self: center; }
 .t-play { color: #FF4D00; font-size: 0.8rem; flex-shrink: 0; }
 
-.empty-state { text-align: center; padding: 2rem 1rem; color: #444; font-size: 0.85rem; }
+.empty-state { text-align: center; padding: 2rem 1rem; color: #777; font-size: 0.85rem; }
 .link-btn { color: #FF4D00; text-decoration: none; font-size: 0.85rem; }
 
 .recent-list { display: flex; flex-direction: column; gap: 0.4rem; }

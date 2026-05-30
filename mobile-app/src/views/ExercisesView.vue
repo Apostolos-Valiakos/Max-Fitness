@@ -135,7 +135,7 @@ async function handleCreate() {
 .view-title { font-family: 'Barlow Condensed',sans-serif; font-size: 1.8rem; font-weight: 900; }
 .add-btn { background: #FF4D00; border: none; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; clip-path: polygon(0 0,100% 0,100% 75%,85% 100%,0 100%); }
 .search-bar { position: relative; margin-bottom: 0.75rem; }
-.search-icon { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #444; font-size: 0.85rem; }
+.search-icon { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #777; font-size: 0.85rem; }
 .search-input { width: 100%; background: #111; border: 1px solid #2A2A2A; color: #F0F0F0; font-family: 'DM Sans',sans-serif; font-size: 0.9rem; padding: 0.65rem 0.75rem 0.65rem 2.25rem; }
 .search-input:focus { outline: none; border-color: #FF4D00; }
 .filters { display: flex; gap: 0.4rem; overflow-x: auto; padding-bottom: 0.75rem; scrollbar-width: none; }
@@ -146,8 +146,8 @@ async function handleCreate() {
 .filter-chip.active { background: rgba(255,77,0,0.1); border-color: #FF4D00; color: #FF4D00; }
 
 .results { display: flex; flex-direction: column; gap: 1px; }
-.alpha-header { font-family: 'Barlow Condensed',sans-serif; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.2em; color: #444; padding: 0.6rem 0 0.25rem; border-bottom: 1px solid #1A1A1A; margin-bottom: 1px; }
-.empty { text-align: center; color: #444; padding: 2rem; font-size: 0.85rem; }
+.alpha-header { font-family: 'Barlow Condensed',sans-serif; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.2em; color: #777; padding: 0.6rem 0 0.25rem; border-bottom: 1px solid #1A1A1A; margin-bottom: 1px; }
+.empty { text-align: center; color: #777; padding: 2rem; font-size: 0.85rem; }
 
 .create-form { display: flex; flex-direction: column; gap: 1rem; }
 .field { display: flex; flex-direction: column; gap: 0.35rem; }

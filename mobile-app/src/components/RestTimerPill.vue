@@ -75,7 +75,7 @@ const timer = useRestTimer()
 
 .pill-skip {
   background: none; border: none;
-  color: #444; font-size: 0.85rem;
+  color: #777; font-size: 0.85rem;
   cursor: pointer; padding: 0.25rem 0.5rem;
   flex-shrink: 0;
   transition: color 0.15s;

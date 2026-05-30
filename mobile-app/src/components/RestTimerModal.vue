@@ -83,7 +83,7 @@ const dashOffset = computed(() => (1 - timer.progress.value / 100) * CIRCUMFEREN
 }
 .icon-btn {
   background: none; border: none;
-  color: #444; cursor: pointer; padding: 0.35rem;
+  color: #777; cursor: pointer; padding: 0.35rem;
   display: flex; align-items: center; justify-content: center;
   transition: color 0.15s;
 }

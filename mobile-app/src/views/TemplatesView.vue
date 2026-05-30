@@ -302,14 +302,14 @@ async function handleDuplicate(templateId: string) {
 .view-title { font-family: 'Barlow Condensed',sans-serif; font-size: 1.8rem; font-weight: 900; }
 .add-btn { background: #FF4D00; border: none; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; clip-path: polygon(0 0,100% 0,100% 75%,85% 100%,0 100%); }
 
-.section-label { font-family: 'Barlow Condensed',sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em; color: #444; margin-bottom: 0.6rem; }
+.section-label { font-family: 'Barlow Condensed',sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em; color: #777; margin-bottom: 0.6rem; }
 
 .tier-banner { display: flex; justify-content: space-between; align-items: center; background: rgba(255,77,0,0.05); border: 1px solid rgba(255,77,0,0.15); padding: 0.65rem 0.9rem; margin-bottom: 1rem; font-size: 0.78rem; color: #666; }
 .tier-left { display: flex; align-items: center; gap: 0.5rem; }
 .upgrade-link { background: none; border: none; color: #FF4D00; font-weight: 600; font-size: 0.75rem; cursor: pointer; padding: 0; }
 
-.empty-state { text-align: center; padding: 2.5rem 1rem; color: #444; }
-.empty-icon { font-size: 2.5rem; color: #2A2A2A; display: block; margin-bottom: 0.75rem; }
+.empty-state { text-align: center; padding: 2.5rem 1rem; color: #777; }
+.empty-icon { font-size: 2.5rem; color: #555; display: block; margin-bottom: 0.75rem; }
 
 .template-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.5rem; }
 .template-card { display: flex; align-items: center; gap: 0.75rem; background: #111; border: 1px solid #1A1A1A; padding: 1rem; clip-path: polygon(0 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%); }
@@ -324,7 +324,7 @@ async function handleDuplicate(templateId: string) {
 .t-creator-badge { font-family: 'Barlow Condensed',sans-serif; font-size: 0.55rem; font-weight: 800; letter-spacing: 0.1em; color: #666; padding: 0.1rem 0.35rem; flex-shrink: 0; }
 .t-meta { display: flex; flex-direction: column; gap: 0.1rem; margin-top: 0.15rem; }
 .t-note { font-size: 0.72rem; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.t-ex-count { font-size: 0.7rem; color: #444; }
+.t-ex-count { font-size: 0.7rem; color: #777; }
 .t-trainer-by { font-size: 0.68rem; color: #7a6200; }
 
 .t-actions { display: flex; gap: 0.3rem; }

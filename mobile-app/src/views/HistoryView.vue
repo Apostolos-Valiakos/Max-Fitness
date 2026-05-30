@@ -204,7 +204,7 @@ onMounted(() => {
 .cal-nav-btn:active { color: #FF4D00; }
 .cal-month { font-family: 'Barlow Condensed',sans-serif; font-size: 1rem; font-weight: 800; color: #F0F0F0; letter-spacing: 0.05em; }
 .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 1.25rem; }
-.cal-dow { font-family: 'Barlow Condensed',sans-serif; font-size: 0.6rem; font-weight: 700; color: #444; text-align: center; padding: 0.25rem 0; letter-spacing: 0.1em; }
+.cal-dow { font-family: 'Barlow Condensed',sans-serif; font-size: 0.6rem; font-weight: 700; color: #777; text-align: center; padding: 0.25rem 0; letter-spacing: 0.1em; }
 .cal-cell { min-height: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: default; background: #111; border: 1px solid #1A1A1A; position: relative; }
 .cal-cell.empty { background: transparent; border-color: transparent; }
 .cal-cell.today { border-color: #FF4D00; }
@@ -224,11 +224,11 @@ onMounted(() => {
 /* List view */
 .week-group { margin-bottom: 1.5rem; }
 .week-label { font-family: 'Barlow Condensed',sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; color: #555; margin-bottom: 0.5rem; padding-bottom: 0.4rem; border-bottom: 1px solid #1A1A1A; }
-.empty-state { text-align: center; padding: 4rem 1rem; color: #444; }
-.empty-icon { font-size: 3rem; color: #2A2A2A; display: block; margin-bottom: 1rem; }
+.empty-state { text-align: center; padding: 4rem 1rem; color: #777; }
+.empty-icon { font-size: 3rem; color: #555; display: block; margin-bottom: 1rem; }
 .cta-btn { background: #FF4D00; border: none; color: #fff; font-family: 'Barlow Condensed',sans-serif; font-weight: 700; letter-spacing: 0.1em; padding: 0.75rem 1.5rem; cursor: pointer; margin-top: 1rem; clip-path: polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%); }
 .load-more-wrap { text-align: center; padding: 1.5rem; }
 .load-more-btn { background: #111; border: 1px solid #2A2A2A; color: #666; font-family: 'Barlow Condensed',sans-serif; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.1em; padding: 0.65rem 1.5rem; cursor: pointer; transition: all 0.15s; }
 .load-more-btn:active { border-color: #FF4D00; color: #FF4D00; }
-.all-loaded { font-size: 0.72rem; color: #333; }
+.all-loaded { font-size: 0.72rem; color: #666; }
 </style>
