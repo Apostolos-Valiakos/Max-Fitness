@@ -5,6 +5,7 @@ import { wrappedValidateAjvStorage } from "rxdb/plugins/validate-ajv";
 import { RxDBQueryBuilderPlugin } from "rxdb/plugins/query-builder";
 import { RxDBUpdatePlugin } from "rxdb/plugins/update";
 import { RxDBMigrationSchemaPlugin } from "rxdb/plugins/migration-schema";
+import { sha256 } from "@noble/hashes/sha2.js";
 import {
   exerciseSchema,
   workoutSessionSchema,
@@ -12,6 +13,23 @@ import {
   setSchema,
   templateExerciseSchema,
 } from "./schemas";
+
+async function hashFunction(data: string | ArrayBuffer | Blob): Promise<string> {
+  let bytes: Uint8Array;
+  if (typeof data === "string") {
+    bytes = new TextEncoder().encode(data);
+  } else if (data instanceof Blob) {
+    bytes = new Uint8Array(await data.arrayBuffer());
+  } else {
+    bytes = new Uint8Array(data);
+  }
+  if (typeof crypto !== "undefined" && crypto.subtle?.digest) {
+    const buf = await crypto.subtle.digest("SHA-256", bytes as BufferSource);
+    return Array.from(new Uint8Array(buf)).map((b: number) => b.toString(16).padStart(2, "0")).join("");
+  }
+  const hash = sha256(bytes);
+  return Array.from(hash).map((b: number) => b.toString(16).padStart(2, "0")).join("");
+}
 
 if (import.meta.env.DEV) addRxPlugin(RxDBDevModePlugin);
 addRxPlugin(RxDBQueryBuilderPlugin);
@@ -30,6 +48,7 @@ async function buildDatabase() {
     storage,
     multiInstance: false,
     ignoreDuplicate: true,
+    hashFunction,
   });
 
   const noopMigration = { 1: (doc: any) => doc }
