@@ -16,7 +16,7 @@
       <!-- Trainer cards -->
       <div v-if="trainers.length === 0" class="empty-state">
         <i class="pi pi-id-card" />
-        <p>No trainers yet. Promote a user to the <strong>trainer</strong> role in the Users section, then assign them clients here.</p>
+        <p>No trainers yet. Promote a user to the <strong>trainer</strong> or <strong>admin</strong> role in the Users section, then assign them clients here.</p>
       </div>
 
       <div v-for="trainer in trainers" :key="trainer.id" class="trainer-block card">
@@ -27,8 +27,8 @@
             <div class="trainer-name">{{ trainer.full_name ?? '—' }}</div>
             <div class="trainer-email">{{ trainer.email }}</div>
           </div>
-          <span class="badge trainer">TRAINER</span>
-          <button class="btn btn-danger btn-sm" @click="demoteTrainer(trainer)" title="Remove trainer role">
+          <span class="badge" :class="trainer.role">{{ trainer.role === 'admin' ? 'ADMIN' : 'TRAINER' }}</span>
+          <button v-if="trainer.role === 'trainer'" class="btn btn-danger btn-sm" @click="demoteTrainer(trainer)" title="Remove trainer role">
             <i class="pi pi-user-minus" />
           </button>
         </div>
@@ -128,7 +128,7 @@ async function load() {
 
   allUsers.value = (profiles ?? []).map(p => ({ ...p, email: emailMap[p.id] ?? '' }))
 
-  const trainerProfiles = (profiles ?? []).filter(p => p.role === 'trainer')
+  const trainerProfiles = (profiles ?? []).filter(p => p.role === 'trainer' || p.role === 'admin')
 
   trainers.value = trainerProfiles.map(tp => {
     const trainerAssignments = (assignments ?? []).filter(a => a.trainer_id === tp.id)
