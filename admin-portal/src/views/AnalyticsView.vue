@@ -172,7 +172,7 @@
                 <td class="td-muted">{{ fmtDate(s.created_at) }}</td>
                 <td class="td-val orange">{{ s.waitDays }}d</td>
               </tr>
-              <tr v-if="!tr.overdue.length"><td colspan="3" class="td-empty" style="color:#00A651">All caught up</td></tr>
+              <tr v-if="!tr.overdue.length"><td colspan="3" class="td-empty" style="color:#2EAF52">All caught up</td></tr>
             </tbody>
           </table>
         </div>
@@ -241,8 +241,8 @@ import { subDays, subMonths, format, startOfMonth, endOfMonth, eachWeekOfInterva
 ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, Tooltip, Filler)
 
 // ── Chart option presets ────────────────────────────────────────────────────
-const tickStyle = { color: '#555', font: { size: 9 } }
-const gridStyle = { color: '#1A1A1A' }
+const tickStyle = { color: '#636366', font: { size: 9 } }
+const gridStyle = { color: '#252528' }
 const baseOpts  = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
 const barOpts   = { ...baseOpts, scales: { x: { ticks: tickStyle, grid: gridStyle }, y: { ticks: tickStyle, grid: gridStyle } } }
 const barOptsThin = { ...barOpts, datasets: { bar: { borderRadius: 1 } } } as any
@@ -368,14 +368,14 @@ async function loadOverview() {
     const end = endOfWeek(w)
     return sessions84.value.filter(s => s.started_at >= w.toISOString() && s.started_at <= end.toISOString()).length
   })
-  ov.sessionsChart = makeBar(weekLabels, sessWeekly, '#FF4D00')
+  ov.sessionsChart = makeBar(weekLabels, sessWeekly, '#4A9EFF')
 
   // Signups per week from authUsers
   const signupWeekly = weeks.map(w => {
     const end = endOfWeek(w).toISOString()
     return authUsers.value.filter(u => u.created_at >= w.toISOString() && u.created_at <= end).length
   })
-  ov.signupsChart = makeLine(weekLabels, signupWeekly, '#FF4D00')
+  ov.signupsChart = makeLine(weekLabels, signupWeekly, '#4A9EFF')
 
   tabLoaded.overview = true
 }
@@ -415,7 +415,7 @@ async function loadGrowth() {
     const end = endOfMonth(m).toISOString()
     return authUsers.value.filter(u => u.created_at >= m.toISOString() && u.created_at <= end).length
   })
-  gr.signupsByMonth = makeBar(monthLabels, signupsByMonth, '#FF4D00')
+  gr.signupsByMonth = makeBar(monthLabels, signupsByMonth, '#4A9EFF')
 
   // Tier distribution stacked bar (snapshot)
   const freeCount  = allProfiles.value.filter(p => p.tier === 'free').length
@@ -424,7 +424,7 @@ async function loadGrowth() {
   gr.tierChart = {
     labels: ['Users'],
     datasets: [
-      { label: 'Free',  data: [freeCount],  backgroundColor: '#2A2A2A', borderColor: '#444', borderWidth: 1 },
+      { label: 'Free',  data: [freeCount],  backgroundColor: '#3A3A3C', borderColor: '#636366', borderWidth: 1 },
       { label: 'Paid',  data: [paidCount],  backgroundColor: 'rgba(77,166,255,0.7)', borderColor: '#4DA6FF', borderWidth: 1 },
       { label: 'Ultra', data: [ultraCount], backgroundColor: 'rgba(255,215,0,0.7)',   borderColor: '#FFD700', borderWidth: 1 },
     ],
@@ -443,15 +443,15 @@ function loadRevenue() {
   rv.tierChart = makeBar(
     ['Free', 'Paid', 'Ultra'],
     [rv.freeCount, rv.paidCount, rv.ultraCount],
-    '#FF4D00',
+    '#4A9EFF',
   )
-  rv.tierChart.datasets[0].backgroundColor = ['#2A2A2A', 'rgba(77,166,255,0.7)', 'rgba(255,215,0,0.7)'] as any
-  rv.tierChart.datasets[0].borderColor     = ['#444', '#4DA6FF', '#FFD700'] as any
+  rv.tierChart.datasets[0].backgroundColor = ['#3A3A3C', 'rgba(77,166,255,0.7)', 'rgba(255,215,0,0.7)'] as any
+  rv.tierChart.datasets[0].borderColor     = ['#636366', '#4DA6FF', '#FFD700'] as any
 
   rv.revenueChart = makeBar(
     ['Paid (€5)', 'Ultra (€30)'],
     [rv.paidCount * 5, rv.ultraCount * 30],
-    '#00C851',
+    '#34C759',
   )
 
   tabLoaded.revenue = true
@@ -482,7 +482,7 @@ function loadEngagement() {
   for (const s of sessions84.value) dowCounts[new Date(s.started_at).getDay()]++
   const peakDowIdx = dowCounts.indexOf(Math.max(...dowCounts))
   eg.peakDay = DAYS[peakDowIdx]
-  eg.dowChart = makeBar(DAYS, dowCounts, '#FF4D00')
+  eg.dowChart = makeBar(DAYS, dowCounts, '#4A9EFF')
 
   // Hour of day peak
   const hourCounts = Array(24).fill(0)
@@ -505,7 +505,7 @@ function loadEngagement() {
     dayCounts.push(dayMap[key] ?? 0)
     cursor = new Date(cursor.getTime() + 86400000)
   }
-  eg.dailyChart = makeBar(days, dayCounts, '#FF4D00')
+  eg.dailyChart = makeBar(days, dayCounts, '#4A9EFF')
 
   // Avg duration per week
   const durationWeekly = weeks.map(w => {
@@ -518,7 +518,7 @@ function loadEngagement() {
       a + (new Date(s.finished_at).getTime() - new Date(s.started_at).getTime()), 0)
     return Math.round(ms / wSess.length / 60000)
   })
-  eg.durationChart = makeLine(weekLabels, durationWeekly, '#00C851')
+  eg.durationChart = makeLine(weekLabels, durationWeekly, '#34C759')
 
   tabLoaded.engagement = true
 }
@@ -640,8 +640,8 @@ async function loadContent() {
     labels: muscleEntries.map(([k]) => k.replace('_', ' ')),
     datasets: [{
       data: muscleEntries.map(([, v]) => v),
-      backgroundColor: 'rgba(255,77,0,0.6)',
-      borderColor: '#FF4D00',
+      backgroundColor: 'rgba(74,158,255,0.6)',
+      borderColor: '#4A9EFF',
       borderWidth: 1,
       borderRadius: 3,
     }],
@@ -676,24 +676,24 @@ onMounted(async () => {
 .page-title { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 900; color: #F0F0F0; letter-spacing: 0.05em; }
 
 /* Tab bar */
-.tab-bar { display: flex; gap: 0; margin-bottom: 1.75rem; border-bottom: 1px solid #1A1A1A; }
+.tab-bar { display: flex; gap: 0; margin-bottom: 1.75rem; border-bottom: 1px solid #252528; }
 .tab-btn {
   background: none; border: none; border-bottom: 2px solid transparent;
   font-family: 'Barlow Condensed', sans-serif; font-size: 0.78rem; font-weight: 700;
-  letter-spacing: 0.15em; color: #444; padding: 0.6rem 1rem; cursor: pointer;
+  letter-spacing: 0.15em; color: #636366; padding: 0.6rem 1rem; cursor: pointer;
   transition: color 0.15s, border-color 0.15s; margin-bottom: -1px;
 }
-.tab-btn:hover  { color: #888; }
-.tab-btn.active { color: #FF4D00; border-bottom-color: #FF4D00; }
+.tab-btn:hover  { color: #AEAEB2; }
+.tab-btn.active { color: #4A9EFF; border-bottom-color: #4A9EFF; }
 
-.loading-state { text-align: center; padding: 4rem; color: #444; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+.loading-state { text-align: center; padding: 4rem; color: #636366; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
 
 /* KPIs */
 .kpi-row  { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
 .kpi-card { padding: 1.25rem; }
 .kpi-val  { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 900; color: #F0F0F0; line-height: 1; }
 .kpi-unit { font-size: 1rem; margin-left: 0.2rem; }
-.kpi-label{ font-size: 0.67rem; color: #555; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.35rem; }
+.kpi-label{ font-size: 0.67rem; color: #636366; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.35rem; }
 
 /* Charts */
 .charts-row  { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
@@ -704,23 +704,23 @@ onMounted(async () => {
 /* Tables */
 .table-panel { padding: 1.25rem; }
 .data-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 0.75rem; }
-.data-table th { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; color: #444; padding: 0 0.5rem 0.6rem; text-align: left; border-bottom: 1px solid #1A1A1A; }
-.data-table td { padding: 0.55rem 0.5rem; border-bottom: 1px solid #111; vertical-align: middle; }
+.data-table th { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; color: #636366; padding: 0 0.5rem 0.6rem; text-align: left; border-bottom: 1px solid #252528; }
+.data-table td { padding: 0.55rem 0.5rem; border-bottom: 1px solid #1C1C1E; vertical-align: middle; }
 
-.section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; color: #555; }
-.td-rank  { color: #444; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; }
-.td-name  { color: #C0C0C0; font-weight: 500; }
-.td-muted { color: #555; font-size: 0.78rem; }
-.td-val   { color: #888; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; }
-.td-empty { color: #333; font-size: 0.8rem; text-align: center; padding: 1.5rem; }
+.section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; color: #636366; }
+.td-rank  { color: #636366; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; }
+.td-name  { color: #C7C7CC; font-weight: 500; }
+.td-muted { color: #636366; font-size: 0.78rem; }
+.td-val   { color: #AEAEB2; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; }
+.td-empty { color: #3A3A3C; font-size: 0.8rem; text-align: center; padding: 1.5rem; }
 
-.orange { color: #FF4D00; }
-.green  { color: #00C851; }
+.orange { color: #4A9EFF; }
+.green  { color: #34C759; }
 
-.chip-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; background: #1A1A1A; border: 1px solid #2A2A2A; color: #666; padding: 0.15rem 0.4rem; text-transform: uppercase; }
+.chip-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; background: #252528; border: 1px solid #3A3A3C; color: #8E8E93; padding: 0.15rem 0.4rem; text-transform: uppercase; }
 
 .badge { font-family: 'Barlow Condensed', sans-serif; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em; padding: 0.1rem 0.4rem; border: 1px solid; }
-.badge.free  { color: #555; border-color: #2A2A2A; }
+.badge.free  { color: #636366; border-color: #3A3A3C; }
 .badge.paid  { color: #4DA6FF; border-color: rgba(77,166,255,0.4); background: rgba(77,166,255,0.08); }
 .badge.ultra { color: #FFD700; border-color: rgba(255,215,0,0.4); background: rgba(255,215,0,0.08); }
 </style>

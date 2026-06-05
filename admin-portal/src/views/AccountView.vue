@@ -34,19 +34,19 @@
         <div class="form-grid">
           <div class="field">
             <label class="mf-label">FULL NAME</label>
-            <input v-model="editName" class="mf-input" type="text" placeholder="Your name" />
+            <InputText v-model="editName" placeholder="Your name" />
           </div>
           <div class="field">
             <label class="mf-label">BIO</label>
-            <textarea v-model="editBio" class="mf-input mf-textarea" rows="3" placeholder="Short description, specialties, certifications…" maxlength="280" />
+            <Textarea v-model="editBio" rows="3" placeholder="Short description, specialties, certifications…" :maxlength="280" auto-resize />
           </div>
           <div class="field">
             <label class="mf-label">EMAIL</label>
-            <input :value="auth.profile?.email" class="mf-input" type="email" disabled />
+            <InputText :model-value="auth.profile?.email" type="email" disabled />
           </div>
           <div class="field">
             <label class="mf-label">ROLE</label>
-            <input :value="auth.profile?.role?.toUpperCase()" class="mf-input" disabled />
+            <InputText :model-value="auth.profile?.role?.toUpperCase()" disabled />
           </div>
         </div>
         <div v-if="profileMsg" class="feedback" :class="profileMsg.type">
@@ -54,9 +54,7 @@
           {{ profileMsg.text }}
         </div>
         <div class="form-actions">
-          <button class="btn btn-primary" @click="handleSaveProfile" :disabled="profileSaving">
-            {{ profileSaving ? 'Saving…' : 'SAVE CHANGES' }}
-          </button>
+          <Button label="SAVE CHANGES" :loading="profileSaving" @click="handleSaveProfile" />
         </div>
       </div>
 
@@ -66,15 +64,15 @@
         <div class="form-grid">
           <div class="field">
             <label class="mf-label">CURRENT PASSWORD</label>
-            <input v-model="pwCurrent" class="mf-input" type="password" autocomplete="current-password" />
+            <InputText v-model="pwCurrent" type="password" autocomplete="current-password" />
           </div>
           <div class="field">
             <label class="mf-label">NEW PASSWORD</label>
-            <input v-model="pwNew" class="mf-input" type="password" autocomplete="new-password" />
+            <InputText v-model="pwNew" type="password" autocomplete="new-password" />
           </div>
           <div class="field">
             <label class="mf-label">CONFIRM NEW PASSWORD</label>
-            <input v-model="pwConfirm" class="mf-input" type="password" autocomplete="new-password" />
+            <InputText v-model="pwConfirm" type="password" autocomplete="new-password" />
           </div>
         </div>
         <div v-if="pwMsg" class="feedback" :class="pwMsg.type">
@@ -82,13 +80,7 @@
           {{ pwMsg.text }}
         </div>
         <div class="form-actions">
-          <button
-            class="btn btn-primary"
-            @click="handleChangePassword"
-            :disabled="pwSaving || !pwCurrent || !pwNew || !pwConfirm"
-          >
-            {{ pwSaving ? 'Updating…' : 'UPDATE PASSWORD' }}
-          </button>
+          <Button label="UPDATE PASSWORD" :loading="pwSaving" :disabled="!pwCurrent || !pwNew || !pwConfirm" @click="handleChangePassword" />
         </div>
       </div>
 
@@ -99,6 +91,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
+import InputText from 'primevue/inputtext'
+import Textarea from 'primevue/textarea'
+import Button from 'primevue/button'
 
 const auth = useAuthStore()
 
@@ -174,12 +169,12 @@ async function handleChangePassword() {
 .page { padding: 2rem; max-width: 640px; }
 .page-header { margin-bottom: 1.75rem; }
 .page-title { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 900; color: #F0F0F0; letter-spacing: 0.05em; }
-.page-sub   { font-size: 0.75rem; color: #444; margin-top: 0.2rem; }
+.page-sub   { font-size: 0.75rem; color: #636366; margin-top: 0.2rem; }
 
 .sections { display: flex; flex-direction: column; gap: 1.25rem; }
 
 .section-card { padding: 1.5rem; }
-.section-heading { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em; color: #444; margin-bottom: 1.25rem; }
+.section-heading { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em; color: #636366; margin-bottom: 1.25rem; }
 
 /* Avatar */
 .avatar-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
@@ -190,7 +185,7 @@ async function handleChangePassword() {
 .avatar-wrap.uploading { opacity: 0.5; pointer-events: none; }
 .avatar-img { width: 72px; height: 72px; object-fit: cover; display: block; }
 .avatar-placeholder {
-  width: 72px; height: 72px; background: #FF4D00;
+  width: 72px; height: 72px; background: #4A9EFF;
   display: flex; align-items: center; justify-content: center;
   font-family: 'Barlow Condensed', sans-serif; font-size: 1.5rem; font-weight: 900; color: #fff;
 }
@@ -201,18 +196,15 @@ async function handleChangePassword() {
 }
 .avatar-wrap:hover .avatar-overlay { opacity: 1; }
 .avatar-file-input { display: none; }
-.avatar-hint { font-size: 0.72rem; color: #444; }
+.avatar-hint { font-size: 0.72rem; color: #636366; }
 
 .form-grid { display: flex; flex-direction: column; gap: 1rem; }
 .field { display: flex; flex-direction: column; gap: 0.35rem; }
 
-.mf-textarea { resize: vertical; min-height: 72px; font-family: inherit; line-height: 1.5; }
-
 .feedback { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; padding: 0.6rem 0.75rem; margin-top: 0.75rem; }
-.feedback.ok  { color: #00A651; background: rgba(0,166,81,0.08); border: 1px solid rgba(0,166,81,0.25); }
-.feedback.err { color: #FF4D00; background: rgba(255,77,0,0.08); border: 1px solid rgba(255,77,0,0.2); }
+.feedback.ok  { color: #2EAF52; background: rgba(0,166,81,0.08); border: 1px solid rgba(0,166,81,0.25); }
+.feedback.err { color: #4A9EFF; background: rgba(74,158,255,0.08); border: 1px solid rgba(74,158,255,0.2); }
 
 .form-actions { margin-top: 1.25rem; }
 
-input[disabled], textarea[disabled] { opacity: 0.4; cursor: not-allowed; }
 </style>

@@ -81,18 +81,18 @@ async function handleSignOut() {
 /* Sidebar */
 .sidebar {
   width: 220px; flex-shrink: 0;
-  background: #0D0D0D; border-right: 1px solid #1A1A1A;
+  background: #1C1C1E; border-right: 1px solid #252528;
   display: flex; flex-direction: column;
 }
 
 .brand {
   padding: 1.5rem 1.25rem 1.25rem;
-  border-bottom: 1px solid #1A1A1A;
+  border-bottom: 1px solid #252528;
   display: flex; align-items: baseline; gap: 0.3rem;
 }
-.brand-max  { font-family: 'Barlow Condensed', sans-serif; font-size: 1.4rem; font-weight: 900; color: #FF4D00; letter-spacing: 0.05em; }
+.brand-max  { font-family: 'Barlow Condensed', sans-serif; font-size: 1.4rem; font-weight: 900; color: #4A9EFF; letter-spacing: 0.05em; }
 .brand-fit  { font-family: 'Barlow Condensed', sans-serif; font-size: 1.4rem; font-weight: 900; color: #F0F0F0; letter-spacing: 0.05em; }
-.brand-admin { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em; color: #444; margin-left: 0.25rem; align-self: flex-end; padding-bottom: 0.1rem; }
+.brand-admin { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em; color: #636366; margin-left: 0.25rem; align-self: flex-end; padding-bottom: 0.1rem; }
 
 .nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 0.15rem; }
 
@@ -100,28 +100,28 @@ async function handleSignOut() {
   display: flex; align-items: center; gap: 0.75rem;
   padding: 0.65rem 0.75rem;
   font-family: 'Barlow Condensed', sans-serif; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.08em;
-  color: #555; text-decoration: none;
+  color: #636366; text-decoration: none;
   transition: color 0.15s, background 0.15s;
 }
 .nav-item i { font-size: 0.85rem; width: 16px; text-align: center; }
-.nav-item:hover  { color: #888; background: rgba(255,255,255,0.03); }
-.nav-item.active { color: #FF4D00; background: rgba(255,77,0,0.08); }
+.nav-item:hover  { color: #AEAEB2; background: rgba(255,255,255,0.03); }
+.nav-item.active { color: #4A9EFF; background: rgba(74,158,255,0.08); }
 
 .sidebar-footer {
   padding: 1rem 0.75rem;
-  border-top: 1px solid #1A1A1A;
+  border-top: 1px solid #252528;
   display: flex; align-items: center; gap: 0.75rem;
 }
 .admin-info { flex: 1; display: flex; align-items: center; gap: 0.6rem; min-width: 0; text-decoration: none; cursor: pointer; border-radius: 4px; padding: 0.25rem; transition: background 0.15s; }
 .admin-info:hover { background: rgba(255,255,255,0.04); }
-.admin-avatar { width: 32px; height: 32px; background: #FF4D00; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 0.85rem; font-weight: 900; color: #fff; flex-shrink: 0; }
+.admin-avatar { width: 32px; height: 32px; background: #4A9EFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 0.85rem; font-weight: 900; color: #fff; flex-shrink: 0; }
 .admin-avatar-img { width: 32px; height: 32px; object-fit: cover; flex-shrink: 0; }
 .admin-meta { min-width: 0; }
-.admin-name  { font-size: 0.78rem; font-weight: 500; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.admin-email { font-size: 0.65rem; color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.signout-btn { background: none; border: none; color: #444; cursor: pointer; font-size: 0.85rem; padding: 0.25rem; transition: color 0.15s; flex-shrink: 0; }
-.signout-btn:hover { color: #FF4D00; }
+.admin-name  { font-size: 0.78rem; font-weight: 500; color: #AEAEB2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.admin-email { font-size: 0.65rem; color: #636366; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.signout-btn { background: none; border: none; color: #636366; cursor: pointer; font-size: 0.85rem; padding: 0.25rem; transition: color 0.15s; flex-shrink: 0; }
+.signout-btn:hover { color: #4A9EFF; }
 
 /* Main content */
-.main { flex: 1; overflow-y: auto; background: #0A0A0A; }
+.main { flex: 1; overflow-y: auto; background: #1C1C1E; }
 </style>

@@ -216,7 +216,7 @@ const volumeChartData = computed(() => {
   })
   return {
     labels: weekLabels,
-    datasets: [{ label: 'Volume (kg)', data: data.map(v => Math.round(v)), backgroundColor: 'rgba(255,77,0,0.6)', borderColor: '#FF4D00', borderWidth: 1, borderRadius: 3 }],
+    datasets: [{ label: 'Volume (kg)', data: data.map(v => Math.round(v)), backgroundColor: 'rgba(74,158,255,0.6)', borderColor: '#4A9EFF', borderWidth: 1, borderRadius: 3 }],
   }
 })
 
@@ -227,7 +227,7 @@ const sessionsChartData = computed(() => {
   })
   return {
     labels: weekLabels,
-    datasets: [{ label: 'Sessions', data, backgroundColor: 'rgba(0,200,81,0.5)', borderColor: '#00C851', borderWidth: 1, borderRadius: 3 }],
+    datasets: [{ label: 'Sessions', data, backgroundColor: 'rgba(52,199,89,0.5)', borderColor: '#34C759', borderWidth: 1, borderRadius: 3 }],
   }
 })
 
@@ -235,8 +235,8 @@ const barOptions = {
   responsive: true, maintainAspectRatio: false,
   plugins: { legend: { display: false } },
   scales: {
-    x: { ticks: { color: '#555', font: { size: 9 } }, grid: { color: '#1A1A1A' } },
-    y: { ticks: { color: '#555', font: { size: 9 } }, grid: { color: '#1A1A1A' } },
+    x: { ticks: { color: '#636366', font: { size: 9 } }, grid: { color: '#252528' } },
+    y: { ticks: { color: '#636366', font: { size: 9 } }, grid: { color: '#252528' } },
   },
 }
 
@@ -289,39 +289,39 @@ onMounted(async () => {
 
 <style scoped>
 .page { padding: 2rem; }
-.loading-state { text-align: center; padding: 4rem; color: #444; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+.loading-state { text-align: center; padding: 4rem; color: #636366; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
 
 .client-header { margin-bottom: 1.75rem; }
-.back-link { font-family: 'Barlow Condensed', sans-serif; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; color: #555; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; margin-bottom: 0.75rem; transition: color 0.15s; }
-.back-link:hover { color: #888; }
+.back-link { font-family: 'Barlow Condensed', sans-serif; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; color: #636366; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; margin-bottom: 0.75rem; transition: color 0.15s; }
+.back-link:hover { color: #AEAEB2; }
 .client-hero { display: flex; align-items: center; gap: 1.25rem; }
-.client-avatar { width: 56px; height: 56px; background: #FF4D00; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 1.5rem; font-weight: 900; color: #fff; flex-shrink: 0; }
+.client-avatar { width: 56px; height: 56px; background: #4A9EFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 1.5rem; font-weight: 900; color: #fff; flex-shrink: 0; }
 .client-avatar-img { width: 56px; height: 56px; object-fit: cover; flex-shrink: 0; }
 .page-title { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 900; color: #F0F0F0; letter-spacing: 0.05em; line-height: 1; }
-.client-meta { font-size: 0.78rem; color: #555; margin-top: 0.3rem; display: flex; align-items: center; gap: 0.5rem; }
+.client-meta { font-size: 0.78rem; color: #636366; margin-top: 0.3rem; display: flex; align-items: center; gap: 0.5rem; }
 
 .badge { font-family: 'Barlow Condensed', sans-serif; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em; padding: 0.1rem 0.4rem; border: 1px solid; }
-.badge.free  { color: #555; border-color: #2A2A2A; }
+.badge.free  { color: #636366; border-color: #3A3A3C; }
 .badge.paid  { color: #4DA6FF; border-color: rgba(77,166,255,0.4); background: rgba(77,166,255,0.08); }
 .badge.ultra { color: #FFD700; border-color: rgba(255,215,0,0.4); background: rgba(255,215,0,0.08); }
 
 .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
 .kpi-card { padding: 1.25rem; }
 .kpi-val  { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 900; color: #F0F0F0; line-height: 1; }
-.kpi-label{ font-size: 0.67rem; color: #555; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.35rem; }
+.kpi-label{ font-size: 0.67rem; color: #636366; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.35rem; }
 
 .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
 .chart-panel { padding: 1.25rem; }
 .chart-wrap { height: 180px; margin-top: 0.75rem; }
-.section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; color: #555; }
+.section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; color: #636366; }
 
 .two-panel-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 .table-panel { padding: 1.25rem; }
 
-.td-reps { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; color: #888; font-size: 0.88rem; }
-.td-name  { color: #C0C0C0; font-weight: 500; }
-.td-muted { color: #555; font-size: 0.78rem; }
-.td-val   { color: #888; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; }
-.td-val.orange { color: #FF4D00; }
-.td-empty { color: #333; font-size: 0.8rem; text-align: center; padding: 1.5rem; }
+.td-reps { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; color: #AEAEB2; font-size: 0.88rem; }
+.td-name  { color: #C7C7CC; font-weight: 500; }
+.td-muted { color: #636366; font-size: 0.78rem; }
+.td-val   { color: #AEAEB2; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; }
+.td-val.orange { color: #4A9EFF; }
+.td-empty { color: #3A3A3C; font-size: 0.8rem; text-align: center; padding: 1.5rem; }
 </style>

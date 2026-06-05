@@ -2,49 +2,112 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html, body, #app { height: 100%; background: #0A0A0A; color: #F0F0F0; font-family: 'DM Sans', sans-serif; }
+html, body, #app { height: 100%; background: #1C1C1E; color: #F0F0F0; font-family: 'DM Sans', sans-serif; }
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #0A0A0A; }
-::-webkit-scrollbar-thumb { background: #2A2A2A; border-radius: 3px; }
+::-webkit-scrollbar-track { background: #1C1C1E; }
+::-webkit-scrollbar-thumb { background: #3A3A3C; border-radius: 3px; }
 
-/* ── Shared table styles ── */
-.data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-.data-table th { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.15em; color: #444; text-align: left; padding: 0.6rem 1rem; border-bottom: 1px solid #1A1A1A; }
-.data-table td { padding: 0.75rem 1rem; border-bottom: 1px solid #111; color: #888; vertical-align: middle; }
-.data-table tr:hover td { background: rgba(255,255,255,0.02); }
-.data-table tr:last-child td { border-bottom: none; }
+/* ── PrimeVue global rules ────────────────────────────────────────────────
+   Structural rules that can't live in design tokens (fonts, borders, etc.).
+   No !important — tokens handle all colours. */
 
-/* ── Badges ── */
-.badge { display: inline-block; font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.15em; padding: 0.15rem 0.45rem; }
-.badge.free   { background: #1A1A1A; color: #555; }
-.badge.paid   { background: rgba(255,77,0,0.1); color: #FF4D00; border: 1px solid rgba(255,77,0,0.3); }
-.badge.ultra  { background: rgba(255,180,0,0.1); color: #FFB400; border: 1px solid rgba(255,180,0,0.3); }
-.badge.user    { background: #1A1A1A; color: #555; }
-.badge.trainer { background: rgba(0,136,255,0.1); color: #0088FF; border: 1px solid rgba(0,136,255,0.3); }
-.badge.admin   { background: rgba(255,77,0,0.15); color: #FF4D00; border: 1px solid rgba(255,77,0,0.4); }
+.p-dialog-mask { backdrop-filter: blur(4px); }
 
-/* ── Form inputs ── */
-.mf-input, .mf-select, .mf-textarea {
-  background: #1A1A1A; border: 1px solid #2A2A2A; color: #F0F0F0;
-  font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
-  padding: 0.6rem 0.75rem; width: 100%;
+.p-dialog .p-dialog-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
-.mf-input:focus, .mf-select:focus, .mf-textarea:focus { outline: none; border-color: #FF4D00; }
-.mf-select { cursor: pointer; }
-.mf-textarea { resize: vertical; min-height: 80px; }
-.mf-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.15em; color: #555; display: block; margin-bottom: 0.35rem; }
+.p-dialog .p-dialog-header  { border-bottom: 1px solid #252528; padding: 1rem 1.25rem; }
+.p-dialog .p-dialog-content { padding: 1.25rem; }
+.p-dialog .p-dialog-footer  { padding: 0 1.25rem 1.25rem; display: flex; gap: 0.5rem; justify-content: flex-end; }
 
-/* ── Buttons ── */
-.btn { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; letter-spacing: 0.1em; font-size: 0.88rem; padding: 0.55rem 1.25rem; border: none; cursor: pointer; transition: background 0.15s; }
-.btn-primary { background: #FF4D00; color: #fff; clip-path: polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%); }
-.btn-primary:hover { background: #e04400; }
-.btn-ghost { background: #1A1A1A; color: #888; border: 1px solid #2A2A2A; }
-.btn-ghost:hover { border-color: #444; color: #ccc; }
-.btn-danger { background: transparent; color: #FF4444; border: 1px solid rgba(255,68,68,0.3); }
-.btn-danger:hover { background: rgba(255,68,68,0.08); }
-.btn-sm { padding: 0.3rem 0.75rem; font-size: 0.75rem; }
+/* Drawer (slide panel) */
+.p-drawer .p-drawer-header {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-bottom: 1px solid #252528;
+  padding: 1rem 1.25rem;
+}
+.p-drawer .p-drawer-content { padding: 1.25rem; }
 
-/* ── Section / card ── */
-.card { background: #111; border: 1px solid #1A1A1A; }
-.section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.2em; color: #555; margin-bottom: 0.75rem; }
+/* DataTable */
+.p-datatable .p-datatable-thead > tr > th {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.6rem 1rem;
+}
+.p-datatable .p-datatable-tbody > tr > td { padding: 0.75rem 1rem; }
+
+/* Button — Barlow Condensed font, angled primary clip */
+.p-button {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  font-size: 0.88rem;
+}
+.p-button.p-button-primary {
+  clip-path: polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%);
+}
+.p-button-sm {
+  font-size: 0.75rem;
+}
+
+/* InputText / Select / Textarea — font override */
+.p-inputtext, .p-select, .p-textarea {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem;
+  width: 100%;
+}
+
+/* Label utility */
+.mf-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: #636366;
+  display: block;
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+}
+
+/* ── App-specific shared classes ──────────────────────────────────────────*/
+
+/* Badges (semantic, not replaced by PrimeVue Tag) */
+.badge {
+  display: inline-block;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  padding: 0.15rem 0.45rem;
+  text-transform: uppercase;
+}
+.badge.free    { background: #252528; color: #636366; }
+.badge.paid    { background: rgba(74,158,255,0.1);  color: #4A9EFF; border: 1px solid rgba(74,158,255,0.3); }
+.badge.ultra   { background: rgba(255,180,0,0.1);   color: #FFB400; border: 1px solid rgba(255,180,0,0.3); }
+.badge.user    { background: #252528; color: #636366; }
+.badge.trainer { background: rgba(0,136,255,0.1);   color: #0088FF; border: 1px solid rgba(0,136,255,0.3); }
+.badge.admin   { background: rgba(74,158,255,0.15); color: #4A9EFF; border: 1px solid rgba(74,158,255,0.4); }
+
+/* Card / section */
+.card          { background: #1C1C1E; border: 1px solid #252528; }
+.section-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #636366;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+}

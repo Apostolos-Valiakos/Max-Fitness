@@ -37,15 +37,33 @@
           </div>
         </div>
         <div class="client-actions">
-          <router-link :to="`/trainer/checkins?client=${c.id}`" class="btn btn-ghost btn-sm">
-            <i class="pi pi-check-square" /> Check-ins
-          </router-link>
-          <router-link :to="`/trainer/plan-builder?client=${c.id}`" class="btn btn-ghost btn-sm">
-            <i class="pi pi-list-check" /> Plans
-          </router-link>
-          <router-link :to="`/trainer/clients/${c.id}`" class="btn btn-primary btn-sm">
-            <i class="pi pi-chart-line" /> Progress
-          </router-link>
+          <Button
+            icon="pi pi-check-square"
+            label="Check-ins"
+            severity="secondary"
+            outlined
+            size="small"
+            class="action-btn"
+            :badge="pendingCheckins[c.id] ? String(pendingCheckins[c.id]) : undefined"
+            badge-severity="warn"
+            @click="router.push(`/trainer/checkins?client=${c.id}`)"
+          />
+          <Button
+            icon="pi pi-list-check"
+            label="Plans"
+            severity="secondary"
+            outlined
+            size="small"
+            class="action-btn"
+            @click="router.push(`/trainer/plan-builder?client=${c.id}`)"
+          />
+          <Button
+            icon="pi pi-chart-line"
+            label="Progress"
+            size="small"
+            class="action-btn"
+            @click="router.push(`/trainer/clients/${c.id}`)"
+          />
         </div>
       </div>
     </div>
@@ -54,8 +72,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
+import Button from 'primevue/button'
+
+const router = useRouter()
 
 interface TrainerClient {
   id: string; full_name: string | null; email: string; tier: string; avatar_url: string | null
@@ -134,30 +156,31 @@ onMounted(async () => {
 .page { padding: 2rem; }
 .page-header { margin-bottom: 1.75rem; }
 .page-title { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 900; color: #F0F0F0; letter-spacing: 0.05em; }
-.page-sub   { font-size: 0.75rem; color: #444; margin-top: 0.2rem; }
+.page-sub   { font-size: 0.75rem; color: #636366; margin-top: 0.2rem; }
 
-.loading-state { text-align: center; padding: 4rem; color: #444; }
+.loading-state { text-align: center; padding: 4rem; color: #636366; }
 
 .empty-state { padding: 4rem 2rem; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
-.empty-icon  { font-size: 2.5rem; color: #2A2A2A; }
-.empty-title { font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; font-weight: 700; color: #555; letter-spacing: 0.05em; }
-.empty-sub   { font-size: 0.8rem; color: #333; }
+.empty-icon  { font-size: 2.5rem; color: #3A3A3C; }
+.empty-title { font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; font-weight: 700; color: #636366; letter-spacing: 0.05em; }
+.empty-sub   { font-size: 0.8rem; color: #3A3A3C; }
 
 .client-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
 
 .client-card { padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
 .client-top  { display: flex; align-items: flex-start; gap: 0.875rem; }
-.client-avatar { width: 44px; height: 44px; background: #FF4D00; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; font-weight: 900; color: #fff; flex-shrink: 0; }
+.client-avatar { width: 44px; height: 44px; background: #4A9EFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; font-weight: 900; color: #fff; flex-shrink: 0; }
 .client-avatar-img { width: 44px; height: 44px; object-fit: cover; flex-shrink: 0; }
 .client-info { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
-.client-name  { font-size: 0.92rem; font-weight: 600; color: #C0C0C0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.client-email { font-size: 0.72rem; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.client-name  { font-size: 0.92rem; font-weight: 600; color: #C7C7CC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.client-email { font-size: 0.72rem; color: #636366; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.client-stats { display: flex; gap: 1.5rem; padding: 0.75rem 0; border-top: 1px solid #1A1A1A; border-bottom: 1px solid #1A1A1A; }
+.client-stats { display: flex; gap: 1.5rem; padding: 0.75rem 0; border-top: 1px solid #252528; border-bottom: 1px solid #252528; }
 .stat { display: flex; flex-direction: column; gap: 0.15rem; }
-.stat-val   { font-family: 'Barlow Condensed', sans-serif; font-size: 1.4rem; font-weight: 900; color: #888; line-height: 1; }
-.stat-val.orange { color: #FF4D00; }
-.stat-label { font-size: 0.62rem; color: #444; text-transform: uppercase; letter-spacing: 0.08em; }
+.stat-val   { font-family: 'Barlow Condensed', sans-serif; font-size: 1.4rem; font-weight: 900; color: #AEAEB2; line-height: 1; }
+.stat-val.orange { color: #4A9EFF; }
+.stat-label { font-size: 0.62rem; color: #636366; text-transform: uppercase; letter-spacing: 0.08em; }
 
-.client-actions { display: flex; gap: 0.5rem; }
+.client-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; padding-top: 0.25rem; }
+.action-btn     { justify-content: center; width: 100%; }
 </style>

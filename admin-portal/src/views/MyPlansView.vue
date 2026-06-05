@@ -5,9 +5,9 @@
         <h1 class="page-title">MY PLANS</h1>
         <div class="page-sub">Workout plans you've created for clients</div>
       </div>
-      <button class="btn btn-primary" @click="openCreatePanel">
+      <Button @click="openCreatePanel">
         <i class="pi pi-plus" /> NEW PLAN
-      </button>
+      </Button>
     </div>
 
     <div v-if="loading" class="loading-state"><i class="pi pi-spin pi-spinner" /> Loading...</div>
@@ -33,9 +33,9 @@
               <div class="plan-desc" v-if="plan.description">{{ plan.description }}</div>
             </div>
             <div class="plan-actions">
-              <button class="btn btn-danger btn-sm" @click.stop="deletePlan(plan.id)">
+              <Button severity="danger" size="small" @click.stop="deletePlan(plan.id)">
                 <i class="pi pi-trash" />
-              </button>
+              </Button>
             </div>
           </div>
           <div class="plan-days-summary">
@@ -59,15 +59,19 @@
               <div class="week-day-label">{{ day.label }}</div>
               <div v-if="getDayTemplate(selectedPlan, day.dow)" class="week-day-assigned">
                 <span class="week-tmpl-name">{{ getDayTemplate(selectedPlan, day.dow)?.template_name }}</span>
-                <button class="btn btn-ghost btn-sm" @click="clearDay(selectedPlan!.id, day.dow)">
+                <Button severity="secondary" size="small" @click="clearDay(selectedPlan!.id, day.dow)">
                   <i class="pi pi-times" />
-                </button>
+                </Button>
               </div>
               <div v-else class="week-day-empty">
-                <select class="mf-select tmpl-select" @change="onDayTemplateChange(selectedPlan!.id, day.dow, ($event.target as HTMLSelectElement).value)">
-                  <option value="">— Rest day —</option>
-                  <option v-for="t in myTemplates" :key="t.id" :value="t.id">{{ t.name }}</option>
-                </select>
+                <Select
+                  :options="[{ label: '— Rest day —', value: '' }, ...myTemplates.map(t => ({ label: t.name, value: t.id }))]"
+                  option-label="label"
+                  option-value="value"
+                  placeholder="— Rest day —"
+                  style="width:100%;font-size:0.78rem"
+                  @update:model-value="(val: string) => { if (val) onDayTemplateChange(selectedPlan!.id, day.dow, val) }"
+                />
               </div>
             </div>
           </div>
@@ -77,54 +81,74 @@
         <div class="card detail-section">
           <div class="detail-header">
             <div class="section-title">CLIENT ASSIGNMENTS</div>
-            <button class="btn btn-primary btn-sm" @click="showAssignClient = true">
+            <Button size="small" @click="showAssignClient = true">
               <i class="pi pi-plus" /> ASSIGN
-            </button>
+            </Button>
           </div>
 
           <div v-if="planAssignments.length === 0" class="no-data">No clients assigned to this plan.</div>
 
-          <table v-else class="data-table">
-            <thead><tr><th>Client</th><th>Since</th><th>Status</th><th></th></tr></thead>
-            <tbody>
-              <tr v-for="a in planAssignments" :key="a.id">
-                <td class="td-name">{{ clientName(a.client_id) }}</td>
-                <td class="td-muted">{{ fmtDate(a.started_at) }}</td>
-                <td>
-                  <span class="badge" :class="a.is_active ? 'admin' : 'user'">
-                    {{ a.is_active ? 'Active' : 'Inactive' }}
-                  </span>
-                </td>
-                <td>
-                  <button v-if="a.is_active" class="btn btn-danger btn-sm" @click="deactivateAssignment(a.id)">
-                    <i class="pi pi-times" />
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <DataTable v-else :value="planAssignments">
+            <Column field="client_id" header="Client">
+              <template #body="{ data }">
+                <span class="td-name">{{ clientName(data.client_id) }}</span>
+              </template>
+            </Column>
+            <Column field="started_at" header="Since">
+              <template #body="{ data }">
+                <span class="td-muted">{{ fmtDate(data.started_at) }}</span>
+              </template>
+            </Column>
+            <Column field="is_active" header="Status">
+              <template #body="{ data }">
+                <span class="badge" :class="data.is_active ? 'admin' : 'user'">
+                  {{ data.is_active ? 'Active' : 'Inactive' }}
+                </span>
+              </template>
+            </Column>
+            <Column header="">
+              <template #body="{ data }">
+                <Button v-if="data.is_active" severity="danger" size="small" @click="deactivateAssignment(data.id)">
+                  <i class="pi pi-times" />
+                </Button>
+              </template>
+            </Column>
+          </DataTable>
         </div>
 
         <!-- Recent session reviews -->
         <div class="card detail-section">
           <div class="section-title">RECENT CLIENT SESSIONS</div>
           <div v-if="recentSessions.length === 0" class="no-data">No sessions from assigned clients yet.</div>
-          <table v-else class="data-table">
-            <thead><tr><th>Client</th><th>Session</th><th>Date</th><th>Sets</th><th>Volume</th><th>Feedback</th></tr></thead>
-            <tbody>
-              <tr v-for="s in recentSessions" :key="s.id" class="sess-row" @click="openFeedback(s)">
-                <td class="td-name">{{ clientName(s.user_id) }}</td>
-                <td>{{ s.name }}</td>
-                <td class="td-muted">{{ fmtDate(s.started_at) }}</td>
-                <td class="td-val">{{ s.total_sets }}</td>
-                <td class="td-val">{{ Math.round(s.total_volume).toLocaleString() }}</td>
-                <td>
-                  <span v-if="feedbackMap[s.id]" class="badge admin"><i class="pi pi-check" /></span>
-                  <span v-else class="badge user">—</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <DataTable v-else :value="recentSessions" row-hover @row-click="(e: any) => openFeedback(e.data)" class="sess-table">
+            <Column field="user_id" header="Client">
+              <template #body="{ data }">
+                <span class="td-name">{{ clientName(data.user_id) }}</span>
+              </template>
+            </Column>
+            <Column field="name" header="Session" />
+            <Column field="started_at" header="Date">
+              <template #body="{ data }">
+                <span class="td-muted">{{ fmtDate(data.started_at) }}</span>
+              </template>
+            </Column>
+            <Column field="total_sets" header="Sets">
+              <template #body="{ data }">
+                <span class="td-val">{{ data.total_sets }}</span>
+              </template>
+            </Column>
+            <Column field="total_volume" header="Volume">
+              <template #body="{ data }">
+                <span class="td-val">{{ Math.round(data.total_volume).toLocaleString() }}</span>
+              </template>
+            </Column>
+            <Column field="id" header="Feedback">
+              <template #body="{ data }">
+                <span v-if="feedbackMap[data.id]" class="badge admin"><i class="pi pi-check" /></span>
+                <span v-else class="badge user">—</span>
+              </template>
+            </Column>
+          </DataTable>
         </div>
       </div>
 
@@ -136,85 +160,76 @@
       </div>
     </div>
 
-    <!-- Create plan panel -->
-    <div v-if="showCreatePanel" class="overlay" @click.self="showCreatePanel = false">
-      <div class="slide-panel">
-        <div class="panel-header">
-          <div class="panel-title">NEW PLAN</div>
-          <button class="panel-close" @click="showCreatePanel = false"><i class="pi pi-times" /></button>
+    <!-- Create plan Drawer -->
+    <Drawer v-model:visible="showCreatePanel" position="right" header="NEW PLAN" :style="{ width: '480px' }">
+      <div class="panel-body">
+        <div class="field">
+          <label class="mf-label">PLAN NAME</label>
+          <InputText v-model="createForm.name" placeholder="e.g. 3-Day PPL" style="width:100%" />
         </div>
-        <div class="panel-body">
-          <div class="field">
-            <label class="mf-label">PLAN NAME</label>
-            <input v-model="createForm.name" class="mf-input" placeholder="e.g. 3-Day PPL" />
-          </div>
-          <div class="field">
-            <label class="mf-label">DESCRIPTION (optional)</label>
-            <textarea v-model="createForm.description" class="mf-textarea" rows="3" placeholder="Brief description…" />
-          </div>
-          <div v-if="createError" class="field-error">{{ createError }}</div>
+        <div class="field">
+          <label class="mf-label">DESCRIPTION (optional)</label>
+          <Textarea v-model="createForm.description" :rows="3" placeholder="Brief description…" style="width:100%" />
         </div>
-        <div class="panel-footer">
-          <button class="btn btn-ghost" @click="showCreatePanel = false">Cancel</button>
-          <button class="btn btn-primary" @click="handleCreate" :disabled="!createForm.name.trim() || creating">
+        <div v-if="createError" class="field-error">{{ createError }}</div>
+      </div>
+      <template #footer>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end">
+          <Button severity="secondary" @click="showCreatePanel = false">Cancel</Button>
+          <Button @click="handleCreate" :disabled="!createForm.name.trim() || creating">
             {{ creating ? 'Creating…' : 'CREATE' }}
-          </button>
+          </Button>
         </div>
-      </div>
-    </div>
+      </template>
+    </Drawer>
 
-    <!-- Assign client panel -->
-    <div v-if="showAssignClient" class="overlay" @click.self="showAssignClient = false">
-      <div class="slide-panel">
-        <div class="panel-header">
-          <div class="panel-title">ASSIGN CLIENT</div>
-          <button class="panel-close" @click="showAssignClient = false"><i class="pi pi-times" /></button>
+    <!-- Assign client Drawer -->
+    <Drawer v-model:visible="showAssignClient" position="right" header="ASSIGN CLIENT" :style="{ width: '480px' }">
+      <div class="panel-body">
+        <div class="field">
+          <label class="mf-label">SELECT CLIENT</label>
+          <Select
+            v-model="assignClientId"
+            :options="[{ label: 'Choose a client…', value: '' }, ...myClients.map(c => ({ label: c.full_name ?? c.email, value: c.id }))]"
+            option-label="label"
+            option-value="value"
+            style="width:100%"
+          />
         </div>
-        <div class="panel-body">
-          <div class="field">
-            <label class="mf-label">SELECT CLIENT</label>
-            <select v-model="assignClientId" class="mf-select">
-              <option value="">Choose a client…</option>
-              <option v-for="c in myClients" :key="c.id" :value="c.id">{{ c.full_name ?? c.email }}</option>
-            </select>
-          </div>
-          <div v-if="assignError" class="field-error">{{ assignError }}</div>
-        </div>
-        <div class="panel-footer">
-          <button class="btn btn-ghost" @click="showAssignClient = false">Cancel</button>
-          <button class="btn btn-primary" :disabled="!assignClientId" @click="handleAssign">ASSIGN</button>
-        </div>
+        <div v-if="assignError" class="field-error">{{ assignError }}</div>
       </div>
-    </div>
+      <template #footer>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end">
+          <Button severity="secondary" @click="showAssignClient = false">Cancel</Button>
+          <Button :disabled="!assignClientId" @click="handleAssign">ASSIGN</Button>
+        </div>
+      </template>
+    </Drawer>
 
-    <!-- Feedback modal -->
-    <div v-if="feedbackSession" class="overlay" @click.self="feedbackSession = null">
-      <div class="slide-panel">
-        <div class="panel-header">
-          <div class="panel-title">SESSION FEEDBACK</div>
-          <button class="panel-close" @click="feedbackSession = null"><i class="pi pi-times" /></button>
+    <!-- Feedback Drawer -->
+    <Drawer v-model:visible="feedbackDrawerVisible" position="right" header="SESSION FEEDBACK" :style="{ width: '480px' }">
+      <div class="panel-body" v-if="feedbackSession">
+        <div class="feedback-session-info">
+          <div class="fs-name">{{ feedbackSession.name }}</div>
+          <div class="fs-meta">{{ clientName(feedbackSession.user_id) }} · {{ fmtDate(feedbackSession.started_at) }}</div>
+          <div class="fs-stats">{{ feedbackSession.total_sets }} sets · {{ Math.round(feedbackSession.total_volume).toLocaleString() }} kg</div>
         </div>
-        <div class="panel-body">
-          <div class="feedback-session-info">
-            <div class="fs-name">{{ feedbackSession.name }}</div>
-            <div class="fs-meta">{{ clientName(feedbackSession.user_id) }} · {{ fmtDate(feedbackSession.started_at) }}</div>
-            <div class="fs-stats">{{ feedbackSession.total_sets }} sets · {{ Math.round(feedbackSession.total_volume).toLocaleString() }} kg</div>
-          </div>
-          <div class="field">
-            <label class="mf-label">YOUR FEEDBACK</label>
-            <textarea v-model="feedbackContent" class="mf-textarea" rows="5" placeholder="Leave feedback for this session…" />
-          </div>
-          <div v-if="feedbackError" class="field-error">{{ feedbackError }}</div>
+        <div class="field">
+          <label class="mf-label">YOUR FEEDBACK</label>
+          <Textarea v-model="feedbackContent" :rows="5" placeholder="Leave feedback for this session…" style="width:100%" />
         </div>
-        <div class="panel-footer">
-          <button v-if="feedbackMap[feedbackSession.id]" class="btn btn-danger" @click="handleDeleteFeedback">Delete</button>
-          <button class="btn btn-ghost" @click="feedbackSession = null">Cancel</button>
-          <button class="btn btn-primary" @click="handleSaveFeedback" :disabled="!feedbackContent.trim() || savingFeedback">
+        <div v-if="feedbackError" class="field-error">{{ feedbackError }}</div>
+      </div>
+      <template #footer>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end">
+          <Button v-if="feedbackSession && feedbackMap[feedbackSession.id]" severity="danger" @click="handleDeleteFeedback">Delete</Button>
+          <Button severity="secondary" @click="feedbackDrawerVisible = false">Cancel</Button>
+          <Button @click="handleSaveFeedback" :disabled="!feedbackContent.trim() || savingFeedback">
             {{ savingFeedback ? 'Saving…' : 'SAVE' }}
-          </button>
+          </Button>
         </div>
-      </div>
-    </div>
+      </template>
+    </Drawer>
   </div>
 </template>
 
@@ -223,6 +238,13 @@ import { ref, computed, reactive, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { listAuthUsers } from '@/lib/adminSupabase'
 import { format } from 'date-fns'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import Textarea from 'primevue/textarea'
+import Select from 'primevue/select'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
+import Drawer from 'primevue/drawer'
 
 interface Plan {
   id: string; trainer_id: string; name: string; description: string | null
@@ -254,6 +276,7 @@ const createError    = ref('')
 const assignClientId = ref('')
 const assignError    = ref('')
 const feedbackSession = ref<SessionRow | null>(null)
+const feedbackDrawerVisible = ref(false)
 const feedbackContent = ref('')
 const feedbackError  = ref('')
 const savingFeedback = ref(false)
@@ -407,6 +430,7 @@ function openFeedback(session: SessionRow) {
   feedbackSession.value = session
   feedbackContent.value = feedbackMap.value[session.id]?.content ?? ''
   feedbackError.value = ''
+  feedbackDrawerVisible.value = true
 }
 
 async function handleSaveFeedback() {
@@ -421,6 +445,7 @@ async function handleSaveFeedback() {
   savingFeedback.value = false
   if (error) { feedbackError.value = error.message; return }
   feedbackMap.value[feedbackSession.value.id] = { id: 'saved', content: feedbackContent.value.trim() }
+  feedbackDrawerVisible.value = false
   feedbackSession.value = null
 }
 
@@ -429,6 +454,7 @@ async function handleDeleteFeedback() {
   const fb = feedbackMap.value[feedbackSession.value.id]
   if (fb) await supabase.from('session_feedback').delete().eq('session_id', feedbackSession.value.id)
   delete feedbackMap.value[feedbackSession.value.id]
+  feedbackDrawerVisible.value = false
   feedbackSession.value = null
 }
 
@@ -439,30 +465,30 @@ onMounted(load)
 .page { padding: 2rem; }
 .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
 .page-title  { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 900; color: #F0F0F0; letter-spacing: 0.05em; }
-.page-sub    { font-size: 0.75rem; color: #444; margin-top: 0.2rem; }
-.loading-state { text-align: center; padding: 4rem; color: #444; }
+.page-sub    { font-size: 0.75rem; color: #636366; margin-top: 0.2rem; }
+.loading-state { text-align: center; padding: 4rem; color: #636366; }
 
 .content-grid { display: grid; grid-template-columns: 300px 1fr; gap: 1rem; align-items: start; }
 
 /* Left col */
 .plans-col { display: flex; flex-direction: column; gap: 0.75rem; }
-.empty-state { text-align: center; padding: 2rem; color: #444; }
-.empty-state i { font-size: 2rem; color: #2A2A2A; display: block; margin-bottom: 0.75rem; }
-.plan-card { padding: 1rem; cursor: pointer; border: 1px solid #1A1A1A; transition: border-color 0.15s; }
-.plan-card.selected { border-color: #FF4D00; }
-.plan-card:hover { border-color: #2A2A2A; }
+.empty-state { text-align: center; padding: 2rem; color: #636366; }
+.empty-state i { font-size: 2rem; color: #3A3A3C; display: block; margin-bottom: 0.75rem; }
+.plan-card { padding: 1rem; cursor: pointer; border: 1px solid #252528; transition: border-color 0.15s; }
+.plan-card.selected { border-color: #4A9EFF; }
+.plan-card:hover { border-color: #3A3A3C; }
 .plan-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.6rem; }
 .plan-name { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 800; color: #F0F0F0; }
-.plan-desc { font-size: 0.7rem; color: #555; margin-top: 0.15rem; }
+.plan-desc { font-size: 0.7rem; color: #636366; margin-top: 0.15rem; }
 .plan-days-summary { display: flex; gap: 4px; margin-bottom: 0.5rem; }
-.day-pip { font-family: 'Barlow Condensed', sans-serif; font-size: 0.6rem; font-weight: 700; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border: 1px solid #2A2A2A; color: #333; }
-.day-pip.filled { border-color: rgba(255,77,0,0.5); color: #FF4D00; background: rgba(255,77,0,0.1); }
-.plan-assignments { font-size: 0.68rem; color: #444; }
+.day-pip { font-family: 'Barlow Condensed', sans-serif; font-size: 0.6rem; font-weight: 700; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border: 1px solid #3A3A3C; color: #3A3A3C; }
+.day-pip.filled { border-color: rgba(74,158,255,0.5); color: #4A9EFF; background: rgba(74,158,255,0.1); }
+.plan-assignments { font-size: 0.68rem; color: #636366; }
 
 /* Right col */
 .detail-col { display: flex; flex-direction: column; gap: 1rem; }
 .detail-placeholder { align-items: center; justify-content: center; min-height: 200px; display: flex; }
-.placeholder-inner { text-align: center; color: #333; }
+.placeholder-inner { text-align: center; color: #3A3A3C; }
 .placeholder-inner i { font-size: 1.5rem; margin-bottom: 0.5rem; }
 .placeholder-inner p { font-size: 0.82rem; }
 
@@ -472,33 +498,22 @@ onMounted(load)
 /* Week grid */
 .week-grid { display: flex; flex-direction: column; gap: 0.5rem; }
 .week-day { display: grid; grid-template-columns: 90px 1fr; align-items: center; gap: 0.75rem; }
-.week-day-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; color: #555; }
-.week-day-assigned { display: flex; align-items: center; justify-content: space-between; background: rgba(255,77,0,0.08); border: 1px solid rgba(255,77,0,0.25); padding: 0.35rem 0.6rem; }
-.week-tmpl-name { font-size: 0.78rem; color: #FF4D00; }
-.week-day-empty { }
-.tmpl-select { width: 100%; font-size: 0.78rem; padding: 0.35rem 0.5rem; }
-.no-data { font-size: 0.82rem; color: #333; padding: 0.75rem 0; }
+.week-day-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; color: #636366; }
+.week-day-assigned { display: flex; align-items: center; justify-content: space-between; background: rgba(74,158,255,0.08); border: 1px solid rgba(74,158,255,0.25); padding: 0.35rem 0.6rem; }
+.week-tmpl-name { font-size: 0.78rem; color: #4A9EFF; }
+.no-data { font-size: 0.82rem; color: #3A3A3C; padding: 0.75rem 0; }
 
 /* Session table */
-.sess-row { cursor: pointer; }
-.sess-row:hover { background: #141414; }
-.td-name  { color: #C0C0C0; font-weight: 500; }
-.td-muted { color: #555; font-size: 0.78rem; }
-.td-val   { color: #888; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; }
+.td-name  { color: #C7C7CC; font-weight: 500; }
+.td-muted { color: #636366; font-size: 0.78rem; }
+.td-val   { color: #AEAEB2; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; }
 
-/* Slide panel */
-.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; }
-.slide-panel { position: fixed; top: 0; right: 0; bottom: 0; width: 420px; background: #111; border-left: 1px solid #2A2A2A; display: flex; flex-direction: column; z-index: 101; }
-.panel-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid #1A1A1A; }
-.panel-title  { font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; font-weight: 800; color: #F0F0F0; letter-spacing: 0.08em; }
-.panel-close  { background: none; border: none; color: #555; cursor: pointer; }
-.panel-body   { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
-.panel-footer { padding: 1rem 1.5rem; border-top: 1px solid #1A1A1A; display: flex; gap: 0.75rem; justify-content: flex-end; }
+.panel-body { display: flex; flex-direction: column; gap: 1.25rem; }
 .field { display: flex; flex-direction: column; gap: 0.35rem; }
-.field-error { font-size: 0.78rem; color: #FF4D00; }
+.field-error { font-size: 0.78rem; color: #4A9EFF; }
 
-.feedback-session-info { background: #0A0A0A; border: 1px solid #1A1A1A; padding: 0.875rem; }
+.feedback-session-info { background: #1C1C1E; border: 1px solid #252528; padding: 0.875rem; }
 .fs-name { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; color: #F0F0F0; }
-.fs-meta { font-size: 0.72rem; color: #555; margin-top: 0.2rem; }
-.fs-stats { font-size: 0.72rem; color: #444; margin-top: 0.15rem; }
+.fs-meta { font-size: 0.72rem; color: #636366; margin-top: 0.2rem; }
+.fs-stats { font-size: 0.72rem; color: #636366; margin-top: 0.15rem; }
 </style>

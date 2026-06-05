@@ -9,39 +9,18 @@
       <form class="auth-form" @submit.prevent="handleLogin">
         <div class="field">
           <label class="mf-label">EMAIL</label>
-          <input
-            v-model="email"
-            class="mf-input"
-            type="email"
-            placeholder="admin@example.com"
-            required
-            autocomplete="email"
-          />
+          <InputText v-model="email" type="email" placeholder="admin@example.com" autocomplete="email" required />
         </div>
         <div class="field">
           <label class="mf-label">PASSWORD</label>
-          <input
-            v-model="password"
-            class="mf-input"
-            type="password"
-            placeholder="••••••••"
-            required
-            autocomplete="current-password"
-          />
+          <InputText v-model="password" type="password" placeholder="••••••••" autocomplete="current-password" required />
         </div>
 
         <div v-if="error" class="auth-error">
           <i class="pi pi-exclamation-triangle" /> {{ error }}
         </div>
 
-        <button
-          class="btn btn-primary auth-btn"
-          type="submit"
-          :disabled="loading"
-        >
-          <i v-if="loading" class="pi pi-spin pi-spinner" />
-          <span v-else>SIGN IN</span>
-        </button>
+        <Button label="SIGN IN" type="submit" :loading="loading" class="auth-btn" />
       </form>
     </div>
   </div>
@@ -51,6 +30,8 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { supabase } from "@/lib/supabase";
+import InputText from 'primevue/inputtext'
+import Button from 'primevue/button'
 
 const email = ref("");
 const password = ref("");
@@ -94,7 +75,7 @@ async function handleLogin() {
 <style scoped>
 .auth-shell {
   min-height: 100vh;
-  background: #0a0a0a;
+  background: #1C1C1E;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -103,8 +84,8 @@ async function handleLogin() {
 .auth-card {
   width: 100%;
   max-width: 380px;
-  background: #111;
-  border: 1px solid #1a1a1a;
+  background: #1C1C1E;
+  border: 1px solid #252528;
   padding: 2.5rem 2rem;
 }
 .auth-brand {
@@ -118,7 +99,7 @@ async function handleLogin() {
   font-family: "Barlow Condensed", sans-serif;
   font-size: 1.8rem;
   font-weight: 900;
-  color: #ff4d00;
+  color: #4A9EFF;
 }
 .b-fit {
   font-family: "Barlow Condensed", sans-serif;
@@ -131,7 +112,7 @@ async function handleLogin() {
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.2em;
-  color: #444;
+  color: #636366;
   width: 100%;
   margin-top: -0.25rem;
 }
@@ -150,22 +131,10 @@ async function handleLogin() {
   align-items: center;
   gap: 0.4rem;
   font-size: 0.8rem;
-  color: #ff4d00;
-  background: rgba(255, 77, 0, 0.08);
-  border: 1px solid rgba(255, 77, 0, 0.2);
+  color: #4A9EFF;
+  background: rgba(74, 158, 255, 0.08);
+  border: 1px solid rgba(74, 158, 255, 0.2);
   padding: 0.6rem 0.75rem;
 }
-.auth-btn {
-  width: 100%;
-  padding: 0.75rem;
-  font-size: 0.95rem;
-  justify-content: center;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.auth-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
+.auth-btn { width: 100%; justify-content: center; margin-top: 0.25rem; }
 </style>
