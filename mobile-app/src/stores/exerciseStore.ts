@@ -3,7 +3,8 @@
  * Exercise library — local reads, custom exercise creation, PR lookup.
  */
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
+import Fuse from 'fuse.js'
 import { v4 as uuidv4 } from 'uuid'
 import { getDatabase } from '@/lib/rxdb/database'
 import { supabase } from '@/lib/supabase'
@@ -158,12 +159,24 @@ export const useExerciseStore = defineStore('exercises', () => {
     return data?.[0] ?? null
   }
 
+  // Fuse.js index — rebuilt when exercise list changes
+  let fuseIndex: Fuse<Exercise> | null = null
+  watch(exercises, (list) => {
+    fuseIndex = new Fuse(list, {
+      keys: [
+        { name: 'name',          weight: 3 },
+        { name: 'body_part',     weight: 1 },
+        { name: 'target_muscle', weight: 1 },
+      ],
+      threshold:          0.35,
+      minMatchCharLength: 2,
+      ignoreLocation:     true,
+    })
+  }, { immediate: true })
+
   function search(q: string): Exercise[] {
-    const lower = q.toLowerCase()
-    return exercises.value.filter(e =>
-      e.name.toLowerCase().includes(lower) ||
-      e.body_part.toLowerCase().includes(lower)
-    )
+    if (!q.trim() || !fuseIndex) return exercises.value
+    return fuseIndex.search(q, { limit: 120 }).map(r => r.item)
   }
 
   return {
