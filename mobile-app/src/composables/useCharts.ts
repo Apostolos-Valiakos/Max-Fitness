@@ -18,7 +18,7 @@ export async function getVolumeChartData(exerciseId: string) {
 
   const labels  = Array.from(weekMap.keys())
   const values  = Array.from(weekMap.values())
-  return { labels, datasets: [{ label: 'Volume (kg)', data: values, borderColor: '#FF4D00', backgroundColor: 'rgba(255,77,0,0.1)', tension: 0.4, fill: true }] }
+  return { labels, datasets: [{ label: 'Volume (kg)', data: values, borderColor: '#4A9EFF', backgroundColor: 'rgba(74,158,255,0.1)', tension: 0.4, fill: true }] }
 }
 
 // Workout frequency last 12 weeks
@@ -39,7 +39,7 @@ export async function getFrequencyChartData(userId: string) {
     }).length
   })
 
-  return { labels, datasets: [{ label: 'Workouts', data: values, backgroundColor: 'rgba(255,77,0,0.6)', borderColor: '#FF4D00', borderWidth: 1, borderRadius: 4 }] }
+  return { labels, datasets: [{ label: 'Workouts', data: values, backgroundColor: 'rgba(74,158,255,0.6)', borderColor: '#4A9EFF', borderWidth: 1, borderRadius: 4 }] }
 }
 
 // Volume by muscle group — last 30 days
@@ -73,8 +73,8 @@ export async function getMuscleVolumeData(userId: string, days = 30) {
     datasets: [{
       label: 'Volume (kg)',
       data: values,
-      backgroundColor: 'rgba(255,77,0,0.7)',
-      borderColor: '#FF4D00',
+      backgroundColor: 'rgba(74,158,255,0.7)',
+      borderColor: '#4A9EFF',
       borderWidth: 1,
       borderRadius: 3,
     }],
@@ -140,10 +140,10 @@ export async function getMaxWeightChartData(exerciseId: string) {
     datasets: [{
       label: 'Max Weight (kg)',
       data: entries.map(([, v]) => v),
-      borderColor: '#00C851',
-      backgroundColor: 'rgba(0,200,81,0.06)',
+      borderColor: '#34C759',
+      backgroundColor: 'rgba(52,199,89,0.06)',
       tension: 0.4, fill: true,
-      pointBackgroundColor: '#00C851',
+      pointBackgroundColor: '#34C759',
     }],
   }
 }
@@ -154,7 +154,7 @@ export function getBodyweightChartData(entries: { date: string; kg: number }[]) 
     labels:   entries.map(e => format(new Date(e.date), 'MMM d')),
     datasets: [{
       label: 'Bodyweight (kg)', data: entries.map(e => e.kg),
-      borderColor: '#FF4D00', backgroundColor: 'rgba(255,77,0,0.1)', tension: 0.4, fill: true,
+      borderColor: '#4A9EFF', backgroundColor: 'rgba(74,158,255,0.1)', tension: 0.4, fill: true,
     }],
   }
 }

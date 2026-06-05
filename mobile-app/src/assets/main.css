@@ -12,7 +12,7 @@ body,
 #app {
   height: 100%;
   width: 100%;
-  background: #0a0a0a;
+  background: #1C1C1E;
   overscroll-behavior: none;
 }
 
@@ -38,16 +38,32 @@ input[type="number"] {
   height: 3px;
 }
 ::-webkit-scrollbar-track {
-  background: #0a0a0a;
+  background: #1C1C1E;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2a2a2a;
+  background: #3A3A3C;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #ff4d00;
+  background: #4A9EFF;
 }
-/* #0e4d93 */
-/* PrimeVue global dark overrides */
-.p-dialog-mask {
-  backdrop-filter: blur(4px) !important;
+/* ── PrimeVue global rules ────────────────────────────────────────────────
+   Supplement the token system for things that can't be design tokens:
+   font-family on dialog titles, structural padding, etc.
+   No !important — tokens handle colours; these handle structure only. */
+
+.p-dialog-mask { backdrop-filter: blur(4px); }
+
+.p-dialog .p-dialog-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
+
+.p-dialog .p-dialog-header  { border-bottom: 1px solid #252528; padding: 1rem 1.25rem; }
+.p-dialog .p-dialog-content { padding: 1.25rem; }
+.p-dialog .p-dialog-footer  { padding: 0 1.25rem 1.25rem; }
+
+/* Full-width helper — add class="mf-input" to any InputText */
+.mf-input { width: 100%; }

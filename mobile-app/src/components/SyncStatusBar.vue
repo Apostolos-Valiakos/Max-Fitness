@@ -33,16 +33,16 @@ const iconClass = computed(() => {
   padding: 0.3rem 1rem; font-size: 0.72rem;
   font-family: 'DM Sans', sans-serif;
 }
-.sync-bar.syncing { background: #1A1A1A; color: #888; }
+.sync-bar.syncing { background: #252528; color: #AEAEB2; }
 .sync-bar.offline { background: #1A1200; color: #FFB800; }
-.sync-bar.error   { background: #1A0000; color: #FF4D00; }
+.sync-bar.error   { background: #1A0000; color: #4A9EFF; }
 .sync-label { flex: 1; }
 .retry-btn {
-  background: none; border: 1px solid rgba(255,77,0,0.4); color: #FF4D00;
+  background: none; border: 1px solid rgba(74,158,255,0.4); color: #4A9EFF;
   font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; font-weight: 700;
   letter-spacing: 0.1em; padding: 0.1rem 0.5rem; cursor: pointer;
 }
-.retry-btn:active { background: rgba(255,77,0,0.1); border-color: #FF4D00; }
+.retry-btn:active { background: rgba(74,158,255,0.1); border-color: #4A9EFF; }
 .slide-enter-active, .slide-leave-active { transition: all 0.2s; }
 .slide-enter-from, .slide-leave-to { transform: translateY(-100%); opacity: 0; }
 </style>

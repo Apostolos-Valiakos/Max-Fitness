@@ -23,8 +23,8 @@ const chartOptions = {
   maintainAspectRatio: false,
   plugins: { legend: { display: false } },
   scales: {
-    x: { ticks: { color: '#555', font: { size: 10 } }, grid: { color: '#1A1A1A' } },
-    y: { ticks: { color: '#888', font: { size: 10 } }, grid: { color: '#1A1A1A' } },
+    x: { ticks: { color: '#636366', font: { size: 10 } }, grid: { color: '#252528' } },
+    y: { ticks: { color: '#AEAEB2', font: { size: 10 } }, grid: { color: '#252528' } },
   },
 }
 
@@ -36,5 +36,5 @@ onMounted(async () => {
 
 <style scoped>
 .chart-wrap  { height: 160px; position: relative; }
-.chart-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: #777; font-size: 0.8rem; }
+.chart-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: #8E8E93; font-size: 0.8rem; }
 </style>

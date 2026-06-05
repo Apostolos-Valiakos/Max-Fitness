@@ -37,8 +37,8 @@ const timer = useRestTimer()
   align-items: center;
   gap: 0.75rem;
 
-  background: #1A1A1A;
-  border: 1px solid #2A2A2A;
+  background: #252528;
+  border: 1px solid #3A3A3C;
   padding: 0.7rem 1rem;
   cursor: pointer;
   overflow: hidden;
@@ -50,38 +50,38 @@ const timer = useRestTimer()
 .pill-progress {
   position: absolute;
   left: 0; top: 0; bottom: 0;
-  background: rgba(255, 77, 0, 0.12);
+  background: rgba(74, 158, 255, 0.12);
   transition: width 1s linear, background 0.3s;
   pointer-events: none;
 }
-.pill-progress.finished { background: rgba(0, 200, 81, 0.12); }
+.pill-progress.finished { background: rgba(52,199,89, 0.12); }
 
 .pill-label {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em;
-  color: #555;
+  color: #636366;
   flex-shrink: 0;
 }
 
 .pill-time {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 1.4rem; font-weight: 900;
-  color: #FF4D00;
+  color: #4A9EFF;
   flex: 1;
   line-height: 1;
   transition: color 0.3s;
 }
-.pill-time.finished { color: #00C851; }
+.pill-time.finished { color: #34C759; }
 
 .pill-skip {
   background: none; border: none;
-  color: #777; font-size: 0.85rem;
+  color: #8E8E93; font-size: 0.85rem;
   cursor: pointer; padding: 0.25rem 0.5rem;
   flex-shrink: 0;
   transition: color 0.15s;
   line-height: 1;
 }
-.pill-skip:active { color: #888; }
+.pill-skip:active { color: #AEAEB2; }
 
 .pill-up-enter-active, .pill-up-leave-active { transition: all 0.25s ease; }
 .pill-up-enter-from, .pill-up-leave-to { opacity: 0; transform: translateY(1rem); }

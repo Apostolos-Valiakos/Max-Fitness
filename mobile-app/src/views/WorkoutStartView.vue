@@ -165,60 +165,60 @@ async function startFromTemplate(t: WorkoutTemplateDocument) {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=DM+Sans:wght@300;400;500&display=swap');
-.view { padding: 1.5rem 1rem; color: #F0F0F0; font-family: 'DM Sans',sans-serif; background: #0A0A0A; min-height: 100vh; }
+.view { padding: 1.5rem 1rem; color: #F0F0F0; font-family: 'DM Sans',sans-serif; background: #1C1C1E; min-height: 100vh; }
 .view-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; }
-.back-btn { background: none; border: none; color: #666; cursor: pointer; font-size: 1rem; padding: 0.25rem; }
+.back-btn { background: none; border: none; color: #8E8E93; cursor: pointer; font-size: 1rem; padding: 0.25rem; }
 .view-title { font-family: 'Barlow Condensed',sans-serif; font-size: 1.4rem; font-weight: 900; letter-spacing: 0.05em; color: #F0F0F0; }
 .section { margin-bottom: 2rem; }
 .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
-.section-title { font-family: 'Barlow Condensed',sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; color: #555; }
-.see-all { font-size: 0.72rem; color: #FF4D00; text-decoration: none; }
+.section-title { font-family: 'Barlow Condensed',sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; color: #636366; }
+.see-all { font-size: 0.72rem; color: #4A9EFF; text-decoration: none; }
 
 .quick-start-btn {
   width: 100%; display: flex; align-items: center; gap: 1rem;
-  background: #111; border: 1px solid #FF4D00; padding: 1.25rem 1rem;
+  background: #1C1C1E; border: 1px solid #4A9EFF; padding: 1.25rem 1rem;
   cursor: pointer; transition: background 0.2s;
   clip-path: polygon(0 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%);
 }
-.quick-start-btn:active { background: #1A1A1A; }
-.qs-icon { width: 44px; height: 44px; background: #FF4D00; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.2rem; flex-shrink: 0; }
+.quick-start-btn:active { background: #252528; }
+.qs-icon { width: 44px; height: 44px; background: #4A9EFF; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.2rem; flex-shrink: 0; }
 .qs-body { flex: 1; text-align: left; }
 .qs-title { font-family: 'Barlow Condensed',sans-serif; font-size: 1.1rem; font-weight: 800; color: #F0F0F0; letter-spacing: 0.05em; }
-.qs-sub { font-size: 0.75rem; color: #555; margin-top: 0.15rem; }
-.qs-arrow { color: #FF4D00; }
+.qs-sub { font-size: 0.75rem; color: #636366; margin-top: 0.15rem; }
+.qs-arrow { color: #4A9EFF; }
 
 .template-list { display: flex; flex-direction: column; gap: 0.5rem; }
 .template-card {
   display: flex; align-items: center; gap: 1rem;
-  background: #111; border: 1px solid #1A1A1A; padding: 1rem;
+  background: #1C1C1E; border: 1px solid #252528; padding: 1rem;
   cursor: pointer; transition: border-color 0.2s;
   clip-path: polygon(0 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%);
 }
-.template-card:active { border-color: #FF4D00; }
+.template-card:active { border-color: #4A9EFF; }
 .t-body { flex: 1; min-width: 0; }
 .t-name-row { display: flex; align-items: center; gap: 0.5rem; }
 .t-name { font-family: 'Barlow Condensed',sans-serif; font-size: 1.1rem; font-weight: 700; color: #F0F0F0; }
 .t-trainer-badge { font-family: 'Barlow Condensed',sans-serif; font-size: 0.55rem; font-weight: 800; letter-spacing: 0.15em; color: #FFB400; background: rgba(255,180,0,0.1); border: 1px solid rgba(255,180,0,0.3); padding: 0.1rem 0.35rem; flex-shrink: 0; }
-.t-note { font-size: 0.72rem; color: #555; margin-top: 0.1rem; }
-.t-creator { font-size: 0.65rem; color: #FF4D00; opacity: 0.7; margin-top: 0.1rem; }
+.t-note { font-size: 0.72rem; color: #636366; margin-top: 0.1rem; }
+.t-creator { font-size: 0.65rem; color: #4A9EFF; opacity: 0.7; margin-top: 0.1rem; }
 .t-exercises { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.5rem; }
-.t-ex-chip { font-size: 0.65rem; color: #555; background: #1A1A1A; border: 1px solid #2A2A2A; padding: 0.15rem 0.45rem; white-space: nowrap; }
-.t-ex-more { font-size: 0.65rem; color: #777; align-self: center; }
-.t-play { color: #FF4D00; font-size: 0.8rem; flex-shrink: 0; }
+.t-ex-chip { font-size: 0.65rem; color: #636366; background: #252528; border: 1px solid #3A3A3C; padding: 0.15rem 0.45rem; white-space: nowrap; }
+.t-ex-more { font-size: 0.65rem; color: #8E8E93; align-self: center; }
+.t-play { color: #4A9EFF; font-size: 0.8rem; flex-shrink: 0; }
 
-.empty-state { text-align: center; padding: 2rem 1rem; color: #777; font-size: 0.85rem; }
-.link-btn { color: #FF4D00; text-decoration: none; font-size: 0.85rem; }
+.empty-state { text-align: center; padding: 2rem 1rem; color: #8E8E93; font-size: 0.85rem; }
+.link-btn { color: #4A9EFF; text-decoration: none; font-size: 0.85rem; }
 
 .recent-list { display: flex; flex-direction: column; gap: 0.4rem; }
 .recent-card {
   display: flex; align-items: center; gap: 1rem;
-  background: #111; border: 1px solid #1A1A1A; padding: 0.85rem 1rem;
+  background: #1C1C1E; border: 1px solid #252528; padding: 0.85rem 1rem;
   cursor: pointer; transition: border-color 0.2s;
   clip-path: polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%);
 }
-.recent-card:active { border-color: #FF4D00; }
+.recent-card:active { border-color: #4A9EFF; }
 .rc-body { flex: 1; min-width: 0; }
 .rc-name { font-family: 'Barlow Condensed',sans-serif; font-size: 1rem; font-weight: 700; color: #F0F0F0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.rc-meta { font-size: 0.7rem; color: #555; margin-top: 0.1rem; }
-.rc-icon { color: #FF4D00; font-size: 0.85rem; flex-shrink: 0; }
+.rc-meta { font-size: 0.7rem; color: #636366; margin-top: 0.1rem; }
+.rc-icon { color: #4A9EFF; font-size: 0.85rem; flex-shrink: 0; }
 </style>

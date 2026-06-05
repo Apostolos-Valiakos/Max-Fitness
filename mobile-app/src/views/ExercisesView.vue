@@ -130,38 +130,33 @@ async function handleCreate() {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=DM+Sans:wght@300;400;500&display=swap');
-.view { padding: 1.5rem 1rem 0; color: #F0F0F0; font-family: 'DM Sans',sans-serif; background: #0A0A0A; min-height: 100vh; }
+.view { padding: 1.5rem 1rem 0; color: #F0F0F0; font-family: 'DM Sans',sans-serif; background: #1C1C1E; min-height: 100vh; }
 .view-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
 .view-title { font-family: 'Barlow Condensed',sans-serif; font-size: 1.8rem; font-weight: 900; }
-.add-btn { background: #FF4D00; border: none; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; clip-path: polygon(0 0,100% 0,100% 75%,85% 100%,0 100%); }
+.add-btn { background: #4A9EFF; border: none; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; clip-path: polygon(0 0,100% 0,100% 75%,85% 100%,0 100%); }
 .search-bar { position: relative; margin-bottom: 0.75rem; }
-.search-icon { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #777; font-size: 0.85rem; }
-.search-input { width: 100%; background: #111; border: 1px solid #2A2A2A; color: #F0F0F0; font-family: 'DM Sans',sans-serif; font-size: 0.9rem; padding: 0.65rem 0.75rem 0.65rem 2.25rem; }
-.search-input:focus { outline: none; border-color: #FF4D00; }
+.search-icon { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #8E8E93; font-size: 0.85rem; }
+.search-input { width: 100%; background: #1C1C1E; border: 1px solid #3A3A3C; color: #F0F0F0; font-family: 'DM Sans',sans-serif; font-size: 0.9rem; padding: 0.65rem 0.75rem 0.65rem 2.25rem; }
+.search-input:focus { outline: none; border-color: #4A9EFF; }
 .filters { display: flex; gap: 0.4rem; overflow-x: auto; padding-bottom: 0.75rem; scrollbar-width: none; }
 .filters::-webkit-scrollbar { display: none; }
 .eq-filters { padding-bottom: 0.5rem; }
 .eq-chip { font-size: 0.65rem !important; padding: 0.2rem 0.55rem !important; }
-.filter-chip { flex-shrink: 0; background: #111; border: 1px solid #2A2A2A; color: #555; font-family: 'Barlow Condensed',sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; padding: 0.3rem 0.7rem; cursor: pointer; text-transform: uppercase; transition: all 0.15s; white-space: nowrap; }
-.filter-chip.active { background: rgba(255,77,0,0.1); border-color: #FF4D00; color: #FF4D00; }
+.filter-chip { flex-shrink: 0; background: #1C1C1E; border: 1px solid #3A3A3C; color: #636366; font-family: 'Barlow Condensed',sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; padding: 0.3rem 0.7rem; cursor: pointer; text-transform: uppercase; transition: all 0.15s; white-space: nowrap; }
+.filter-chip.active { background: rgba(74,158,255,0.1); border-color: #4A9EFF; color: #4A9EFF; }
 
 .results { display: flex; flex-direction: column; gap: 1px; }
-.alpha-header { font-family: 'Barlow Condensed',sans-serif; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.2em; color: #777; padding: 0.6rem 0 0.25rem; border-bottom: 1px solid #1A1A1A; margin-bottom: 1px; }
-.empty { text-align: center; color: #777; padding: 2rem; font-size: 0.85rem; }
+.alpha-header { font-family: 'Barlow Condensed',sans-serif; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.2em; color: #8E8E93; padding: 0.6rem 0 0.25rem; border-bottom: 1px solid #252528; margin-bottom: 1px; }
+.empty { text-align: center; color: #8E8E93; padding: 2rem; font-size: 0.85rem; }
 
 .create-form { display: flex; flex-direction: column; gap: 1rem; }
 .field { display: flex; flex-direction: column; gap: 0.35rem; }
-.field label { font-family: 'Barlow Condensed',sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.2em; color: #555; }
-:deep(.mf-input.p-inputtext) { width: 100%; background: #1A1A1A !important; border: 1px solid #2A2A2A !important; border-radius: 0 !important; color: #F0F0F0 !important; font-size: 0.9rem !important; padding: 0.65rem 0.75rem !important; }
-:deep(.mf-input.p-inputtext:focus) { border-color: #FF4D00 !important; box-shadow: none !important; }
-.mf-select { width: 100%; background: #1A1A1A; border: 1px solid #2A2A2A; color: #F0F0F0; font-family: 'DM Sans',sans-serif; font-size: 0.9rem; padding: 0.65rem 0.75rem; cursor: pointer; }
-.mf-select:focus { outline: none; border-color: #FF4D00; }
+.field label { font-family: 'Barlow Condensed',sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.2em; color: #636366; }
+.mf-select { width: 100%; background: #252528; border: 1px solid #3A3A3C; color: #F0F0F0; font-family: 'DM Sans',sans-serif; font-size: 0.9rem; padding: 0.65rem 0.75rem; cursor: pointer; }
+.mf-select:focus { outline: none; border-color: #4A9EFF; }
 .dialog-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
 .dialog-btn { flex: 1; border: none; font-family: 'Barlow Condensed',sans-serif; font-weight: 700; letter-spacing: 0.1em; font-size: 0.9rem; padding: 0.75rem; cursor: pointer; }
-.dialog-btn.cancel { background: #1A1A1A; color: #888; }
-.dialog-btn.finish { background: #FF4D00; color: #fff; clip-path: polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%); }
+.dialog-btn.cancel { background: #252528; color: #AEAEB2; }
+.dialog-btn.finish { background: #4A9EFF; color: #fff; clip-path: polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%); }
 .dialog-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-:deep(.mf-dialog .p-dialog) { background: #111 !important; border: 1px solid #2A2A2A !important; border-radius: 0 !important; }
-:deep(.mf-dialog .p-dialog-header) { background: #111 !important; color: #F0F0F0 !important; font-family: 'Barlow Condensed',sans-serif !important; font-weight: 800 !important; letter-spacing: 0.05em !important; border-bottom: 1px solid #1A1A1A !important; padding: 1rem 1.25rem !important; }
-:deep(.mf-dialog .p-dialog-content) { background: #111 !important; padding: 1.25rem !important; }
 </style>

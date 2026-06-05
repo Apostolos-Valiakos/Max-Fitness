@@ -49,17 +49,17 @@ const workout = useWorkoutStore()
 <style scoped>
 .app-shell {
   display: flex; flex-direction: column;
-  min-height: 100dvh; background: #0A0A0A; position: relative;
+  min-height: 100dvh; background: #1C1C1E; position: relative;
   padding-top: env(safe-area-inset-top, 0px);
 }
 
 .active-banner {
   display: flex; align-items: center; justify-content: space-between;
-  background: #FF4D00; padding: 0.6rem 1.25rem;
+  background: #4A9EFF; padding: 0.6rem 1.25rem;
   cursor: pointer; z-index: 100; flex-shrink: 0;
   transition: background 0.2s;
 }
-.active-banner:active { background: #CC3D00; }
+.active-banner:active { background: #3B8EEF; }
 .banner-left  { display: flex; align-items: center; gap: 0.5rem; }
 .banner-right { display: flex; align-items: center; gap: 0.75rem; }
 .banner-dot   { width: 8px; height: 8px; background: #fff; border-radius: 50%; animation: pulse-dot 1.5s infinite; }
