@@ -1,5 +1,10 @@
 import type { RxJsonSchema } from "rxdb";
 
+export interface SetConfig {
+  set_type: 'warmup' | 'working' | 'failure' | 'drop' | 'myorep'
+  target_reps: number | null
+}
+
 export interface TemplateExerciseDocument {
   id: string
   template_id: string
@@ -11,6 +16,7 @@ export interface TemplateExerciseDocument {
   notes: string | null
   superset_group: number | null
   rest_seconds: number | null
+  set_configs: SetConfig[] | null
   updated_at: string
 }
 
@@ -71,7 +77,7 @@ export interface SetDocument {
 }
 
 export const templateExerciseSchema: RxJsonSchema<TemplateExerciseDocument> = {
-  version: 1,
+  version: 2,
   primaryKey: 'id',
   type: 'object',
   properties: {
@@ -85,6 +91,7 @@ export const templateExerciseSchema: RxJsonSchema<TemplateExerciseDocument> = {
     notes:           { type: ['string',  'null'] },
     superset_group:  { type: ['integer', 'null'] },
     rest_seconds:    { type: ['integer', 'null'] },
+    set_configs:     { type: ['array', 'null'] },
     updated_at:      { type: 'string', maxLength: 32 },
   },
   required: ['id', 'template_id', 'exercise_id', 'position', 'updated_at'],

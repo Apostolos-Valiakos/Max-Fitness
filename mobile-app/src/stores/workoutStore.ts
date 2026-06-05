@@ -5,9 +5,9 @@ import { getDatabase } from '@/lib/rxdb/database'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from './authStore'
 import { getPreviousPerformance } from '@/composables/usePreviousPerformance'
-import type { WorkoutSessionDocument, SetDocument } from '@/lib/rxdb/schemas'
+import type { WorkoutSessionDocument, SetDocument, TemplateExerciseDocument } from '@/lib/rxdb/schemas'
 
-export interface ActiveSet extends SetDocument { done?: boolean; isPR?: boolean }
+export interface ActiveSet extends SetDocument { done?: boolean; isPR?: boolean; restSeconds?: number }
 export interface ActiveExercise {
   exerciseId: string
   exerciseName: string
@@ -68,17 +68,29 @@ export const useWorkoutStore = defineStore('workout', () => {
 
     // Pre-load exercises from template
     if (templateId) {
-      const templateExs = await db.template_exercises
+      let teDocs: TemplateExerciseDocument[] = []
+
+      // Try RxDB first (works for own templates + synced trainer templates)
+      const rxDocs = await db.template_exercises
         .find({ selector: { template_id: { $eq: templateId } }, sort: [{ position: 'asc' }] })
         .exec()
+      teDocs = rxDocs.map(d => d.toJSON())
 
-      for (const te of templateExs) {
-        const teDoc      = te.toJSON()
+      // Fallback: fetch from Supabase when RxDB hasn't synced this template yet
+      if (teDocs.length === 0) {
+        const { data } = await supabase
+          .from('template_exercises')
+          .select('id,template_id,exercise_id,position,target_sets,target_reps,target_rpe,notes,superset_group,rest_seconds,set_configs,updated_at')
+          .eq('template_id', templateId)
+          .order('position')
+        teDocs = (data ?? []) as TemplateExerciseDocument[]
+      }
+
+      for (const teDoc of teDocs) {
         const exerciseDoc = await db.exercises.findOne(teDoc.exercise_id).exec()
         if (!exerciseDoc) continue
         const exercise = exerciseDoc.toJSON()
         const prev     = await getPreviousPerformance(teDoc.exercise_id, session.id)
-        const numSets  = teDoc.target_sets ?? 3
 
         let ex = activeExercises.value.find(e => e.exerciseId === teDoc.exercise_id)
         if (!ex) {
@@ -95,18 +107,38 @@ export const useWorkoutStore = defineStore('workout', () => {
           activeExercises.value.push(ex)
         }
 
-        for (let i = 0; i < numSets; i++) {
-          const set: ActiveSet = {
-            id: uuidv4(), session_id: session.id, exercise_id: teDoc.exercise_id,
-            set_number: i + 1, set_type: 'working',
-            weight_kg: prev?.weight_kg ?? null,
-            reps:      teDoc.target_reps ?? prev?.reps ?? null,
-            rpe: null, duration_secs: null, distance_m: null, notes: null,
-            logged_at: now, updated_at: now, done: false,
+        // set_configs (per-set types) takes priority over flat target_sets/target_reps
+        const configs = teDoc.set_configs
+        if (configs && configs.length > 0) {
+          for (let i = 0; i < configs.length; i++) {
+            const cfg = configs[i]
+            const set: ActiveSet = {
+              id: uuidv4(), session_id: session.id, exercise_id: teDoc.exercise_id,
+              set_number: i + 1, set_type: cfg.set_type as SetDocument['set_type'],
+              weight_kg: prev?.weight_kg ?? null,
+              reps:      cfg.target_reps ?? prev?.reps ?? null,
+              rpe: null, duration_secs: null, distance_m: null, notes: null,
+              logged_at: now, updated_at: now, done: false,
+            }
+            const { done: _done, ...dbSet } = set
+            await db.sets.insert(dbSet)
+            ex.sets.push(set)
           }
-          const { done: _done, ...dbSet } = set
-          await db.sets.insert(dbSet)
-          ex.sets.push(set)
+        } else {
+          const numSets = teDoc.target_sets ?? 3
+          for (let i = 0; i < numSets; i++) {
+            const set: ActiveSet = {
+              id: uuidv4(), session_id: session.id, exercise_id: teDoc.exercise_id,
+              set_number: i + 1, set_type: 'working',
+              weight_kg: prev?.weight_kg ?? null,
+              reps:      teDoc.target_reps ?? prev?.reps ?? null,
+              rpe: null, duration_secs: null, distance_m: null, notes: null,
+              logged_at: now, updated_at: now, done: false,
+            }
+            const { done: _done, ...dbSet } = set
+            await db.sets.insert(dbSet)
+            ex.sets.push(set)
+          }
         }
       }
     }
@@ -332,6 +364,18 @@ export const useWorkoutStore = defineStore('workout', () => {
     }
   }
 
+  function updateSetRest(setId: string, seconds: number) {
+    for (const ex of activeExercises.value) {
+      const idx = ex.sets.findIndex(s => s.id === setId)
+      if (idx !== -1) {
+        for (let i = idx; i < ex.sets.length; i++) {
+          ex.sets[i].restSeconds = seconds
+        }
+        break
+      }
+    }
+  }
+
   async function renameSession(name: string) {
     if (!activeSession.value) return
     const trimmed = name.trim()
@@ -345,7 +389,7 @@ export const useWorkoutStore = defineStore('workout', () => {
     activeSession, activeExercises, elapsedSeconds, elapsedFormatted,
     hasActiveSession, totalSets, totalVolume, isFinishing, usedTemplateId,
     startSession, addExercise, removeExercise, logSet, updateSet, markSetDone,
-    deleteSet, updateExerciseNotes, addWarmupSets, replaceExercise,
+    deleteSet, updateExerciseNotes, updateSetRest, addWarmupSets, replaceExercise,
     finishSession, discardSession, recoverSession, duplicateSession, renameSession,
   }
 })

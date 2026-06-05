@@ -149,7 +149,7 @@ async function replicateTemplateExercises(db: Awaited<ReturnType<typeof getDatab
     replicationIdentifier: 'template-exercises-supabase-v2',
     deletedField:    '_deleted',
     // RLS automatically filters to templates the user owns — no extra filter needed
-    pull:            buildPullHandler('template_exercises', 'id,template_id,exercise_id,position,target_sets,target_reps,target_rpe,notes,superset_group,rest_seconds,updated_at,deleted'),
+    pull:            buildPullHandler('template_exercises', 'id,template_id,exercise_id,position,target_sets,target_reps,target_rpe,notes,superset_group,rest_seconds,set_configs,updated_at,deleted'),
     push:            buildPushHandler('template_exercises'),
     live:            true,
     retryTime:       5000,

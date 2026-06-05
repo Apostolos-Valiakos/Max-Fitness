@@ -85,6 +85,7 @@ export const useTemplateStore = defineStore('templates', () => {
       notes:          null,
       superset_group: opts.supersetGroup ?? null,
       rest_seconds:   opts.restSeconds ?? null,
+      set_configs:    null,
       updated_at:     now,
     }
     await db.template_exercises.insert(te)
@@ -167,7 +168,7 @@ export const useTemplateStore = defineStore('templates', () => {
       const te: TemplateExerciseDocument = {
         id: uuidv4(), template_id: templateId!, exercise_id: exerciseIds[i],
         position: i, target_sets: 3, target_reps: null, target_rpe: null, notes: null,
-        superset_group: null, rest_seconds: null, updated_at: now,
+        superset_group: null, rest_seconds: null, set_configs: null, updated_at: now,
       }
       await db.template_exercises.insert(te)
     }

@@ -82,6 +82,7 @@ async function buildDatabase() {
       schema: templateExerciseSchema,
       migrationStrategies: {
         1: (doc: any) => ({ ...doc, superset_group: null, rest_seconds: null }),
+        2: (doc: any) => ({ ...doc, set_configs: null }),
       },
     },
   });
