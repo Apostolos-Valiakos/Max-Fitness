@@ -82,16 +82,17 @@ import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import ViewHeader from '@/components/ViewHeader.vue'
 import { useWorkoutStore }   from '@/stores/workoutStore'
+import { useHistoryStore }   from '@/stores/historyStore'
 import { useTemplateStore }  from '@/stores/templateStore'
 import { useExerciseStore }  from '@/stores/exerciseStore'
 import { useAuthStore }      from '@/stores/authStore'
-import { getDatabase }       from '@/lib/rxdb/database'
 import { supabase }          from '@/lib/supabase'
 import { format, isToday, isYesterday } from 'date-fns'
 import type { WorkoutTemplateDocument, WorkoutSessionDocument } from '@/lib/rxdb/schemas'
 
 const router    = useRouter()
 const workout   = useWorkoutStore()
+const history   = useHistoryStore()
 const templates = useTemplateStore()
 const exercises = useExerciseStore()
 const auth      = useAuthStore()
@@ -109,13 +110,7 @@ onMounted(async () => {
 
 async function loadRecentSessions() {
   if (!auth.user?.id) return
-  const db = getDatabase()
-  const sessions = await db.workout_sessions.find({
-    selector: { user_id: { $eq: auth.user.id }, finished_at: { $ne: null } },
-    sort: [{ started_at: 'desc' }],
-    limit: 5,
-  }).exec()
-  recentSessions.value = sessions.map(s => s.toJSON())
+  recentSessions.value = await history.loadRecentSessions(auth.user.id)
 }
 
 function formatSessionDate(iso: string): string {

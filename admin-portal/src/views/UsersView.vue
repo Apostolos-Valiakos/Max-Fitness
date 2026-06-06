@@ -124,8 +124,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
-import { adminSupabase, listAuthUsers } from '@/lib/adminSupabase'
+import { adminSupabase } from '@/lib/adminSupabase'
 import { useAuthStore } from '@/stores/authStore'
+import { useAuthUsers } from '@/composables/useAuthUsers'
 import { initials, fmtDate } from '@/lib/utils'
 import type { UserRow, UserRole, UserTier } from '@/lib/database.types'
 import DataTable from 'primevue/datatable'
@@ -139,6 +140,7 @@ import Dialog from 'primevue/dialog'
 
 const auth    = useAuthStore()
 const selfId  = computed(() => auth.user?.id)
+const { authMap, fetchAuthUsers } = useAuthUsers()
 const loading = ref(true)
 const users   = ref<UserRow[]>([])
 
@@ -174,15 +176,14 @@ const filtered = computed(() => {
 
 onMounted(async () => {
   loading.value = true
-  const [authUsers, { data: profiles }] = await Promise.all([
-    listAuthUsers(),
+  const [, { data: profiles }] = await Promise.all([
+    fetchAuthUsers(),
     supabase.from('profiles').select('*').order('created_at', { ascending: false }),
   ])
-  const emailMap = Object.fromEntries(authUsers.map(u => [u.id, u]))
   users.value = (profiles ?? []).map(p => ({
     ...p,
-    email:           emailMap[p.id]?.email ?? '',
-    last_sign_in_at: emailMap[p.id]?.last_sign_in_at ?? null,
+    email:           authMap.value[p.id]?.email ?? '',
+    last_sign_in_at: authMap.value[p.id]?.last_sign_in_at ?? null,
   }))
   loading.value = false
 })

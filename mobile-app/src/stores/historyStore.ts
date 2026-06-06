@@ -8,6 +8,7 @@ import { isThisWeek, isThisMonth } from 'date-fns'
 export interface SessionWithSets extends WorkoutSessionDocument {
   sets: SetDocument[]
   exerciseNames: string[]
+  exerciseNameMap: Record<string, string>
   totalVolume: number
 }
 
@@ -40,7 +41,29 @@ export const useHistoryStore = defineStore('history', () => {
     const exerciseIds = [...new Set(setDocs.map(s => s.exercise_id))]
     const exercises   = await db.exercises.find({ selector: { id: { $in: exerciseIds } } }).exec()
     const nameMap     = Object.fromEntries(exercises.map(e => [e.id, e.name]))
-    return { ...session.toJSON(), sets: setDocs, exerciseNames: exerciseIds.map(id => nameMap[id] ?? 'Unknown'), totalVolume: setDocs.reduce((a, s) => a + ((s.weight_kg ?? 0) * (s.reps ?? 0)), 0) }
+    return { ...session.toJSON(), sets: setDocs, exerciseNames: exerciseIds.map(id => nameMap[id] ?? 'Unknown'), exerciseNameMap: nameMap, totalVolume: setDocs.reduce((a, s) => a + ((s.weight_kg ?? 0) * (s.reps ?? 0)), 0) }
+  }
+
+  async function enrichSessions(list: WorkoutSessionDocument[]) {
+    const db = getDatabase()
+    return Promise.all(list.map(async s => {
+      const sets = await db.sets.find({ selector: { session_id: { $eq: s.id } } }).exec()
+      const sd   = sets.map((x: any) => x.toJSON())
+      const eIds = [...new Set(sd.map((x: any) => x.exercise_id))] as string[]
+      const ed   = await db.exercises.find({ selector: { id: { $in: eIds } } }).exec()
+      const nm   = Object.fromEntries(ed.map((e: any) => [e.id, e.name]))
+      return { ...s, exerciseNames: eIds.map(id => nm[id] ?? 'Unknown'), totalVolume: sd.reduce((a: number, x: any) => a + ((x.weight_kg ?? 0) * (x.reps ?? 0)), 0) }
+    }))
+  }
+
+  async function loadRecentSessions(userId: string): Promise<WorkoutSessionDocument[]> {
+    const db = getDatabase()
+    const docs = await db.workout_sessions.find({
+      selector: { user_id: { $eq: userId }, finished_at: { $ne: null } },
+      sort: [{ started_at: 'desc' }],
+      limit: 5,
+    }).exec()
+    return docs.map((s: any) => s.toJSON())
   }
 
   function getCurrentStreak(): number {
@@ -70,5 +93,5 @@ export const useHistoryStore = defineStore('history', () => {
     if (idx !== -1) sessions.value[idx] = { ...sessions.value[idx], name: trimmed }
   }
 
-  return { sessions, isLoading, canLoadMore, subscribeToSessions, loadMore, getSessionWithSets, getCurrentStreak, getWeeklyCount, getMonthlyCount, renameSession }
+  return { sessions, isLoading, canLoadMore, subscribeToSessions, loadMore, getSessionWithSets, enrichSessions, loadRecentSessions, getCurrentStreak, getWeeklyCount, getMonthlyCount, renameSession }
 })

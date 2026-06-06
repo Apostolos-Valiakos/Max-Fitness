@@ -148,7 +148,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { supabase } from '@/lib/supabase'
-import { listAuthUsers } from '@/lib/adminSupabase'
+import { useAuthUsers } from '@/composables/useAuthUsers'
 import { initials } from '@/lib/utils'
 import {
   format, differenceInDays,
@@ -157,6 +157,7 @@ import {
 } from 'date-fns'
 
 const today = format(new Date(), 'EEEE, MMMM d yyyy')
+const { authUsers, emailMap, fetchAuthUsers } = useAuthUsers()
 
 // ── KPI state ──────────────────────────────────────────────────────────────
 const totalUsers          = ref<number | null>(null)
@@ -282,13 +283,12 @@ onMounted(async () => {
   sessionsWeekDelta.value  = (sw ?? 0) - (swlw ?? 0)
 
   try {
-    const authUsers = await listAuthUsers()
-    totalUsers.value   = authUsers.length
-    newThisMonth.value = authUsers.filter(u => u.created_at >= monthStart).length
-    const newLastMonth = authUsers.filter(u => u.created_at >= lastMonthStart && u.created_at < monthStart).length
+    await fetchAuthUsers()
+    totalUsers.value   = authUsers.value.length
+    newThisMonth.value = authUsers.value.filter(u => u.created_at >= monthStart).length
+    const newLastMonth = authUsers.value.filter(u => u.created_at >= lastMonthStart && u.created_at < monthStart).length
     newMonthDelta.value = (newThisMonth.value ?? 0) - newLastMonth
 
-    const emailMap       = Object.fromEntries(authUsers.map(u => [u.id, u.email ?? '']))
     const assignedSet    = new Set((assignments ?? []).map(a => a.client_id))
     const profileMap     = Object.fromEntries((profiles ?? []).map(p => [p.id, p]))
 
@@ -313,7 +313,7 @@ onMounted(async () => {
       .map(p => ({
         id:          p.id,
         full_name:   p.full_name,
-        email:       emailMap[p.id] ?? '',
+        email:       emailMap.value[p.id] ?? '',
         clientCount: clientCounts[p.id] ?? 0,
       }))
       .sort((a, b) => b.clientCount - a.clientCount)
@@ -321,14 +321,14 @@ onMounted(async () => {
     // Ultra without trainer
     ultraUnassigned.value = (profiles ?? [])
       .filter(p => p.tier === 'ultra' && !assignedSet.has(p.id))
-      .map(p => ({ id: p.id, full_name: p.full_name, email: emailMap[p.id] ?? '' }))
+      .map(p => ({ id: p.id, full_name: p.full_name, email: emailMap.value[p.id] ?? '' }))
       .slice(0, 8)
 
     // Pending check-ins with resolved names
     pendingCheckins.value = (pendingSubs ?? []).map(s => ({
       id:          s.id,
-      clientName:  profileMap[s.client_id]?.full_name  ?? emailMap[s.client_id]  ?? '?',
-      trainerName: profileMap[s.trainer_id]?.full_name ?? emailMap[s.trainer_id] ?? '?',
+      clientName:  profileMap[s.client_id]?.full_name  ?? emailMap.value[s.client_id]  ?? '?',
+      trainerName: profileMap[s.trainer_id]?.full_name ?? emailMap.value[s.trainer_id] ?? '?',
       daysAgo:     differenceInDays(now, new Date(s.submitted_at)),
     }))
 

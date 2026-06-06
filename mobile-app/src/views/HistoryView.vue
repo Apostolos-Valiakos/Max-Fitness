@@ -88,7 +88,6 @@ import { useRouter } from 'vue-router'
 import ViewHeader from '@/components/ViewHeader.vue'
 import { useHistoryStore } from '@/stores/historyStore'
 import { useAuthStore }    from '@/stores/authStore'
-import { getDatabase }     from '@/lib/rxdb/database'
 import { format, startOfWeek, isThisWeek, differenceInCalendarWeeks, isToday as fnsIsToday, getDaysInMonth, startOfMonth } from 'date-fns'
 import SessionCard from '@/components/SessionCard.vue'
 
@@ -166,18 +165,7 @@ const grouped = computed(() => {
 })
 
 async function enrich() {
-  const db = getDatabase()
-  const list = await Promise.all(
-    history.sessions.map(async s => {
-      const sets  = await db.sets.find({ selector: { session_id: { $eq: s.id } } }).exec()
-      const sd    = sets.map(x => x.toJSON())
-      const eIds  = [...new Set(sd.map(x => x.exercise_id))]
-      const ed    = await db.exercises.find({ selector: { id: { $in: eIds } } }).exec()
-      const nm    = Object.fromEntries(ed.map(e => [e.id, e.name]))
-      return { ...s, exerciseNames: eIds.map(id => nm[id] ?? 'Unknown'), totalVolume: sd.reduce((a, x) => a + ((x.weight_kg ?? 0) * (x.reps ?? 0)), 0) }
-    })
-  )
-  enriched.value = list
+  enriched.value = await history.enrichSessions(history.sessions)
 }
 
 onMounted(() => {

@@ -89,7 +89,6 @@ import { useHistoryStore } from '@/stores/historyStore'
 import { useWorkoutStore } from '@/stores/workoutStore'
 import { useTrainerStore } from '@/stores/trainerStore'
 import { useAuthStore }    from '@/stores/authStore'
-import { getDatabase }     from '@/lib/rxdb/database'
 import { format }          from 'date-fns'
 import type { SetDocument } from '@/lib/rxdb/schemas'
 
@@ -136,10 +135,9 @@ const duration      = computed(() => {
 
 const byExercise = computed(() => {
   if (!session.value?.sets) return {}
-  const db = getDatabase()
   const map: Record<string, SetDocument[]> = {}
   for (const set of session.value.sets) {
-    const name = session.value._exerciseNameMap?.[set.exercise_id] ?? 'Unknown'
+    const name = session.value.exerciseNameMap?.[set.exercise_id] ?? 'Unknown'
     if (!map[name]) map[name] = []
     map[name].push(set)
   }
@@ -149,14 +147,7 @@ const byExercise = computed(() => {
 onMounted(async () => {
   loading.value = true
   const data = await history.getSessionWithSets(props.id)
-  if (data) {
-    // Build name map
-    const db   = getDatabase()
-    const eIds = [...new Set(data.sets.map(s => s.exercise_id))]
-    const exs  = await db.exercises.find({ selector: { id: { $in: eIds } } }).exec()
-    const nm   = Object.fromEntries(exs.map(e => [e.id, e.name]))
-    session.value = { ...data, _exerciseNameMap: nm }
-  }
+  if (data) session.value = data
   feedback.value = await trainerStore.fetchSessionFeedback(props.id)
   loading.value = false
 })

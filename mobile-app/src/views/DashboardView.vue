@@ -87,7 +87,6 @@ import { useHistoryStore } from '@/stores/historyStore'
 import { useProfileStore } from '@/stores/profileStore'
 import { useTrainerStore } from '@/stores/trainerStore'
 import { useWorkoutStore } from '@/stores/workoutStore'
-import { getDatabase }     from '@/lib/rxdb/database'
 import Dialog from 'primevue/dialog'
 import Button from 'primevue/button'
 import StatCard         from '@/components/StatCard.vue'
@@ -178,18 +177,7 @@ async function discardAndStart() {
 }
 
 async function enrichSessions() {
-  const db = getDatabase()
-  const enriched = await Promise.all(
-    history.sessions.slice(0, 5).map(async s => {
-      const sets  = await db.sets.find({ selector: { session_id: { $eq: s.id } } }).exec()
-      const sd    = sets.map(x => x.toJSON())
-      const eIds  = [...new Set(sd.map(x => x.exercise_id))]
-      const ed    = await db.exercises.find({ selector: { id: { $in: eIds } } }).exec()
-      const nm    = Object.fromEntries(ed.map(e => [e.id, e.name]))
-      return { ...s, exerciseNames: eIds.map(id => nm[id] ?? 'Unknown'), totalVolume: sd.reduce((a, x) => a + ((x.weight_kg ?? 0) * (x.reps ?? 0)), 0) }
-    })
-  )
-  recentWithMeta.value = enriched
+  recentWithMeta.value = await history.enrichSessions(history.sessions.slice(0, 5))
 }
 
 onMounted(async () => {

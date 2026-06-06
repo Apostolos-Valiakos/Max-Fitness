@@ -61,7 +61,6 @@ import ViewHeader from '@/components/ViewHeader.vue'
 import Dialog    from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import { useExerciseStore } from '@/stores/exerciseStore'
-import { getDatabase }      from '@/lib/rxdb/database'
 import ExerciseCard from '@/components/ExerciseCard.vue'
 import ExerciseSearchBar from '@/components/ExerciseSearchBar.vue'
 
@@ -104,14 +103,7 @@ onMounted(async () => {
 })
 
 async function loadUsageCounts() {
-  const db = getDatabase()
-  const sets = await db.sets.find({}).exec()
-  const counts: Record<string, number> = {}
-  for (const s of sets) {
-    const d = s.toJSON()
-    counts[d.exercise_id] = (counts[d.exercise_id] ?? 0) + 1
-  }
-  usageCounts.value = counts
+  usageCounts.value = await exercises.getUsageCounts()
 }
 
 async function handleCreate() {

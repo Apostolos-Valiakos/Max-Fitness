@@ -235,7 +235,8 @@ import {
   Chart as ChartJS, CategoryScale, LinearScale, BarElement,
   PointElement, LineElement, Tooltip, Filler,
 } from 'chart.js'
-import { adminSupabase, listAuthUsers } from '@/lib/adminSupabase'
+import { adminSupabase } from '@/lib/adminSupabase'
+import { useAuthUsers } from '@/composables/useAuthUsers'
 import { subDays, subMonths, format, startOfMonth, endOfMonth, eachWeekOfInterval, endOfWeek, eachMonthOfInterval, differenceInDays } from 'date-fns'
 import { fmtDate } from '@/lib/utils'
 
@@ -268,9 +269,10 @@ const activeTab  = ref('overview')
 const tabLoading = ref(false)
 const tabLoaded  = reactive({ overview: false, growth: false, revenue: false, engagement: false, trainers: false, content: false })
 
+const { authUsers, fetchAuthUsers } = useAuthUsers()
+
 // ── Shared data (loaded with overview) ──────────────────────────────────────
 const allProfiles  = ref<any[]>([])
-const authUsers    = ref<any[]>([])
 const sessions84   = ref<any[]>([])
 const sets84       = ref<any[]>([])
 const exMeta84     = ref<Record<string, { name: string; body_part: string }>>({})
@@ -330,15 +332,14 @@ async function loadOverview() {
   const weeks = eachWeekOfInterval({ start: from, end: now })
   const weekLabels = weeks.map(w => format(w, 'MMM d'))
 
-  const [profilesRes, authRes, sessRes] = await Promise.all([
+  const [profilesRes, , sessRes] = await Promise.all([
     adminSupabase.from('profiles').select('id, tier, role, created_at'),
-    listAuthUsers().catch(() => []),
+    fetchAuthUsers().catch(() => {}),
     adminSupabase.from('workout_sessions').select('id, user_id, started_at, finished_at')
       .gte('started_at', from.toISOString()).not('finished_at', 'is', null),
   ])
 
   allProfiles.value = profilesRes.data ?? []
-  authUsers.value   = authRes
   sessions84.value  = sessRes.data ?? []
 
   // Load sets for those sessions

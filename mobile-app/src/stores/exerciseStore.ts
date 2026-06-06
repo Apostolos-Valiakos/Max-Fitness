@@ -179,9 +179,20 @@ export const useExerciseStore = defineStore('exercises', () => {
     return fuseIndex.search(q, { limit: 120 }).map(r => r.item)
   }
 
+  async function getUsageCounts(): Promise<Record<string, number>> {
+    const db = getDatabase()
+    const sets = await db.sets.find({}).exec()
+    const counts: Record<string, number> = {}
+    for (const s of sets) {
+      const d = s.toJSON()
+      counts[d.exercise_id] = (counts[d.exercise_id] ?? 0) + 1
+    }
+    return counts
+  }
+
   return {
     exercises, filtered, searchQuery, filterBodyPart, filterEquipment,
     subscribeToExercises, clearFilters, createCustomExercise,
-    getVolumeHistory, getExercisePR, search, updateStickyNote,
+    getVolumeHistory, getExercisePR, search, updateStickyNote, getUsageCounts,
   }
 })

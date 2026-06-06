@@ -107,7 +107,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, reactive } from 'vue'
 import { supabase } from '@/lib/supabase'
-import { listAuthUsers } from '@/lib/adminSupabase'
+import { useAuthUsers } from '@/composables/useAuthUsers'
 import { initials, fmtDate } from '@/lib/utils'
 import type { TrainerRow, ClientRow } from '@/lib/database.types'
 import DataTable from 'primevue/datatable'
@@ -116,6 +116,7 @@ import Button from 'primevue/button'
 import Select from 'primevue/select'
 import Drawer from 'primevue/drawer'
 
+const { emailMap, fetchAuthUsers } = useAuthUsers()
 const loading         = ref(true)
 const trainers        = ref<TrainerRow[]>([])
 const allUsers        = ref<any[]>([])
@@ -133,23 +134,22 @@ onMounted(async () => { await load() })
 
 async function load() {
   loading.value = true
-  const [authUsers, { data: profiles }, { data: assignments }] = await Promise.all([
-    listAuthUsers(),
+  const [, { data: profiles }, { data: assignments }] = await Promise.all([
+    fetchAuthUsers(),
     supabase.from('profiles').select('*'),
     supabase.from('trainer_assignments').select('*').eq('is_active', true),
   ])
 
-  const emailMap = Object.fromEntries(authUsers.map(u => [u.id, u.email]))
-  allUsers.value = (profiles ?? []).map(p => ({ ...p, email: emailMap[p.id] ?? '' }))
+  allUsers.value = (profiles ?? []).map(p => ({ ...p, email: emailMap.value[p.id] ?? '' }))
 
   const trainerProfiles = (profiles ?? []).filter(p => p.role === 'trainer' || p.role === 'admin')
   trainers.value = trainerProfiles.map(tp => {
     const trainerAssignments = (assignments ?? []).filter(a => a.trainer_id === tp.id)
     const clients: ClientRow[] = trainerAssignments.map(a => {
       const cp = (profiles ?? []).find(p => p.id === a.client_id)
-      return cp ? { ...cp, email: emailMap[cp.id] ?? '', assignment_id: a.id, assigned_at: a.assigned_at } : null
+      return cp ? { ...cp, email: emailMap.value[cp.id] ?? '', assignment_id: a.id, assigned_at: a.assigned_at } : null
     }).filter(Boolean) as ClientRow[]
-    return { ...tp, email: emailMap[tp.id] ?? '', clients }
+    return { ...tp, email: emailMap.value[tp.id] ?? '', clients }
   })
   loading.value = false
 }
