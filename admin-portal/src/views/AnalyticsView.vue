@@ -169,7 +169,7 @@
             <tbody>
               <tr v-for="s in tr.overdue" :key="s.id">
                 <td class="td-name">{{ s.trainerName }}</td>
-                <td class="td-muted">{{ fmtDate(s.created_at) }}</td>
+                <td class="td-muted">{{ fmtDate(s.created_at, 'MMM d, yy') }}</td>
                 <td class="td-val orange">{{ s.waitDays }}d</td>
               </tr>
               <tr v-if="!tr.overdue.length"><td colspan="3" class="td-empty" style="color:#2EAF52">All caught up</td></tr>
@@ -237,6 +237,7 @@ import {
 } from 'chart.js'
 import { adminSupabase, listAuthUsers } from '@/lib/adminSupabase'
 import { subDays, subMonths, format, startOfMonth, endOfMonth, eachWeekOfInterval, endOfWeek, eachMonthOfInterval, differenceInDays } from 'date-fns'
+import { fmtDate } from '@/lib/utils'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, Tooltip, Filler)
 
@@ -314,7 +315,6 @@ const ct = reactive({
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 function pct(n: number, total: number) { return total ? Math.round(n / total * 100) : 0 }
-function fmtDate(iso: string) { return format(new Date(iso), 'MMM d, yy') }
 
 function makeBar(labels: string[], data: number[], color: string) {
   return { labels, datasets: [{ data, backgroundColor: color + 'aa', borderColor: color, borderWidth: 1, borderRadius: 3 }] }
@@ -671,10 +671,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.page { padding: 2rem; }
-.page-header { margin-bottom: 1.5rem; }
-.page-title { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 900; color: #F0F0F0; letter-spacing: 0.05em; }
-
 /* Tab bar */
 .tab-bar { display: flex; gap: 0; margin-bottom: 1.75rem; border-bottom: 1px solid #252528; }
 .tab-btn {
@@ -685,8 +681,6 @@ onMounted(async () => {
 }
 .tab-btn:hover  { color: #AEAEB2; }
 .tab-btn.active { color: #4A9EFF; border-bottom-color: #4A9EFF; }
-
-.loading-state { text-align: center; padding: 4rem; color: #636366; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
 
 /* KPIs */
 .kpi-row  { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }

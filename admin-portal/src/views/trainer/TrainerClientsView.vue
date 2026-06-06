@@ -19,7 +19,7 @@
       <div v-for="c in clients" :key="c.id" class="client-card card">
         <div class="client-top">
           <img v-if="c.avatar_url" :src="c.avatar_url" class="client-avatar-img" />
-          <div v-else class="client-avatar">{{ initials(c) }}</div>
+          <div v-else class="client-avatar">{{ initials(c.full_name ?? c.email) }}</div>
           <div class="client-info">
             <div class="client-name">{{ c.full_name ?? '—' }}</div>
             <div class="client-email">{{ c.email }}</div>
@@ -75,6 +75,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
+import { initials } from '@/lib/utils'
 import Button from 'primevue/button'
 
 const router = useRouter()
@@ -89,10 +90,6 @@ const clients = ref<TrainerClient[]>([])
 const sessionCounts  = ref<Record<string, number>>({})
 const pendingCheckins = ref<Record<string, number>>({})
 
-function initials(c: TrainerClient) {
-  const name = c.full_name ?? c.email ?? '?'
-  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-}
 
 onMounted(async () => {
   const trainerId = auth.user?.id
@@ -153,10 +150,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.page { padding: 2rem; }
 .page-header { margin-bottom: 1.75rem; }
-.page-title { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 900; color: #F0F0F0; letter-spacing: 0.05em; }
-.page-sub   { font-size: 0.75rem; color: #636366; margin-top: 0.2rem; }
 
 .loading-state { text-align: center; padding: 4rem; color: #636366; }
 

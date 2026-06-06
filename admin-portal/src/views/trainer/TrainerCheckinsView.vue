@@ -253,8 +253,8 @@ import { ref, computed, reactive, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
-import { format } from 'date-fns'
 import { v4 as uuidv4 } from 'uuid'
+import { fmtDate } from '@/lib/utils'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
@@ -300,7 +300,6 @@ const aForm = reactive({ template_id: '', client_id: '', frequency: 'weekly', da
 
 const unreadCount = computed(() => submissions.value.filter(s => !s.is_read && !s.trainer_reply).length)
 
-function fmtDate(iso: string) { return format(new Date(iso), 'MMM d, yyyy') }
 function clientName(id: string) { return clients.value.find(c => c.id === id)?.full_name ?? id.slice(0, 8) }
 function templateName(assignmentId: string) {
   const a = assignments.value.find(a => a.id === assignmentId)
@@ -435,16 +434,11 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.page { padding: 2rem; }
-.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
-.page-title { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 900; color: #F0F0F0; letter-spacing: 0.05em; }
-.page-sub   { font-size: 0.75rem; color: #636366; margin-top: 0.2rem; display: flex; align-items: center; gap: 0.5rem; }
+.page-sub   { display: flex; align-items: center; gap: 0.5rem; }
 .unread-badge { background: #4A9EFF; color: #fff; font-family: 'Barlow Condensed', sans-serif; font-size: 0.6rem; font-weight: 900; padding: 0.1rem 0.4rem; letter-spacing: 0.08em; }
-.loading-state { text-align: center; padding: 4rem; color: #636366; }
-
 .tab-badge { background: #4A9EFF; color: #fff; font-size: 0.58rem; font-weight: 900; padding: 0.1rem 0.35rem; border-radius: 99px; }
 
-.empty-state { padding: 4rem 2rem; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
+.empty-state { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
 .empty-icon  { font-size: 2.5rem; color: #3A3A3C; }
 .empty-title { font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; font-weight: 700; color: #636366; }
 

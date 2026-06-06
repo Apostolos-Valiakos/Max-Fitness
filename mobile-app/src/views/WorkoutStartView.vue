@@ -170,7 +170,6 @@ async function startFromTemplate(t: WorkoutTemplateDocument) {
 .view-title { font-family: 'Barlow Condensed',sans-serif; font-size: 1.4rem; font-weight: 900; letter-spacing: 0.05em; color: #F0F0F0; }
 .section { margin-bottom: 2rem; }
 .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
-.section-title { font-family: 'Barlow Condensed',sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; color: #636366; }
 .see-all { font-size: 0.72rem; color: #4A9EFF; text-decoration: none; }
 
 .quick-start-btn {

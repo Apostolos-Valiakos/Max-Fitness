@@ -219,7 +219,6 @@ function viewResponse(r: CheckinResponse) {
 .back-btn { background: none; border: none; color: #8E8E93; cursor: pointer; font-size: 1rem; padding: 0; }
 .view-title { font-family: 'Barlow Condensed',sans-serif; font-size: 1.8rem; font-weight: 900; }
 .section { margin-bottom: 2rem; }
-.section-title { font-family: 'Barlow Condensed',sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; color: #636366; margin-bottom: 0.75rem; }
 .empty-state { color: #8E8E93; font-size: 0.85rem; text-align: center; padding: 2rem 0; }
 
 .client-block { background: #1C1C1E; border: 1px solid #252528; padding: 1rem; margin-bottom: 0.75rem; }

@@ -69,3 +69,8 @@ input[type="number"] {
 
 /* Full-width helper — add class="mf-input" to any InputText */
 .mf-input { width: 100%; }
+
+/* ── Shared layout helpers ────────────────────────────────────────────────*/
+.section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; color: #636366; margin-bottom: 0.75rem; }
+.tab-loading   { text-align: center; padding: 3rem; color: #8E8E93; }
+.tab-empty     { text-align: center; padding: 2rem; color: #8E8E93; font-size: 0.85rem; }

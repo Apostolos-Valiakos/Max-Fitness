@@ -166,10 +166,8 @@ async function handleChangePassword() {
 </script>
 
 <style scoped>
-.page { padding: 2rem; max-width: 640px; }
+.page { max-width: 640px; }
 .page-header { margin-bottom: 1.75rem; }
-.page-title { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 900; color: #F0F0F0; letter-spacing: 0.05em; }
-.page-sub   { font-size: 0.75rem; color: #636366; margin-top: 0.2rem; }
 
 .sections { display: flex; flex-direction: column; gap: 1.25rem; }
 

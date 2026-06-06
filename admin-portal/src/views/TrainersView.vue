@@ -19,7 +19,7 @@
       <div v-for="trainer in trainers" :key="trainer.id" class="trainer-block card">
         <div class="trainer-header">
           <img v-if="trainer.avatar_url" :src="trainer.avatar_url" class="trainer-avatar-img" />
-          <div v-else class="trainer-avatar">{{ initials(trainer) }}</div>
+          <div v-else class="trainer-avatar">{{ initials(trainer.full_name ?? trainer.email) }}</div>
           <div class="trainer-info">
             <div class="trainer-name">{{ trainer.full_name ?? '—' }}</div>
             <div class="trainer-email">{{ trainer.email }}</div>
@@ -108,7 +108,7 @@
 import { ref, computed, onMounted, reactive } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { listAuthUsers } from '@/lib/adminSupabase'
-import { format } from 'date-fns'
+import { initials, fmtDate } from '@/lib/utils'
 import type { TrainerRow, ClientRow } from '@/lib/database.types'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
@@ -128,11 +128,6 @@ const ultraUsers = computed(() => allUsers.value.filter(u => u.tier === 'ultra' 
 const trainerOptions  = computed(() => trainers.value.map(t => ({ label: t.full_name ?? t.email, value: t.id })))
 const ultraUserOptions = computed(() => ultraUsers.value.map(u => ({ label: `${u.full_name ?? u.email} — ${u.email}`, value: u.id })))
 
-function initials(u: { full_name: string | null; email: string }) {
-  const name = u.full_name ?? u.email ?? '?'
-  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-}
-function fmtDate(iso: string) { return format(new Date(iso), 'MMM d, yyyy') }
 
 onMounted(async () => { await load() })
 
@@ -194,14 +189,6 @@ async function demoteTrainer(trainer: TrainerRow) {
 </script>
 
 <style scoped>
-.page { padding: 2rem; }
-.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
-.page-title  { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 900; color: #F0F0F0; letter-spacing: 0.05em; }
-.page-sub    { font-size: 0.75rem; color: #636366; margin-top: 0.2rem; }
-
-.loading-state { text-align: center; padding: 4rem; color: #636366; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
-.empty-state   { text-align: center; padding: 4rem 2rem; color: #636366; }
-.empty-state i { font-size: 2.5rem; color: #3A3A3C; display: block; margin-bottom: 1rem; }
 .empty-state p { font-size: 0.85rem; line-height: 1.5; }
 .empty-state strong { color: #AEAEB2; }
 

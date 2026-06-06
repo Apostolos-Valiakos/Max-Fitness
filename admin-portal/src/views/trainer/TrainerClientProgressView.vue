@@ -81,7 +81,7 @@
                 <td class="td-name">{{ s.name }}</td>
                 <td class="td-muted">{{ fmtDuration(s.started_at, s.finished_at) }}</td>
                 <td class="td-val">{{ sessionSetCounts[s.id] ?? 0 }}</td>
-                <td class="td-muted">{{ fmtDate(s.started_at) }}</td>
+                <td class="td-muted">{{ fmtDate(s.started_at, 'MMM d, yy') }}</td>
               </tr>
               <tr v-if="!recentSessions.length"><td colspan="4" class="td-empty">No sessions</td></tr>
             </tbody>
@@ -128,6 +128,7 @@ import { Bar } from 'vue-chartjs'
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip } from 'chart.js'
 import { supabase } from '@/lib/supabase'
 import { format, subDays, eachWeekOfInterval, endOfWeek, differenceInDays } from 'date-fns'
+import { fmtDate } from '@/lib/utils'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip)
 
@@ -233,7 +234,6 @@ const barOptions = {
   },
 }
 
-function fmtDate(iso: string) { return format(new Date(iso), 'MMM d, yy') }
 function fmtDuration(start: string, end: string | null) {
   if (!end) return '—'
   const m = Math.floor((new Date(end).getTime() - new Date(start).getTime()) / 60000)

@@ -227,5 +227,4 @@ onMounted(async () => {
 .picker-list { max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; }
 .picker-row { padding: 0.875rem; border-bottom: 1px solid #252528; cursor: pointer; color: #EBEBEB; font-size: 0.9rem; }
 .picker-row:hover { background: #252528; color: #4A9EFF; }
-.tab-empty { text-align: center; padding: 2rem; color: #8E8E93; font-size: 0.85rem; }
 </style>

@@ -275,8 +275,6 @@ onMounted(async () => {
 .tab { flex: 1; padding: 0.75rem; background: none; border: none; color: #636366; cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; transition: color 0.15s; }
 .tab.active { color: #4A9EFF; border-bottom: 2px solid #4A9EFF; }
 
-.tab-loading { text-align: center; padding: 3rem; color: #8E8E93; }
-.tab-empty { text-align: center; padding: 2rem; color: #8E8E93; font-size: 0.85rem; }
 
 /* History */
 .session-list { display: flex; flex-direction: column; }

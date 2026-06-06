@@ -395,12 +395,6 @@ onMounted(load)
 </script>
 
 <style scoped>
-.page { padding: 2rem; }
-.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
-.page-title  { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 900; color: #F0F0F0; letter-spacing: 0.05em; }
-.page-sub    { font-size: 0.75rem; color: #636366; margin-top: 0.2rem; }
-.loading-state { text-align: center; padding: 4rem; color: #636366; }
-
 .filters { padding: 0.875rem; margin-bottom: 1rem; }
 .filter-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
 .filter-divider { width: 1px; height: 16px; background: #3A3A3C; margin: 0 0.2rem; }

@@ -84,7 +84,7 @@
                 <td class="td-name">{{ s.name }}</td>
                 <td class="td-muted">{{ fmtDuration(s.started_at, s.finished_at) }}</td>
                 <td class="td-val">{{ sessionSetCounts[s.id] ?? 0 }}</td>
-                <td class="td-muted">{{ fmtDate(s.started_at) }}</td>
+                <td class="td-muted">{{ fmtDate(s.started_at, 'MMM d, yy') }}</td>
               </tr>
               <tr v-if="!recentSessions.length"><td colspan="4" class="td-empty">No sessions</td></tr>
             </tbody>
@@ -131,6 +131,7 @@ import { Bar } from 'vue-chartjs'
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip } from 'chart.js'
 import { adminSupabase } from '@/lib/adminSupabase'
 import { format, subDays, eachWeekOfInterval, endOfWeek, differenceInDays } from 'date-fns'
+import { fmtDate } from '@/lib/utils'
 import type { BodyMeasurement } from '@/lib/database.types'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip)
@@ -240,7 +241,6 @@ const barOptions = {
   },
 }
 
-function fmtDate(iso: string) { return format(new Date(iso), 'MMM d, yy') }
 function fmtDuration(start: string, end: string | null) {
   if (!end) return '—'
   const m = Math.floor((new Date(end).getTime() - new Date(start).getTime()) / 60000)
@@ -288,22 +288,14 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.page { padding: 2rem; }
-.loading-state { text-align: center; padding: 4rem; color: #636366; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
-
 .client-header { margin-bottom: 1.75rem; }
 .back-link { font-family: 'Barlow Condensed', sans-serif; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; color: #636366; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; margin-bottom: 0.75rem; transition: color 0.15s; }
 .back-link:hover { color: #AEAEB2; }
 .client-hero { display: flex; align-items: center; gap: 1.25rem; }
 .client-avatar { width: 56px; height: 56px; background: #4A9EFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 1.5rem; font-weight: 900; color: #fff; flex-shrink: 0; }
 .client-avatar-img { width: 56px; height: 56px; object-fit: cover; flex-shrink: 0; }
-.page-title { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 900; color: #F0F0F0; letter-spacing: 0.05em; line-height: 1; }
+.page-title { line-height: 1; }
 .client-meta { font-size: 0.78rem; color: #636366; margin-top: 0.3rem; display: flex; align-items: center; gap: 0.5rem; }
-
-.badge { font-family: 'Barlow Condensed', sans-serif; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em; padding: 0.1rem 0.4rem; border: 1px solid; }
-.badge.free  { color: #636366; border-color: #3A3A3C; }
-.badge.paid  { color: #4DA6FF; border-color: rgba(77,166,255,0.4); background: rgba(77,166,255,0.08); }
-.badge.ultra { color: #FFD700; border-color: rgba(255,215,0,0.4); background: rgba(255,215,0,0.08); }
 
 .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
 .kpi-card { padding: 1.25rem; }

@@ -119,7 +119,6 @@ async function handleLog() {
 .back-btn { background: none; border: none; color: #8E8E93; cursor: pointer; font-size: 1rem; padding: 0; }
 .view-title { font-family: 'Barlow Condensed',sans-serif; font-size: 1.8rem; font-weight: 900; color: #F0F0F0; }
 .section { margin-bottom: 2rem; }
-.section-title { font-family: 'Barlow Condensed',sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; color: #636366; margin-bottom: 0.75rem; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.75rem; }
 .field { display: flex; flex-direction: column; gap: 0.25rem; }
 .field.full { grid-column: 1 / -1; }

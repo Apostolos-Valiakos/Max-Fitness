@@ -37,7 +37,7 @@
           <template #body="{ data: u }">
             <div class="user-cell">
               <img v-if="u.avatar_url" :src="u.avatar_url" class="user-avatar-img" />
-              <div v-else class="user-avatar">{{ initials(u) }}</div>
+              <div v-else class="user-avatar">{{ initials(u.full_name ?? u.email) }}</div>
               <div>
                 <div class="user-name">{{ u.full_name ?? '—' }}</div>
                 <div class="user-email">{{ u.email }}</div>
@@ -126,7 +126,7 @@ import { ref, computed, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { adminSupabase, listAuthUsers } from '@/lib/adminSupabase'
 import { useAuthStore } from '@/stores/authStore'
-import { format } from 'date-fns'
+import { initials, fmtDate } from '@/lib/utils'
 import type { UserRow, UserRole, UserTier } from '@/lib/database.types'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
@@ -171,11 +171,6 @@ const filtered = computed(() => {
   return list
 })
 
-function initials(u: UserRow) {
-  const name = u.full_name ?? u.email ?? '?'
-  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-}
-function fmtDate(iso: string) { return format(new Date(iso), 'MMM d, yyyy') }
 
 onMounted(async () => {
   loading.value = true
@@ -215,10 +210,7 @@ async function handleDelete() {
 </script>
 
 <style scoped>
-.page { padding: 2rem; }
-.page-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.5rem; }
-.page-title { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 900; color: #F0F0F0; letter-spacing: 0.05em; }
-.page-sub   { font-size: 0.75rem; color: #636366; }
+.page-header { align-items: baseline; }
 
 .filters { padding: 1rem; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
 .filter-chips { display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }

@@ -243,7 +243,6 @@ onMounted(async () => {
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1.5rem; }
 .section { margin-bottom: 1.5rem; }
 .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
-.section-title { font-family: 'Barlow Condensed',sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; color: #636366; margin-bottom: 0.75rem; }
 .see-all { font-size: 0.72rem; color: #4A9EFF; text-decoration: none; }
 .chart-card { background: #1C1C1E; border: 1px solid #252528; padding: 1rem; }
 .sessions-list { display: flex; flex-direction: column; gap: 0.5rem; }

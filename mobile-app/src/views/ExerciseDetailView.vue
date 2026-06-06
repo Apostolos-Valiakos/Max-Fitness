@@ -232,7 +232,6 @@ function addToWorkout() {
 .pr-date { font-size: 0.7rem; color: #636366; margin-top: 0.1rem; }
 
 .section { margin-bottom: 1.5rem; }
-.section-title { font-family: 'Barlow Condensed',sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; color: #636366; margin-bottom: 0.75rem; }
 
 .steps { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem; }
 .step { display: flex; align-items: flex-start; gap: 0.65rem; font-size: 0.84rem; color: #AEAEB2; line-height: 1.55; }

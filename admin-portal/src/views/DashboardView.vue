@@ -149,6 +149,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { listAuthUsers } from '@/lib/adminSupabase'
+import { initials } from '@/lib/utils'
 import {
   format, differenceInDays,
   startOfDay, startOfWeek, startOfMonth,
@@ -214,11 +215,6 @@ const kpis = computed(() => [
     period: 'month',
   },
 ])
-
-// ── Helpers ────────────────────────────────────────────────────────────────
-function initials(name: string) {
-  return (name ?? '?').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-}
 
 function trendClass(delta: number | null) {
   if (delta === null || delta === 0) return 'trend-neutral'
@@ -345,8 +341,8 @@ onMounted(async () => {
 <style scoped>
 .page        { padding: 2.5rem; }
 .page-header { margin-bottom: 2rem; }
-.page-title  { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 900; color: #F0F0F0; letter-spacing: 0.05em; line-height: 1; }
-.page-sub    { font-size: 0.75rem; color: #636366; margin-top: 0.3rem; }
+.page-title  { line-height: 1; }
+.page-sub    { margin-top: 0.3rem; }
 
 /* ── KPI cards ──────────────────────────────────────────────────────────── */
 .kpi-grid {

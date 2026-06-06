@@ -237,7 +237,7 @@
 import { ref, computed, reactive, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { listAuthUsers } from '@/lib/adminSupabase'
-import { format } from 'date-fns'
+import { fmtDate } from '@/lib/utils'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
@@ -290,8 +290,6 @@ function hasDayTemplate(plan: Plan, dow: number) { return plan.days.some(d => d.
 function getDayTemplate(plan: Plan, dow: number) { return plan.days.find(d => d.day_of_week === dow) }
 function assignmentCount(planId: string) { return allAssignments.value.filter(a => a.plan_id === planId && a.is_active).length }
 function clientName(id: string) { return myClients.value.find(c => c.id === id)?.full_name ?? '—' }
-function fmtDate(iso: string) { return format(new Date(iso), 'MMM d, yyyy') }
-
 async function load() {
   loading.value = true
   const { data: { user } } = await supabase.auth.getUser()
@@ -462,18 +460,12 @@ onMounted(load)
 </script>
 
 <style scoped>
-.page { padding: 2rem; }
-.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
-.page-title  { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 900; color: #F0F0F0; letter-spacing: 0.05em; }
-.page-sub    { font-size: 0.75rem; color: #636366; margin-top: 0.2rem; }
-.loading-state { text-align: center; padding: 4rem; color: #636366; }
-
 .content-grid { display: grid; grid-template-columns: 300px 1fr; gap: 1rem; align-items: start; }
 
 /* Left col */
 .plans-col { display: flex; flex-direction: column; gap: 0.75rem; }
-.empty-state { text-align: center; padding: 2rem; color: #636366; }
-.empty-state i { font-size: 2rem; color: #3A3A3C; display: block; margin-bottom: 0.75rem; }
+.empty-state { padding: 2rem; }
+.empty-state i { font-size: 2rem; margin-bottom: 0.75rem; }
 .plan-card { padding: 1rem; cursor: pointer; border: 1px solid #252528; transition: border-color 0.15s; }
 .plan-card.selected { border-color: #4A9EFF; }
 .plan-card:hover { border-color: #3A3A3C; }
