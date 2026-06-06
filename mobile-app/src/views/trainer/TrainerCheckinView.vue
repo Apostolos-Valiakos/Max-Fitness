@@ -1,9 +1,6 @@
 <template>
   <div class="view">
-    <header class="view-header">
-      <button class="back-btn" @click="router.back()"><i class="pi pi-arrow-left" /></button>
-      <h1 class="view-title">CHECK-IN FORMS</h1>
-    </header>
+    <ViewHeader title="CHECK-IN FORMS" back />
 
     <!-- Per-client forms list -->
     <section class="section">
@@ -89,6 +86,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import ViewHeader from '@/components/ViewHeader.vue'
 import Dialog from 'primevue/dialog'
 import { supabase }    from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
@@ -215,9 +213,6 @@ function viewResponse(r: CheckinResponse) {
 
 <style scoped>
 .view { padding: 1.5rem 1rem 2rem; color: #F0F0F0; font-family: 'DM Sans',sans-serif; background: #1C1C1E; min-height: 100vh; }
-.view-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
-.back-btn { background: none; border: none; color: #8E8E93; cursor: pointer; font-size: 1rem; padding: 0; }
-.view-title { font-family: 'Barlow Condensed',sans-serif; font-size: 1.8rem; font-weight: 900; }
 .section { margin-bottom: 2rem; }
 .empty-state { color: #8E8E93; font-size: 0.85rem; text-align: center; padding: 2rem 0; }
 

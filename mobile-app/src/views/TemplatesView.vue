@@ -1,11 +1,10 @@
 <template>
   <div class="view">
-    <header class="view-header">
-      <h1 class="view-title">TEMPLATES</h1>
-      <button class="add-btn" @click="handleCreateClick">
-        <i class="pi pi-plus" />
-      </button>
-    </header>
+    <ViewHeader title="TEMPLATES" mb="1rem">
+      <template #right>
+        <button class="add-btn" @click="handleCreateClick"><i class="pi pi-plus" /></button>
+      </template>
+    </ViewHeader>
 
     <!-- Tier limit warning -->
     <div v-if="auth.isFree" class="tier-banner">
@@ -171,6 +170,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import ViewHeader from '@/components/ViewHeader.vue'
 import Dialog    from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import { useTemplateStore } from '@/stores/templateStore'
@@ -297,8 +297,6 @@ async function handleDuplicate(templateId: string) {
 
 <style scoped>
 .view { padding: 1.5rem 1rem 0; color: #F0F0F0; font-family: 'DM Sans',sans-serif; background: #1C1C1E; min-height: 100vh; padding-bottom: 5rem; }
-.view-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-.view-title { font-family: 'Barlow Condensed',sans-serif; font-size: 1.8rem; font-weight: 900; }
 .add-btn { background: #4A9EFF; border: none; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; clip-path: polygon(0 0,100% 0,100% 75%,85% 100%,0 100%); }
 
 .section-label { font-family: 'Barlow Condensed',sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em; color: #8E8E93; margin-bottom: 0.6rem; }

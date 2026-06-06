@@ -1,9 +1,6 @@
 <template>
   <div class="view">
-    <div class="view-header">
-      <button class="back-btn" @click="router.back()"><i class="pi pi-arrow-left" /></button>
-      <h1 class="view-title">START WORKOUT</h1>
-    </div>
+    <ViewHeader title="START WORKOUT" back mb="2rem" />
 
     <!-- Quick start -->
     <section class="section">
@@ -83,6 +80,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import ViewHeader from '@/components/ViewHeader.vue'
 import { useWorkoutStore }   from '@/stores/workoutStore'
 import { useTemplateStore }  from '@/stores/templateStore'
 import { useExerciseStore }  from '@/stores/exerciseStore'
@@ -165,9 +163,6 @@ async function startFromTemplate(t: WorkoutTemplateDocument) {
 
 <style scoped>
 .view { padding: 1.5rem 1rem; color: #F0F0F0; font-family: 'DM Sans',sans-serif; background: #1C1C1E; min-height: 100vh; }
-.view-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; }
-.back-btn { background: none; border: none; color: #8E8E93; cursor: pointer; font-size: 1rem; padding: 0.25rem; }
-.view-title { font-family: 'Barlow Condensed',sans-serif; font-size: 1.4rem; font-weight: 900; letter-spacing: 0.05em; color: #F0F0F0; }
 .section { margin-bottom: 2rem; }
 .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
 .see-all { font-size: 0.72rem; color: #4A9EFF; text-decoration: none; }

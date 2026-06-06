@@ -1,14 +1,13 @@
 <template>
   <div class="view">
-    <header class="view-header">
-      <h1 class="view-title">HISTORY</h1>
-      <div class="header-right">
+    <ViewHeader title="HISTORY">
+      <template #right>
         <div class="header-meta">{{ history.sessions.length }} sessions</div>
         <button class="view-toggle" @click="calendarMode = !calendarMode" :title="calendarMode ? 'List view' : 'Calendar view'">
           <i :class="calendarMode ? 'pi pi-list' : 'pi pi-calendar'" />
         </button>
-      </div>
-    </header>
+      </template>
+    </ViewHeader>
 
     <div v-if="history.sessions.length === 0" class="empty-state">
       <i class="pi pi-calendar empty-icon" />
@@ -86,6 +85,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import ViewHeader from '@/components/ViewHeader.vue'
 import { useHistoryStore } from '@/stores/historyStore'
 import { useAuthStore }    from '@/stores/authStore'
 import { getDatabase }     from '@/lib/rxdb/database'
@@ -189,9 +189,6 @@ onMounted(() => {
 
 <style scoped>
 .view { padding: 1.5rem 1rem 0; color: #F0F0F0; font-family: 'DM Sans',sans-serif; background: #1C1C1E; min-height: 100vh; }
-.view-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-.view-title { font-family: 'Barlow Condensed',sans-serif; font-size: 1.8rem; font-weight: 900; color: #F0F0F0; }
-.header-right { display: flex; align-items: center; gap: 0.75rem; }
 .header-meta { font-size: 0.72rem; color: #636366; }
 .view-toggle { background: none; border: 1px solid #3A3A3C; color: #636366; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.85rem; transition: all 0.15s; }
 .view-toggle:active { border-color: #4A9EFF; color: #4A9EFF; }
