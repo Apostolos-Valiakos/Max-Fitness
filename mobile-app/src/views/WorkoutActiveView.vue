@@ -456,7 +456,6 @@ async function handleDiscard() {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=DM+Sans:wght@300;400;500&display=swap');
 .view { background: #1C1C1E; min-height: 100dvh; color: #F0F0F0; font-family: 'DM Sans',sans-serif; padding-bottom: 5rem; padding-top: env(safe-area-inset-top, 0px); }
 
 .workout-header {

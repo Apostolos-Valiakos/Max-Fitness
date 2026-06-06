@@ -196,7 +196,6 @@ function addToWorkout() {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=DM+Sans:wght@300;400;500&display=swap');
 .view { color: #F0F0F0; font-family: 'DM Sans',sans-serif; background: #1C1C1E; min-height: 100vh; padding-bottom: 5rem; }
 
 .view-header { display: flex; align-items: flex-start; gap: 0.75rem; padding: 1.25rem 1rem 0.75rem; }

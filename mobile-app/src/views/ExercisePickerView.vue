@@ -74,7 +74,6 @@ async function handleAdd(ex: ExerciseDocument) {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=DM+Sans:wght@300;400;500&display=swap');
 .view { background: #1C1C1E; min-height: 100dvh; color: #F0F0F0; font-family: 'DM Sans',sans-serif; }
 .picker-header { display: flex; align-items: center; gap: 1rem; padding: 1.25rem 1rem 0.75rem; }
 .back-btn { background: none; border: none; color: #8E8E93; cursor: pointer; font-size: 1rem; }

@@ -114,6 +114,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, reactive } from 'vue'
+import { useToast } from 'primevue/usetoast'
 import { supabase } from '@/lib/supabase'
 import type { Exercise, BodyPart, Equipment } from '@/lib/database.types'
 import Button from 'primevue/button'
@@ -132,6 +133,8 @@ const EQUIPMENT: Equipment[] = ['barbell','dumbbell','cable','machine','bodyweig
 
 const BODY_PARTS_OPTIONS = BODY_PARTS.map(bp => ({ label: bp.replace('_', ' '), value: bp }))
 const EQUIPMENT_OPTIONS  = EQUIPMENT.map(eq => ({ label: eq, value: eq }))
+
+const toast = useToast()
 
 const loading      = ref(true)
 const exercises    = ref<Exercise[]>([])
@@ -238,7 +241,10 @@ async function handleImport(e: Event) {
   const tmIdx    = header.indexOf('target_muscle')
   const instrIdx = header.indexOf('instructions')
   const snIdx    = header.indexOf('sticky_note')
-  if (nameIdx === -1 || bpIdx === -1 || eqIdx === -1) return alert('CSV must have name, body_part, equipment columns')
+  if (nameIdx === -1 || bpIdx === -1 || eqIdx === -1) {
+    toast.add({ severity: 'error', summary: 'Invalid CSV', detail: 'CSV must have name, body_part, equipment columns', life: 4000 })
+    return
+  }
 
   const parseRow = (line: string) => {
     const cols: string[] = []
@@ -267,7 +273,10 @@ async function handleImport(e: Event) {
 
   if (!toInsert.length) return
   const { data, error } = await supabase.from('exercises').insert(toInsert).select()
-  if (error) return alert('Import error: ' + error.message)
+  if (error) {
+    toast.add({ severity: 'error', summary: 'Import failed', detail: error.message, life: 5000 })
+    return
+  }
   exercises.value.unshift(...((data ?? []) as Exercise[]))
   if (importInput.value) importInput.value.value = ''
 }

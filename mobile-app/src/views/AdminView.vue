@@ -290,7 +290,6 @@ onMounted(loadUsers)
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=DM+Sans:wght@300;400;500&display=swap');
 
 .view {
   background: #1C1C1E; min-height: 100dvh; color: #F0F0F0;

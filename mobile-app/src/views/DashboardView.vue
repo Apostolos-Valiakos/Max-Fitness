@@ -207,7 +207,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=DM+Sans:wght@300;400;500&display=swap');
 .view { padding: 1.5rem 1rem 0; color: #F0F0F0; font-family: 'DM Sans',sans-serif; background: #1C1C1E; min-height: 100vh; }
 .view-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
 .greeting { font-size: 0.72rem; color: #636366; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.2rem; }

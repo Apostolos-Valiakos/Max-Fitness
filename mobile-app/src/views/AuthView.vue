@@ -64,7 +64,6 @@ async function handleSubmit() {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=DM+Sans:wght@300;400;500&display=swap');
 .auth-wrap{min-height:100dvh;background:#1C1C1E;display:flex;align-items:center;justify-content:center;padding:1.5rem;}
 .auth-card{width:100%;max-width:360px;}
 .auth-logo{font-family:'Barlow Condensed',sans-serif;font-size:3rem;font-weight:900;color:#F0F0F0;letter-spacing:-0.02em;line-height:1;margin-bottom:0.25rem;}

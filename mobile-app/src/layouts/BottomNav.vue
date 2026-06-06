@@ -43,7 +43,6 @@ function handleWorkoutStart() {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=DM+Sans:wght@400;500&display=swap');
 
 .bottom-nav {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;

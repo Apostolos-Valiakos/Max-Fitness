@@ -525,14 +525,14 @@ function loadEngagement() {
 
 // ── Load: TRAINERS ────────────────────────────────────────────────────────────
 async function loadTrainers() {
-  const trainerProfiles = allProfiles.value.filter(p => p.role === 'trainer')
+  const trainerProfiles = allProfiles.value.filter(p => p.role === 'trainer' || p.role === 'admin')
   const trainerIds = trainerProfiles.map(p => p.id)
   if (!trainerIds.length) {
     tr.rows = []; tr.overdue = []; tabLoaded.trainers = true; return
   }
 
   const nameMap: Record<string, string> = {}
-  for (const p of allProfiles.value) if (p.role === 'trainer') nameMap[p.id] = p.full_name ?? '—'
+  for (const p of allProfiles.value) if (p.role === 'trainer' || p.role === 'admin') nameMap[p.id] = p.full_name ?? '—'
 
   const [assignRes, caRes, subRes] = await Promise.all([
     adminSupabase.from('trainer_assignments').select('trainer_id, client_id').eq('is_active', true),
