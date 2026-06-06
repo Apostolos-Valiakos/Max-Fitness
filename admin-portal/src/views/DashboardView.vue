@@ -352,20 +352,20 @@ onMounted(async () => {
   margin-bottom: 1.75rem;
 }
 .kpi-card {
-  background: #1C1C1E;
-  border: 1px solid #252528;
+  background: var(--bg);
+  border: 1px solid var(--surface);
   padding: 1.5rem 1.5rem 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  border-top: 2px solid #252528;
+  border-top: 2px solid var(--surface);
   transition: border-top-color 0.2s;
 }
-.kpi-card:hover { border-top-color: #4A9EFF; }
+.kpi-card:hover { border-top-color: var(--accent); }
 
-.kpi-icon  { font-size: 1rem; color: #4A9EFF; margin-bottom: 0.25rem; }
-.kpi-val   { font-family: 'Barlow Condensed', sans-serif; font-size: 2.75rem; font-weight: 900; color: #F0F0F0; line-height: 1; }
-.kpi-label { font-size: 0.68rem; color: #636366; text-transform: uppercase; letter-spacing: 0.12em; }
+.kpi-icon  { font-size: 1rem; color: var(--accent); margin-bottom: 0.25rem; }
+.kpi-val   { font-family: 'Barlow Condensed', sans-serif; font-size: 2.75rem; font-weight: 900; color: var(--text); line-height: 1; }
+.kpi-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; }
 
 .kpi-trend {
   display: flex;
@@ -374,12 +374,12 @@ onMounted(async () => {
   font-size: 0.7rem;
   margin-top: 0.35rem;
   padding-top: 0.5rem;
-  border-top: 1px solid #252528;
+  border-top: 1px solid var(--surface);
 }
 .kpi-trend .pi { font-size: 0.6rem; }
 .trend-up      { color: #34C759; }
-.trend-down    { color: #FF6B6B; }
-.trend-neutral { color: #636366; }
+.trend-down    { color: var(--danger); }
+.trend-neutral { color: var(--muted); }
 
 /* ── Bottom row ─────────────────────────────────────────────────────────── */
 .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -395,7 +395,7 @@ onMounted(async () => {
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.2em;
-  color: #4A9EFF;
+  color: var(--accent);
   margin-bottom: 1.25rem;
 }
 
@@ -404,7 +404,7 @@ onMounted(async () => {
 
 .section-divider {
   height: 1px;
-  background: #252528;
+  background: var(--surface);
   margin: 1.25rem 0;
 }
 
@@ -419,12 +419,12 @@ onMounted(async () => {
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.18em;
-  color: #636366;
+  color: var(--muted);
   flex: 1;
 }
 .subsection-meta {
   font-size: 0.7rem;
-  color: #636366;
+  color: var(--muted);
 }
 
 .count-badge {
@@ -439,7 +439,7 @@ onMounted(async () => {
   padding: 0 0.3rem;
   border-radius: 9px;
 }
-.count-badge.warn { background: rgba(255,180,0,0.15); color: #FFB400; border: 1px solid rgba(255,180,0,0.3); }
+.count-badge.warn { background: rgba(255,180,0,0.15); color: var(--gold); border: 1px solid rgba(255,180,0,0.3); }
 .count-badge.ok   { background: rgba(52,199,89,0.1);  color: #34C759; border: 1px solid rgba(52,199,89,0.2); font-size: 0.55rem; }
 
 .all-clear {
@@ -460,9 +460,9 @@ onMounted(async () => {
   align-items: center;
   gap: 0.65rem;
   padding: 0.55rem 0.65rem;
-  background: #252528;
+  background: var(--surface);
   border: 1px solid #2C2C2E;
-  border-left: 2px solid #FFB400;
+  border-left: 2px solid var(--gold);
 }
 
 .ar-dot {
@@ -471,19 +471,19 @@ onMounted(async () => {
   border-radius: 50%;
   flex-shrink: 0;
 }
-.warn-dot { background: #FFB400; }
+.warn-dot { background: var(--gold); }
 
 .ar-avatar {
   width: 26px;
   height: 26px;
-  background: #3A3A3C;
+  background: var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 0.62rem;
   font-weight: 800;
-  color: #8E8E93;
+  color: var(--sub);
   flex-shrink: 0;
   border-radius: 50%;
 }
@@ -496,19 +496,19 @@ onMounted(async () => {
   gap: 0.1rem;
 }
 .ar-name    { font-size: 0.82rem; color: #C7C7CC; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ar-sep     { color: #636366; font-size: 0.7rem; }
-.ar-trainer { font-size: 0.72rem; color: #636366; }
-.ar-sub     { font-size: 0.7rem; color: #636366; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ar-sep     { color: var(--muted); font-size: 0.7rem; }
+.ar-trainer { font-size: 0.72rem; color: var(--muted); }
+.ar-sub     { font-size: 0.7rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.ar-age       { font-size: 0.68rem; color: #636366; flex-shrink: 0; }
-.ar-age-old   { color: #FF6B6B; }
+.ar-age       { font-size: 0.68rem; color: var(--muted); flex-shrink: 0; }
+.ar-age-old   { color: var(--danger); }
 
 .ar-cta {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: #4A9EFF;
+  color: var(--accent);
   text-decoration: none;
   flex-shrink: 0;
   transition: opacity 0.15s;
@@ -523,7 +523,7 @@ onMounted(async () => {
 .tier-bar-track {
   flex: 1;
   height: 6px;
-  background: #252528;
+  background: var(--surface);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -535,7 +535,7 @@ onMounted(async () => {
 }
 
 .tier-count { font-size: 0.78rem; color: #C7C7CC; font-weight: 500; width: 22px; text-align: right; flex-shrink: 0; }
-.tier-pct   { font-size: 0.68rem; color: #636366; width: 32px; text-align: right; flex-shrink: 0; }
+.tier-pct   { font-size: 0.68rem; color: var(--muted); width: 32px; text-align: right; flex-shrink: 0; }
 
 /* ── Trainer workload ───────────────────────────────────────────────────── */
 .workload-row {
@@ -543,7 +543,7 @@ onMounted(async () => {
   align-items: center;
   gap: 0.65rem;
   padding: 0.45rem 0;
-  border-bottom: 1px solid #252528;
+  border-bottom: 1px solid var(--surface);
 }
 .workload-row:last-child { border-bottom: none; }
 
@@ -567,7 +567,7 @@ onMounted(async () => {
 .wr-name { font-size: 0.82rem; color: #C7C7CC; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .wr-bar-row   { display: flex; align-items: center; gap: 0.5rem; }
-.wr-bar-track { flex: 1; height: 4px; background: #252528; border-radius: 2px; overflow: hidden; }
+.wr-bar-track { flex: 1; height: 4px; background: var(--surface); border-radius: 2px; overflow: hidden; }
 .wr-bar-fill  { height: 100%; border-radius: 2px; transition: width 0.6s ease; min-width: 2px; }
 .wr-count     { font-size: 0.68rem; font-weight: 600; flex-shrink: 0; width: 54px; text-align: right; }
 </style>

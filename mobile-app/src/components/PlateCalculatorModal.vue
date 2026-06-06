@@ -246,7 +246,7 @@ function plateStyle(kg: number): Record<string, string> {
 .plate-close {
   background: none;
   border: none;
-  color: #636366;
+  color: var(--muted);
   font-size: 1rem;
   cursor: pointer;
   padding: 0.25rem;
@@ -264,7 +264,7 @@ function plateStyle(kg: number): Record<string, string> {
   margin-bottom: 1rem;
 }
 .w-btn {
-  background: #252528;
+  background: var(--surface);
   border: 1px solid #3a3a3c;
   color: #aeaeb2;
   width: 40px;
@@ -292,7 +292,7 @@ function plateStyle(kg: number): Record<string, string> {
 .weight-unit {
   font-family: "Barlow Condensed", sans-serif;
   font-size: 1rem;
-  color: #636366;
+  color: var(--muted);
   margin-left: 4px;
 }
 
@@ -305,7 +305,7 @@ function plateStyle(kg: number): Record<string, string> {
   flex-wrap: wrap;
 }
 .bar-btn {
-  background: #252528;
+  background: var(--surface);
   border: 1px solid #3a3a3c;
   color: #8e8e93;
   font-family: "Barlow Condensed", sans-serif;

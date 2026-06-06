@@ -73,7 +73,7 @@ function handleWorkoutStart() {
   grid-template-columns: 1fr 1fr 72px 1fr 1fr;
   align-items: center;
   background: #1c1c1e;
-  border-top: 1px solid #252528;
+  border-top: 1px solid var(--surface);
   padding: 0.5rem 0 calc(0.5rem + env(safe-area-inset-bottom, 0px));
   height: calc(64px + env(safe-area-inset-bottom, 0px));
 }
@@ -85,7 +85,7 @@ function handleWorkoutStart() {
   justify-content: center;
   gap: 0.2rem;
   padding: 0.25rem;
-  color: #636366;
+  color: var(--muted);
   text-decoration: none;
   font-family: "DM Sans", sans-serif;
   font-size: 0.65rem;
@@ -115,7 +115,7 @@ function handleWorkoutStart() {
   justify-content: center;
   color: #fff;
   cursor: pointer;
-  clip-path: polygon(0 0, 100% 0, 100% 75%, 88% 100%, 0 100%);
+  clip-path: var(--clip-btn);
   transition:
     background 0.2s,
     transform 0.1s;

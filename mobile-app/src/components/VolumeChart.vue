@@ -26,5 +26,5 @@ onMounted(async () => {
 
 <style scoped>
 .chart-wrap { height: 160px; position: relative; }
-.chart-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: #8E8E93; font-size: 0.8rem; }
+.chart-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--sub); font-size: 0.8rem; }
 </style>

@@ -276,7 +276,7 @@ function onTouchEnd() {
 /* Outer wrapper clips the wider inner so delete zone is hidden at rest */
 .set-row {
   overflow: hidden;
-  border-bottom: 1px solid #252528;
+  border-bottom: 1px solid var(--surface);
   transition: background 0.2s;
 }
 .set-row.done   { background: #162D1F; }
@@ -321,7 +321,7 @@ function onTouchEnd() {
 
 /* Type button */
 .type-btn {
-  background: #252528; border: 1px solid #3A3A3C;
+  background: var(--surface); border: 1px solid var(--border);
   color: #AEAEB2; font-family: 'Barlow Condensed', sans-serif;
   font-weight: 700; font-size: 0.85rem;
   width: 28px; height: 28px;
@@ -332,47 +332,47 @@ function onTouchEnd() {
 /* Previous */
 .prev-col  { text-align: center; display: flex; flex-direction: column; gap: 1px; }
 .prev-val  { font-size: 0.6rem; line-height: 1.2; }
-.prev-last  { color: #8E8E93; }
+.prev-last  { color: var(--sub); }
 .prev-best  { color: rgba(255,180,0,0.6); }
 .delta-up   { color: #34C759; }
-.delta-down { color: #FF6B6B; }
+.delta-down { color: var(--danger); }
 .delta-same { color: #AEAEB2; }
-.prev-empty { font-size: 0.62rem; color: #636366; }
+.prev-empty { font-size: 0.62rem; color: var(--muted); }
 
 /* Stepper */
 .stepper { display: flex; align-items: center; gap: 0; position: relative; }
 .step-val-wrap {
   flex: 1; min-width: 0; display: flex; align-items: center;
-  background: #252528; border: 1px solid #3A3A3C; border-left: none; border-right: none;
+  background: var(--surface); border: 1px solid var(--border); border-left: none; border-right: none;
   height: 30px;
 }
 .step-val-wrap.bw { background: rgba(52,199,89,0.04); border-color: rgba(52,199,89,0.15); }
 .bw-plus { color: #34C759; font-size: 0.75rem; font-weight: 700; padding-left: 0.3rem; flex-shrink: 0; }
 .step-btn {
-  background: #1C1C1E; border: 1px solid #3A3A3C; color: #8E8E93;
+  background: var(--bg); border: 1px solid var(--border); color: var(--sub);
   font-size: 1rem; line-height: 1;
   width: 26px; height: 30px;
   cursor: pointer; flex-shrink: 0;
   transition: background 0.1s, color 0.1s;
   display: flex; align-items: center; justify-content: center;
 }
-.step-btn:active { background: #3A3A3C; color: #4A9EFF; }
+.step-btn:active { background: var(--border); color: var(--accent); }
 .step-val {
   flex: 1; min-width: 0; width: 100%;
   background: transparent; border: none;
-  color: #F0F0F0; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500;
+  color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500;
   padding: 0.35rem 0.2rem; text-align: center; height: 30px;
 }
 .step-val:focus { outline: none; }
-.step-val-wrap:focus-within { border-color: #4A9EFF; background: #2C2C2E; }
+.step-val-wrap:focus-within { border-color: var(--accent); background: #2C2C2E; }
 .set-row.done .step-val { color: #AEAEB2; }
 .plate-btn {
   position: absolute; right: -18px;
   background: none; border: none;
-  color: #8E8E93; font-size: 0.7rem;
+  color: var(--sub); font-size: 0.7rem;
   cursor: pointer; padding: 0; line-height: 1;
 }
-.plate-btn:active { color: #4A9EFF; }
+.plate-btn:active { color: var(--accent); }
 
 /* Done wrap + PR badge */
 .done-wrap { position: relative; display: flex; align-items: center; justify-content: center; }
@@ -381,7 +381,7 @@ function onTouchEnd() {
 .done-btn {
   width: 28px; height: 28px;
   border-radius: 50%;
-  border: 2px solid #636366;
+  border: 2px solid var(--muted);
   background: none;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
@@ -403,15 +403,15 @@ function onTouchEnd() {
 }
 .delete-dialog {
   width: min(320px, 90vw);
-  background: #1C1C1E; border: 1px solid #3A0000; border-top: 2px solid #FF4444;
+  background: var(--bg); border: 1px solid #3A0000; border-top: 2px solid #FF4444;
   padding: 1.5rem;
 }
 .delete-dialog-title {
   font-family: 'Barlow Condensed',sans-serif; font-size: 1.2rem; font-weight: 900;
-  color: #F0F0F0; margin-bottom: 0.35rem;
+  color: var(--text); margin-bottom: 0.35rem;
 }
 .delete-dialog-sub {
-  font-size: 0.78rem; color: #8E8E93; margin-bottom: 1.25rem;
+  font-size: 0.78rem; color: var(--sub); margin-bottom: 1.25rem;
 }
 .delete-dialog-actions {
   display: flex; gap: 0.5rem;
@@ -421,7 +421,7 @@ function onTouchEnd() {
   font-weight: 700; font-size: 0.9rem; letter-spacing: 0.1em;
   padding: 0.7rem; cursor: pointer;
 }
-.ddbtn.cancel  { background: #252528; color: #AEAEB2; }
+.ddbtn.cancel  { background: var(--surface); color: #AEAEB2; }
 .ddbtn.confirm { background: #3A0000; color: #FF4444; border: 1px solid rgba(255,68,68,0.3); }
 .ddbtn.confirm:active { background: #FF4444; color: #fff; }
 </style>

@@ -466,21 +466,21 @@ onMounted(load)
 .plans-col { display: flex; flex-direction: column; gap: 0.75rem; }
 .empty-state { padding: 2rem; }
 .empty-state i { font-size: 2rem; margin-bottom: 0.75rem; }
-.plan-card { padding: 1rem; cursor: pointer; border: 1px solid #252528; transition: border-color 0.15s; }
-.plan-card.selected { border-color: #4A9EFF; }
-.plan-card:hover { border-color: #3A3A3C; }
+.plan-card { padding: 1rem; cursor: pointer; border: 1px solid var(--surface); transition: border-color 0.15s; }
+.plan-card.selected { border-color: var(--accent); }
+.plan-card:hover { border-color: var(--border); }
 .plan-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.6rem; }
-.plan-name { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 800; color: #F0F0F0; }
-.plan-desc { font-size: 0.7rem; color: #636366; margin-top: 0.15rem; }
+.plan-name { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 800; color: var(--text); }
+.plan-desc { font-size: 0.7rem; color: var(--muted); margin-top: 0.15rem; }
 .plan-days-summary { display: flex; gap: 4px; margin-bottom: 0.5rem; }
-.day-pip { font-family: 'Barlow Condensed', sans-serif; font-size: 0.6rem; font-weight: 700; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border: 1px solid #3A3A3C; color: #3A3A3C; }
-.day-pip.filled { border-color: rgba(74,158,255,0.5); color: #4A9EFF; background: rgba(74,158,255,0.1); }
-.plan-assignments { font-size: 0.68rem; color: #636366; }
+.day-pip { font-family: 'Barlow Condensed', sans-serif; font-size: 0.6rem; font-weight: 700; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); color: var(--border); }
+.day-pip.filled { border-color: rgba(74,158,255,0.5); color: var(--accent); background: rgba(74,158,255,0.1); }
+.plan-assignments { font-size: 0.68rem; color: var(--muted); }
 
 /* Right col */
 .detail-col { display: flex; flex-direction: column; gap: 1rem; }
 .detail-placeholder { align-items: center; justify-content: center; min-height: 200px; display: flex; }
-.placeholder-inner { text-align: center; color: #3A3A3C; }
+.placeholder-inner { text-align: center; color: var(--border); }
 .placeholder-inner i { font-size: 1.5rem; margin-bottom: 0.5rem; }
 .placeholder-inner p { font-size: 0.82rem; }
 
@@ -490,22 +490,22 @@ onMounted(load)
 /* Week grid */
 .week-grid { display: flex; flex-direction: column; gap: 0.5rem; }
 .week-day { display: grid; grid-template-columns: 90px 1fr; align-items: center; gap: 0.75rem; }
-.week-day-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; color: #636366; }
+.week-day-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; color: var(--muted); }
 .week-day-assigned { display: flex; align-items: center; justify-content: space-between; background: rgba(74,158,255,0.08); border: 1px solid rgba(74,158,255,0.25); padding: 0.35rem 0.6rem; }
-.week-tmpl-name { font-size: 0.78rem; color: #4A9EFF; }
-.no-data { font-size: 0.82rem; color: #3A3A3C; padding: 0.75rem 0; }
+.week-tmpl-name { font-size: 0.78rem; color: var(--accent); }
+.no-data { font-size: 0.82rem; color: var(--border); padding: 0.75rem 0; }
 
 /* Session table */
 .td-name  { color: #C7C7CC; font-weight: 500; }
-.td-muted { color: #636366; font-size: 0.78rem; }
+.td-muted { color: var(--muted); font-size: 0.78rem; }
 .td-val   { color: #AEAEB2; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; }
 
 .panel-body { display: flex; flex-direction: column; gap: 1.25rem; }
 .field { display: flex; flex-direction: column; gap: 0.35rem; }
-.field-error { font-size: 0.78rem; color: #4A9EFF; }
+.field-error { font-size: 0.78rem; color: var(--accent); }
 
-.feedback-session-info { background: #1C1C1E; border: 1px solid #252528; padding: 0.875rem; }
-.fs-name { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; color: #F0F0F0; }
-.fs-meta { font-size: 0.72rem; color: #636366; margin-top: 0.2rem; }
-.fs-stats { font-size: 0.72rem; color: #636366; margin-top: 0.15rem; }
+.feedback-session-info { background: var(--bg); border: 1px solid var(--surface); padding: 0.875rem; }
+.fs-name { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; color: var(--text); }
+.fs-meta { font-size: 0.72rem; color: var(--muted); margin-top: 0.2rem; }
+.fs-stats { font-size: 0.72rem; color: var(--muted); margin-top: 0.15rem; }
 </style>

@@ -108,7 +108,7 @@ function add() {
   font-size: 0.58rem;
   font-weight: 700;
   letter-spacing: 0.12em;
-  color: #636366;
+  color: var(--muted);
   text-transform: uppercase;
 }
 
@@ -123,7 +123,7 @@ function add() {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 0.72rem;
   font-weight: 700;
-  color: #636366;
+  color: var(--muted);
   text-align: center;
 }
 
@@ -132,9 +132,9 @@ function add() {
 
 .reps-input {
   width: 100%;
-  background: #252528;
-  border: 1px solid #3A3A3C;
-  color: #F0F0F0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
   font-family: 'DM Sans', sans-serif;
   font-size: 0.85rem;
   padding: 0.42rem 0.5rem;
@@ -143,12 +143,12 @@ function add() {
 }
 .reps-input::-webkit-inner-spin-button,
 .reps-input::-webkit-outer-spin-button { -webkit-appearance: none; }
-.reps-input:focus { outline: none; border-color: #4A9EFF; }
+.reps-input:focus { outline: none; border-color: var(--accent); }
 
 .remove-btn {
   background: none;
   border: none;
-  color: #636366;
+  color: var(--muted);
   cursor: pointer;
   padding: 0.25rem;
   font-size: 0.7rem;
@@ -157,15 +157,15 @@ function add() {
   align-items: center;
   justify-content: center;
 }
-.remove-btn:hover { color: #FF6B6B; }
+.remove-btn:hover { color: var(--danger); }
 
 .add-btn {
   display: flex;
   align-items: center;
   gap: 0.35rem;
   background: none;
-  border: 1px dashed #3A3A3C;
-  color: #636366;
+  border: 1px dashed var(--border);
+  color: var(--muted);
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 0.68rem;
   font-weight: 700;
@@ -176,5 +176,5 @@ function add() {
   transition: border-color 0.15s, color 0.15s;
   width: fit-content;
 }
-.add-btn:hover { border-color: #4A9EFF; color: #4A9EFF; }
+.add-btn:hover { border-color: var(--accent); color: var(--accent); }
 </style>

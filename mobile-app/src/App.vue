@@ -46,8 +46,8 @@ onUnmounted(() => {
   position: fixed;
   top: 0; left: 0; right: 0;
   z-index: 9999;
-  background: #252528;
-  border-bottom: 1px solid #3A3A3C;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
   color: #AEAEB2;
   font-size: 0.72rem;
   font-family: 'DM Sans', sans-serif;

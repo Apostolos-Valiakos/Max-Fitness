@@ -178,7 +178,7 @@ function openDetail() {
 .sheet-close {
   background: none;
   border: none;
-  color: #636366;
+  color: var(--muted);
   cursor: pointer;
   font-size: 0.85rem;
   padding: 0.1rem;
@@ -206,12 +206,12 @@ function openDetail() {
 .chip.bp {
   color: #8e8e93;
   border-color: #3a3a3c;
-  background: #252528;
+  background: var(--surface);
 }
 .chip.eq {
-  color: #636366;
+  color: var(--muted);
   border-color: #2c2c2e;
-  background: #252528;
+  background: var(--surface);
 }
 .chip.target {
   color: #4a9eff;
@@ -228,7 +228,7 @@ function openDetail() {
 .gif-wrap {
   width: 100%;
   background: #1c1c1e;
-  border: 1px solid #252528;
+  border: 1px solid var(--surface);
   margin-bottom: 1rem;
   display: flex;
   justify-content: center;
@@ -271,7 +271,7 @@ function openDetail() {
   padding: 0.2rem 0.55rem;
   border: 1px solid #3a3a3c;
   color: #aeaeb2;
-  background: #252528;
+  background: var(--surface);
 }
 
 .steps {
@@ -317,8 +317,8 @@ function openDetail() {
   width: 100%;
   background: transparent;
   border: none;
-  border-top: 1px solid #252528;
-  color: #636366;
+  border-top: 1px solid var(--surface);
+  color: var(--muted);
   font-family: "Barlow Condensed", sans-serif;
   font-size: 0.8rem;
   font-weight: 700;

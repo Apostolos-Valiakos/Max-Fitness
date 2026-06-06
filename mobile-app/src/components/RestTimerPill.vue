@@ -37,13 +37,13 @@ const timer = useRestTimer()
   align-items: center;
   gap: 0.75rem;
 
-  background: #252528;
-  border: 1px solid #3A3A3C;
+  background: var(--surface);
+  border: 1px solid var(--border);
   padding: 0.7rem 1rem;
   cursor: pointer;
   overflow: hidden;
 
-  clip-path: polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%);
+  clip-path: var(--clip-sm);
 }
 
 /* live progress fill behind content */
@@ -59,14 +59,14 @@ const timer = useRestTimer()
 .pill-label {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em;
-  color: #636366;
+  color: var(--muted);
   flex-shrink: 0;
 }
 
 .pill-time {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 1.4rem; font-weight: 900;
-  color: #4A9EFF;
+  color: var(--accent);
   flex: 1;
   line-height: 1;
   transition: color 0.3s;
@@ -75,7 +75,7 @@ const timer = useRestTimer()
 
 .pill-skip {
   background: none; border: none;
-  color: #8E8E93; font-size: 0.85rem;
+  color: var(--sub); font-size: 0.85rem;
   cursor: pointer; padding: 0.25rem 0.5rem;
   flex-shrink: 0;
   transition: color 0.15s;

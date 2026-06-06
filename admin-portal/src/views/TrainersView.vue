@@ -193,20 +193,20 @@ async function demoteTrainer(trainer: TrainerRow) {
 .empty-state strong { color: #AEAEB2; }
 
 .trainer-block { margin-bottom: 1rem; overflow: hidden; }
-.trainer-header { display: flex; align-items: center; gap: 0.75rem; padding: 1.25rem; border-bottom: 1px solid #252528; }
+.trainer-header { display: flex; align-items: center; gap: 0.75rem; padding: 1.25rem; border-bottom: 1px solid var(--surface); }
 .trainer-avatar { width: 38px; height: 38px; background: rgba(0,136,255,0.1); border: 1px solid rgba(0,136,255,0.2); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 0.88rem; font-weight: 900; color: #0088FF; flex-shrink: 0; }
 .trainer-avatar-img { width: 38px; height: 38px; object-fit: cover; flex-shrink: 0; }
 .trainer-info  { flex: 1; }
-.trainer-name  { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 800; color: #F0F0F0; }
-.trainer-email { font-size: 0.72rem; color: #636366; }
+.trainer-name  { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 800; color: var(--text); }
+.trainer-email { font-size: 0.72rem; color: var(--muted); }
 
 .clients-section { padding: 1rem 1.25rem; }
-.clients-label   { font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.2em; color: #636366; margin-bottom: 0.75rem; }
-.no-clients      { font-size: 0.8rem; color: #3A3A3C; padding: 0.5rem 0; }
+.clients-label   { font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.2em; color: var(--muted); margin-bottom: 0.75rem; }
+.no-clients      { font-size: 0.8rem; color: var(--border); padding: 0.5rem 0; }
 .td-name  { color: #C7C7CC; font-weight: 500; }
-.td-muted { color: #636366; font-size: 0.78rem; }
+.td-muted { color: var(--muted); font-size: 0.78rem; }
 
 .panel-body { display: flex; flex-direction: column; gap: 1.25rem; }
 .field { display: flex; flex-direction: column; gap: 0.35rem; }
-.assign-error { font-size: 0.8rem; color: #4A9EFF; background: rgba(74,158,255,0.08); border: 1px solid rgba(74,158,255,0.2); padding: 0.6rem 0.75rem; display: flex; gap: 0.4rem; align-items: center; }
+.assign-error { font-size: 0.8rem; color: var(--accent); background: rgba(74,158,255,0.08); border: 1px solid rgba(74,158,255,0.2); padding: 0.6rem 0.75rem; display: flex; gap: 0.4rem; align-items: center; }
 </style>

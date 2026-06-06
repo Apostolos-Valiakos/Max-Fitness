@@ -287,21 +287,21 @@ async function handleImport(e: Event) {
 
 .filters { padding: 1rem; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
 .filter-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
-.chip { background: #252528; border: 1px solid #3A3A3C; color: #636366; font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; padding: 0.2rem 0.65rem; cursor: pointer; transition: all 0.15s; }
-.chip.active { background: rgba(74,158,255,0.1); border-color: #4A9EFF; color: #4A9EFF; }
+.chip { background: var(--surface); border: 1px solid var(--border); color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; padding: 0.2rem 0.65rem; cursor: pointer; transition: all 0.15s; }
+.chip.active { background: rgba(74,158,255,0.1); border-color: var(--accent); color: var(--accent); }
 
 .table-wrap { overflow: hidden; }
-.loading { padding: 2rem; text-align: center; color: #636366; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+.loading { padding: 2rem; text-align: center; color: var(--muted); font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
 .td-name  { color: #C7C7CC; font-weight: 500; }
-.td-muted { color: #636366; font-size: 0.78rem; }
-.td-instructions { color: #636366; font-size: 0.78rem; max-width: 200px; }
+.td-muted { color: var(--muted); font-size: 0.78rem; }
+.td-instructions { color: var(--muted); font-size: 0.78rem; max-width: 200px; }
 .td-actions { display: flex; gap: 0.35rem; }
-.chip-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; background: #252528; border: 1px solid #3A3A3C; color: #8E8E93; padding: 0.15rem 0.4rem; text-transform: uppercase; }
+.chip-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; background: var(--surface); border: 1px solid var(--border); color: var(--sub); padding: 0.15rem 0.4rem; text-transform: uppercase; }
 .chip-tag.eq { color: #AEAEB2; }
 
 .panel-body { display: flex; flex-direction: column; gap: 1.25rem; }
 .field { display: flex; flex-direction: column; gap: 0.35rem; }
 
 .modal-body { font-size: 0.85rem; color: #AEAEB2; line-height: 1.5; margin-bottom: 0.5rem; }
-.modal-body strong { color: #F0F0F0; }
+.modal-body strong { color: var(--text); }
 </style>

@@ -130,7 +130,7 @@ const dashOffset = computed(
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.3em;
-  color: #636366;
+  color: var(--muted);
 }
 .icon-btn {
   background: none;
@@ -163,7 +163,7 @@ const dashOffset = computed(
 }
 .ring-bg {
   fill: none;
-  stroke: #252528;
+  stroke: var(--surface);
   stroke-width: 8;
 }
 .ring-fill {
@@ -202,7 +202,7 @@ const dashOffset = computed(
   margin-bottom: 1rem;
 }
 .t-btn {
-  background: #252528;
+  background: var(--surface);
   border: 1px solid #3a3a3c;
   color: #aeaeb2;
   font-family: "Barlow Condensed", sans-serif;
@@ -228,8 +228,8 @@ const dashOffset = computed(
 }
 .preset-btn {
   background: none;
-  border: 1px solid #252528;
-  color: #636366;
+  border: 1px solid var(--surface);
+  color: var(--muted);
   font-size: 0.72rem;
   padding: 0.3rem 0.5rem;
   cursor: pointer;

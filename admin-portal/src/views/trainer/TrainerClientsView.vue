@@ -152,28 +152,28 @@ onMounted(async () => {
 <style scoped>
 .page-header { margin-bottom: 1.75rem; }
 
-.loading-state { text-align: center; padding: 4rem; color: #636366; }
+.loading-state { text-align: center; padding: 4rem; color: var(--muted); }
 
 .empty-state { padding: 4rem 2rem; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
-.empty-icon  { font-size: 2.5rem; color: #3A3A3C; }
-.empty-title { font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; font-weight: 700; color: #636366; letter-spacing: 0.05em; }
-.empty-sub   { font-size: 0.8rem; color: #3A3A3C; }
+.empty-icon  { font-size: 2.5rem; color: var(--border); }
+.empty-title { font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--muted); letter-spacing: 0.05em; }
+.empty-sub   { font-size: 0.8rem; color: var(--border); }
 
 .client-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
 
 .client-card { padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
 .client-top  { display: flex; align-items: flex-start; gap: 0.875rem; }
-.client-avatar { width: 44px; height: 44px; background: #4A9EFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; font-weight: 900; color: #fff; flex-shrink: 0; }
+.client-avatar { width: 44px; height: 44px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; font-weight: 900; color: #fff; flex-shrink: 0; }
 .client-avatar-img { width: 44px; height: 44px; object-fit: cover; flex-shrink: 0; }
 .client-info { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
 .client-name  { font-size: 0.92rem; font-weight: 600; color: #C7C7CC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.client-email { font-size: 0.72rem; color: #636366; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.client-email { font-size: 0.72rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.client-stats { display: flex; gap: 1.5rem; padding: 0.75rem 0; border-top: 1px solid #252528; border-bottom: 1px solid #252528; }
+.client-stats { display: flex; gap: 1.5rem; padding: 0.75rem 0; border-top: 1px solid var(--surface); border-bottom: 1px solid var(--surface); }
 .stat { display: flex; flex-direction: column; gap: 0.15rem; }
 .stat-val   { font-family: 'Barlow Condensed', sans-serif; font-size: 1.4rem; font-weight: 900; color: #AEAEB2; line-height: 1; }
-.stat-val.orange { color: #4A9EFF; }
-.stat-label { font-size: 0.62rem; color: #636366; text-transform: uppercase; letter-spacing: 0.08em; }
+.stat-val.orange { color: var(--accent); }
+.stat-label { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
 
 .client-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; padding-top: 0.25rem; }
 .action-btn     { justify-content: center; width: 100%; }

@@ -164,67 +164,67 @@ onMounted(async () => {
 
 <style scoped>
 .view { padding: 0 0 100px; }
-.view-header { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border-bottom: 1px solid #252528; }
+.view-header { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border-bottom: 1px solid var(--surface); }
 .back-btn { background: none; border: none; color: #AEAEB2; cursor: pointer; font-size: 1.1rem; }
-.view-title { flex: 1; font-family: 'Barlow Condensed', sans-serif; font-size: 1.4rem; font-weight: 900; color: #F0F0F0; letter-spacing: 0.05em; }
-.add-plan-btn { background: #4A9EFF; border: none; color: #fff; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; }
+.view-title { flex: 1; font-family: 'Barlow Condensed', sans-serif; font-size: 1.4rem; font-weight: 900; color: var(--text); letter-spacing: 0.05em; }
+.add-plan-btn { background: var(--accent); border: none; color: #fff; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; }
 
-.empty-state { text-align: center; padding: 4rem 2rem; color: #8E8E93; }
-.empty-icon  { font-size: 2.5rem; color: #636366; display: block; margin-bottom: 1rem; }
-.cta-btn { margin-top: 1rem; background: #4A9EFF; border: none; color: #fff; padding: 0.6rem 1.25rem; font-family: 'Barlow Condensed', sans-serif; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.08em; cursor: pointer; }
+.empty-state { text-align: center; padding: 4rem 2rem; color: var(--sub); }
+.empty-icon  { font-size: 2.5rem; color: var(--muted); display: block; margin-bottom: 1rem; }
+.cta-btn { margin-top: 1rem; background: var(--accent); border: none; color: #fff; padding: 0.6rem 1.25rem; font-family: 'Barlow Condensed', sans-serif; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.08em; cursor: pointer; }
 
 .plan-list { display: flex; flex-direction: column; gap: 1px; padding: 0.75rem 0; }
-.plan-card { background: #1C1C1E; border: 1px solid #252528; margin: 0 0.75rem 0.75rem; }
+.plan-card { background: var(--bg); border: 1px solid var(--surface); margin: 0 0.75rem 0.75rem; }
 
-.plan-header { display: flex; align-items: flex-start; padding: 0.875rem; border-bottom: 1px solid #252528; }
+.plan-header { display: flex; align-items: flex-start; padding: 0.875rem; border-bottom: 1px solid var(--surface); }
 .plan-info { flex: 1; }
-.plan-name { font-family: 'Barlow Condensed', sans-serif; font-size: 1.05rem; font-weight: 800; color: #F0F0F0; }
-.plan-desc { font-size: 0.72rem; color: #636366; margin-top: 0.2rem; }
-.plan-delete { background: none; border: none; color: #3A3A3C; cursor: pointer; padding: 0.25rem; font-size: 0.9rem; }
-.plan-delete:hover { color: #4A9EFF; }
+.plan-name { font-family: 'Barlow Condensed', sans-serif; font-size: 1.05rem; font-weight: 800; color: var(--text); }
+.plan-desc { font-size: 0.72rem; color: var(--muted); margin-top: 0.2rem; }
+.plan-delete { background: none; border: none; color: var(--border); cursor: pointer; padding: 0.25rem; font-size: 0.9rem; }
+.plan-delete:hover { color: var(--accent); }
 
 .weekly-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; padding: 0.75rem; }
 .day-slot { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.day-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.58rem; font-weight: 700; color: #8E8E93; letter-spacing: 0.05em; text-align: center; }
+.day-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.58rem; font-weight: 700; color: var(--sub); letter-spacing: 0.05em; text-align: center; }
 
 .day-add {
-  width: 100%; aspect-ratio: 1; border: 1px dashed #3A3A3C; background: #1C1C1E;
-  color: #8E8E93; display: flex; align-items: center; justify-content: center;
+  width: 100%; aspect-ratio: 1; border: 1px dashed var(--border); background: var(--bg);
+  color: var(--sub); display: flex; align-items: center; justify-content: center;
   cursor: pointer; font-size: 0.7rem; transition: border-color 0.15s, color 0.15s;
 }
-.day-add:hover { border-color: #4A9EFF; color: #4A9EFF; }
+.day-add:hover { border-color: var(--accent); color: var(--accent); }
 
 .day-assigned {
   width: 100%; min-height: 36px; background: rgba(74,158,255,0.12); border: 1px solid rgba(74,158,255,0.3);
   padding: 3px; display: flex; flex-direction: column; align-items: center; justify-content: center;
   cursor: pointer; position: relative;
 }
-.day-tmpl-name { font-size: 0.5rem; color: #4A9EFF; text-align: center; line-height: 1.2; word-break: break-word; }
+.day-tmpl-name { font-size: 0.5rem; color: var(--accent); text-align: center; line-height: 1.2; word-break: break-word; }
 .day-clear {
   background: none; border: none; color: rgba(74,158,255,0.5); cursor: pointer;
   font-size: 0.55rem; padding: 0; margin-top: 2px;
 }
-.day-clear:hover { color: #4A9EFF; }
+.day-clear:hover { color: var(--accent); }
 
 /* Modal shared */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: flex; align-items: flex-end; }
-.modal { width: 100%; background: #1C1C1E; border-top: 1px solid #3A3A3C; max-height: 80vh; overflow-y: auto; }
-.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem; border-bottom: 1px solid #252528; }
-.modal-title { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 800; color: #F0F0F0; letter-spacing: 0.08em; }
-.modal-close { background: none; border: none; color: #636366; cursor: pointer; }
+.modal { width: 100%; background: var(--bg); border-top: 1px solid var(--border); max-height: 80vh; overflow-y: auto; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem; border-bottom: 1px solid var(--surface); }
+.modal-title { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 800; color: var(--text); letter-spacing: 0.08em; }
+.modal-close { background: none; border: none; color: var(--muted); cursor: pointer; }
 .modal-body { padding: 1rem; display: flex; flex-direction: column; gap: 0.875rem; }
-.modal-footer { display: flex; justify-content: flex-end; gap: 0.5rem; padding: 0.75rem 1rem; border-top: 1px solid #252528; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 0.5rem; padding: 0.75rem 1rem; border-top: 1px solid var(--surface); }
 
 .field { display: flex; flex-direction: column; gap: 0.3rem; }
-.field-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; font-weight: 700; color: #636366; letter-spacing: 0.12em; }
-.field-input { background: #1C1C1E; border: 1px solid #3A3A3C; color: #EBEBEB; padding: 0.6rem 0.75rem; font-size: 0.875rem; font-family: 'DM Sans', sans-serif; }
-.form-error { font-size: 0.75rem; color: #4A9EFF; }
+.field-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; font-weight: 700; color: var(--muted); letter-spacing: 0.12em; }
+.field-input { background: var(--bg); border: 1px solid var(--border); color: #EBEBEB; padding: 0.6rem 0.75rem; font-size: 0.875rem; font-family: 'DM Sans', sans-serif; }
+.form-error { font-size: 0.75rem; color: var(--accent); }
 
-.btn-cancel { background: none; border: 1px solid #3A3A3C; color: #636366; padding: 0.5rem 0.875rem; font-family: 'Barlow Condensed', sans-serif; font-size: 0.8rem; cursor: pointer; }
-.btn-create { background: #4A9EFF; border: none; color: #fff; padding: 0.5rem 1rem; font-family: 'Barlow Condensed', sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; cursor: pointer; }
+.btn-cancel { background: none; border: 1px solid var(--border); color: var(--muted); padding: 0.5rem 0.875rem; font-family: 'Barlow Condensed', sans-serif; font-size: 0.8rem; cursor: pointer; }
+.btn-create { background: var(--accent); border: none; color: #fff; padding: 0.5rem 1rem; font-family: 'Barlow Condensed', sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; cursor: pointer; }
 .btn-create:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .picker-list { max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; }
-.picker-row { padding: 0.875rem; border-bottom: 1px solid #252528; cursor: pointer; color: #EBEBEB; font-size: 0.9rem; }
-.picker-row:hover { background: #252528; color: #4A9EFF; }
+.picker-row { padding: 0.875rem; border-bottom: 1px solid var(--surface); cursor: pointer; color: #EBEBEB; font-size: 0.9rem; }
+.picker-row:hover { background: var(--surface); color: var(--accent); }
 </style>

@@ -74,18 +74,18 @@ function select(s: number) {
 .gap-line {
   flex: 1;
   height: 1px;
-  background: #252528;
+  background: var(--surface);
 }
 .gap-time {
   font-size: 0.6rem;
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 700;
-  color: #636366;
+  color: var(--muted);
   letter-spacing: 0.1em;
   padding: 0 0.65rem;
   transition: color 0.15s;
 }
-.rest-gap:active .gap-time { color: #4A9EFF; }
+.rest-gap:active .gap-time { color: var(--accent); }
 
 .preset-row {
   display: flex;
@@ -99,8 +99,8 @@ function select(s: number) {
 .preset-row::-webkit-scrollbar { display: none; }
 
 .preset-btn {
-  background: #252528;
-  border: 1px solid #3A3A3C;
+  background: var(--surface);
+  border: 1px solid var(--border);
   color: #AEAEB2;
   font-size: 0.65rem;
   font-family: 'Barlow Condensed', sans-serif;
@@ -112,13 +112,13 @@ function select(s: number) {
   flex-shrink: 0;
   transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
-.preset-btn.active  { border-color: #4A9EFF; color: #4A9EFF; }
+.preset-btn.active  { border-color: var(--accent); color: var(--accent); }
 .preset-btn:active  { background: rgba(74,158,255,0.08); }
 
 .preset-close {
   background: none;
   border: none;
-  color: #636366;
+  color: var(--muted);
   font-size: 0.65rem;
   font-family: 'DM Sans', sans-serif;
   cursor: pointer;
@@ -127,5 +127,5 @@ function select(s: number) {
   flex-shrink: 0;
   transition: color 0.15s;
 }
-.preset-close:active { color: #4A9EFF; }
+.preset-close:active { color: var(--accent); }
 </style>

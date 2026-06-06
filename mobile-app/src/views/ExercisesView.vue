@@ -113,20 +113,20 @@ async function handleCreate() {
 </script>
 
 <style scoped>
-.view { padding: 1.5rem 1rem 0; color: #F0F0F0; font-family: 'DM Sans',sans-serif; background: #1C1C1E; min-height: 100vh; }
-.add-btn { background: #4A9EFF; border: none; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; clip-path: polygon(0 0,100% 0,100% 75%,85% 100%,0 100%); }
+.view { padding: 1.5rem 1rem 0; color: var(--text); font-family: 'DM Sans',sans-serif; background: var(--bg); min-height: 100vh; }
+.add-btn { background: var(--accent); border: none; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; clip-path: var(--clip-btn); }
 .results { display: flex; flex-direction: column; gap: 1px; }
-.alpha-header { font-family: 'Barlow Condensed',sans-serif; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.2em; color: #8E8E93; padding: 0.6rem 0 0.25rem; border-bottom: 1px solid #252528; margin-bottom: 1px; }
-.empty { text-align: center; color: #8E8E93; padding: 2rem; font-size: 0.85rem; }
+.alpha-header { font-family: 'Barlow Condensed',sans-serif; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.2em; color: var(--sub); padding: 0.6rem 0 0.25rem; border-bottom: 1px solid var(--surface); margin-bottom: 1px; }
+.empty { text-align: center; color: var(--sub); padding: 2rem; font-size: 0.85rem; }
 
 .create-form { display: flex; flex-direction: column; gap: 1rem; }
 .field { display: flex; flex-direction: column; gap: 0.35rem; }
-.field label { font-family: 'Barlow Condensed',sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.2em; color: #636366; }
-.mf-select { width: 100%; background: #252528; border: 1px solid #3A3A3C; color: #F0F0F0; font-family: 'DM Sans',sans-serif; font-size: 0.9rem; padding: 0.65rem 0.75rem; cursor: pointer; }
-.mf-select:focus { outline: none; border-color: #4A9EFF; }
+.field label { font-family: 'Barlow Condensed',sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.2em; color: var(--muted); }
+.mf-select { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Sans',sans-serif; font-size: 0.9rem; padding: 0.65rem 0.75rem; cursor: pointer; }
+.mf-select:focus { outline: none; border-color: var(--accent); }
 .dialog-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
 .dialog-btn { flex: 1; border: none; font-family: 'Barlow Condensed',sans-serif; font-weight: 700; letter-spacing: 0.1em; font-size: 0.9rem; padding: 0.75rem; cursor: pointer; }
-.dialog-btn.cancel { background: #252528; color: #AEAEB2; }
-.dialog-btn.finish { background: #4A9EFF; color: #fff; clip-path: polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%); }
+.dialog-btn.cancel { background: var(--surface); color: #AEAEB2; }
+.dialog-btn.finish { background: var(--accent); color: #fff; clip-path: var(--clip-sm); }
 .dialog-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 </style>

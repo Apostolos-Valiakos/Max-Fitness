@@ -39,19 +39,19 @@ const duration = computed(() => {
 
 <style scoped>
 .session-card {
-  background: #1C1C1E; border: 1px solid #252528; padding: 1.25rem;
+  background: var(--bg); border: 1px solid var(--surface); padding: 1.25rem;
   cursor: pointer; transition: border-color 0.2s;
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+  clip-path: var(--clip-lg);
 }
-.session-card:active { border-color: #4A9EFF; }
+.session-card:active { border-color: var(--accent); }
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
-.card-date { font-size: 0.72rem; color: #8E8E93; text-transform: uppercase; letter-spacing: 0.1em; }
-.card-duration { font-size: 0.72rem; color: #8E8E93; }
-.card-name { font-family: 'Barlow Condensed', sans-serif; font-size: 1.2rem; font-weight: 700; color: #F0F0F0; margin-bottom: 0.6rem; }
+.card-date { font-size: 0.72rem; color: var(--sub); text-transform: uppercase; letter-spacing: 0.1em; }
+.card-duration { font-size: 0.72rem; color: var(--sub); }
+.card-name { font-family: 'Barlow Condensed', sans-serif; font-size: 1.2rem; font-weight: 700; color: var(--text); margin-bottom: 0.6rem; }
 .card-exercises { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.75rem; }
-.exercise-chip { background: #252528; border: 1px solid #3A3A3C; padding: 0.2rem 0.5rem; font-size: 0.68rem; color: #AEAEB2; }
-.exercise-chip.more { color: #4A9EFF; border-color: #4A9EFF; }
+.exercise-chip { background: var(--surface); border: 1px solid var(--border); padding: 0.2rem 0.5rem; font-size: 0.68rem; color: #AEAEB2; }
+.exercise-chip.more { color: var(--accent); border-color: var(--accent); }
 .card-footer { display: flex; justify-content: space-between; align-items: center; }
-.card-vol { font-size: 0.72rem; color: #636366; }
-.card-arrow { color: #8E8E93; font-size: 0.75rem; }
+.card-vol { font-size: 0.72rem; color: var(--muted); }
+.card-arrow { color: var(--sub); font-size: 0.75rem; }
 </style>

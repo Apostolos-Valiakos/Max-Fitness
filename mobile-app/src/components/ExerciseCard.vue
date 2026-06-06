@@ -39,7 +39,7 @@ defineEmits<{ click: []; add: [] }>();
   align-items: center;
   gap: 0.9rem;
   background: #1c1c1e;
-  border: 1px solid #252528;
+  border: 1px solid var(--surface);
   padding: 0.9rem 1rem;
   cursor: pointer;
   transition: border-color 0.2s;
@@ -80,7 +80,7 @@ defineEmits<{ click: []; add: [] }>();
   flex-wrap: wrap;
 }
 .ex-chip {
-  background: #252528;
+  background: var(--surface);
   border: 1px solid #3a3a3c;
   padding: 0.15rem 0.4rem;
   font-size: 0.62rem;
@@ -111,8 +111,8 @@ defineEmits<{ click: []; add: [] }>();
   font-family: "Barlow Condensed", sans-serif;
   font-size: 0.7rem;
   font-weight: 700;
-  color: #636366;
-  background: #252528;
+  color: var(--muted);
+  background: var(--surface);
   border: 1px solid #3a3a3c;
   padding: 0.1rem 0.4rem;
   min-width: 1.4rem;

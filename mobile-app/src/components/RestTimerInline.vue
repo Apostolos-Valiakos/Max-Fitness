@@ -43,7 +43,7 @@ const timer = useRestTimer();
 .bar-track {
   width: 100%;
   height: 3px;
-  background: #252528;
+  background: var(--surface);
 }
 .bar-fill {
   height: 100%;
@@ -72,7 +72,7 @@ const timer = useRestTimer();
 .rest-label {
   font-size: 0.5rem;
   letter-spacing: 0.12em;
-  color: #636366;
+  color: var(--muted);
   font-family: "Barlow Condensed", sans-serif;
   font-weight: 700;
   text-transform: uppercase;
@@ -90,7 +90,7 @@ const timer = useRestTimer();
 }
 
 .adj-btn {
-  background: #252528;
+  background: var(--surface);
   border: 1px solid #3a3a3c;
   color: #aeaeb2;
   font-size: 0.7rem;
@@ -107,7 +107,7 @@ const timer = useRestTimer();
 .skip-btn {
   background: none;
   border: none;
-  color: #636366;
+  color: var(--muted);
   font-size: 0.7rem;
   font-family: "DM Sans", sans-serif;
   cursor: pointer;

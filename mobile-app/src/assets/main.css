@@ -1,5 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=DM+Sans:wght@300;400;500&display=swap');
 
+:root {
+  --bg:      #1C1C1E;
+  --surface: #252528;
+  --border:  #3A3A3C;
+  --accent:  #4A9EFF;
+  --text:    #F0F0F0;
+  --muted:   #636366;
+  --sub:     #8E8E93;
+  --gold:    #FFB400;
+  --danger:  #FF6B6B;
+
+  --clip-sm:  polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%);
+  --clip-md:  polygon(0 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%);
+  --clip-lg:  polygon(0 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%);
+  --clip-btn: polygon(0 0,100% 0,100% 75%,85% 100%,0 100%);
+}
+
 /* Global reset */
 *,
 *::before,
@@ -14,7 +31,7 @@ body,
 #app {
   height: 100%;
   width: 100%;
-  background: #1C1C1E;
+  background: var(--bg);
   overscroll-behavior: none;
 }
 
@@ -40,13 +57,13 @@ input[type="number"] {
   height: 3px;
 }
 ::-webkit-scrollbar-track {
-  background: #1C1C1E;
+  background: var(--bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: #3A3A3C;
+  background: var(--border);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #4A9EFF;
+  background: var(--accent);
 }
 /* ── PrimeVue global rules ────────────────────────────────────────────────
    Supplement the token system for things that can't be design tokens:
@@ -63,7 +80,7 @@ input[type="number"] {
   text-transform: uppercase;
 }
 
-.p-dialog .p-dialog-header  { border-bottom: 1px solid #252528; padding: 1rem 1.25rem; }
+.p-dialog .p-dialog-header  { border-bottom: 1px solid var(--surface); padding: 1rem 1.25rem; }
 .p-dialog .p-dialog-content { padding: 1.25rem; }
 .p-dialog .p-dialog-footer  { padding: 0 1.25rem 1.25rem; }
 
@@ -71,6 +88,6 @@ input[type="number"] {
 .mf-input { width: 100%; }
 
 /* ── Shared layout helpers ────────────────────────────────────────────────*/
-.section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; color: #636366; margin-bottom: 0.75rem; }
-.tab-loading   { text-align: center; padding: 3rem; color: #8E8E93; }
-.tab-empty     { text-align: center; padding: 2rem; color: #8E8E93; font-size: 0.85rem; }
+.section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; color: var(--muted); margin-bottom: 0.75rem; }
+.tab-loading   { text-align: center; padding: 3rem; color: var(--sub); }
+.tab-empty     { text-align: center; padding: 2rem; color: var(--sub); font-size: 0.85rem; }

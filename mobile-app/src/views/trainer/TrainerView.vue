@@ -68,37 +68,37 @@ onMounted(() => trainer.fetchClients())
 }
 .view-title {
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 1.5rem; font-weight: 900; color: #F0F0F0; letter-spacing: 0.05em;
+  font-size: 1.5rem; font-weight: 900; color: var(--text); letter-spacing: 0.05em;
 }
 .plans-btn {
   display: flex; align-items: center; gap: 0.35rem;
-  background: #252528; border: 1px solid #3A3A3C; color: #AEAEB2;
+  background: var(--surface); border: 1px solid var(--border); color: #AEAEB2;
   padding: 0.4rem 0.75rem; font-size: 0.68rem; font-weight: 700;
   letter-spacing: 0.1em; cursor: pointer; font-family: 'Barlow Condensed', sans-serif;
 }
-.plans-btn:hover { color: #4A9EFF; border-color: #4A9EFF; }
+.plans-btn:hover { color: var(--accent); border-color: var(--accent); }
 
-.loading-state { text-align: center; padding: 3rem; color: #8E8E93; }
-.empty-state   { text-align: center; padding: 4rem 2rem; color: #8E8E93; }
-.empty-icon    { font-size: 2.5rem; color: #636366; display: block; margin-bottom: 1rem; }
-.empty-sub     { font-size: 0.75rem; margin-top: 0.5rem; color: #8E8E93; }
+.loading-state { text-align: center; padding: 3rem; color: var(--sub); }
+.empty-state   { text-align: center; padding: 4rem 2rem; color: var(--sub); }
+.empty-icon    { font-size: 2.5rem; color: var(--muted); display: block; margin-bottom: 1rem; }
+.empty-sub     { font-size: 0.75rem; margin-top: 0.5rem; color: var(--sub); }
 
 .client-list { display: flex; flex-direction: column; gap: 1px; padding: 0.5rem 0; }
 
 .client-card {
   display: flex; align-items: center; gap: 0.875rem;
-  padding: 0.875rem 1rem; background: #1C1C1E;
+  padding: 0.875rem 1rem; background: var(--bg);
   cursor: pointer; transition: background 0.15s;
 }
-.client-card:hover { background: #252528; }
-.client-card:active { background: #252528; }
+.client-card:hover { background: var(--surface); }
+.client-card:active { background: var(--surface); }
 
 .client-avatar {
   width: 42px; height: 42px; border-radius: 0; flex-shrink: 0;
   background: rgba(74,158,255,0.1); border: 1px solid rgba(74,158,255,0.2);
   display: flex; align-items: center; justify-content: center;
   font-family: 'Barlow Condensed', sans-serif; font-size: 1rem;
-  font-weight: 900; color: #4A9EFF;
+  font-weight: 900; color: var(--accent);
 }
 .client-body { flex: 1; min-width: 0; }
 .client-name { font-size: 0.92rem; font-weight: 600; color: #EBEBEB; }
@@ -108,10 +108,10 @@ onMounted(() => trainer.fetchClients())
   font-weight: 700; letter-spacing: 0.12em; padding: 0.1rem 0.35rem;
   border: 1px solid;
 }
-.tier-chip.free   { color: #636366; border-color: #3A3A3C; background: #252528; }
+.tier-chip.free   { color: var(--muted); border-color: var(--border); background: var(--surface); }
 .tier-chip.paid   { color: #4DA6FF; border-color: rgba(77,166,255,0.3); background: rgba(77,166,255,0.08); }
 .tier-chip.ultra  { color: #FFD700; border-color: rgba(255,215,0,0.3); background: rgba(255,215,0,0.08); }
-.last-session  { font-size: 0.7rem; color: #636366; }
-.no-session    { color: #8E8E93; }
-.chevron       { color: #8E8E93; font-size: 0.8rem; }
+.last-session  { font-size: 0.7rem; color: var(--muted); }
+.no-session    { color: var(--sub); }
+.chevron       { color: var(--sub); font-size: 0.8rem; }
 </style>

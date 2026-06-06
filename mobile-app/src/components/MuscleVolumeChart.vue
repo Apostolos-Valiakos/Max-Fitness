@@ -85,9 +85,9 @@ watch(days, load, { immediate: true });
   margin-bottom: 0.5rem;
 }
 .window-btn {
-  background: #252528;
+  background: var(--surface);
   border: 1px solid #3a3a3c;
-  color: #636366;
+  color: var(--muted);
   font-family: "Barlow Condensed", sans-serif;
   font-size: 0.72rem;
   font-weight: 700;

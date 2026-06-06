@@ -673,22 +673,22 @@ onMounted(async () => {
 
 <style scoped>
 /* Tab bar */
-.tab-bar { display: flex; gap: 0; margin-bottom: 1.75rem; border-bottom: 1px solid #252528; }
+.tab-bar { display: flex; gap: 0; margin-bottom: 1.75rem; border-bottom: 1px solid var(--surface); }
 .tab-btn {
   background: none; border: none; border-bottom: 2px solid transparent;
   font-family: 'Barlow Condensed', sans-serif; font-size: 0.78rem; font-weight: 700;
-  letter-spacing: 0.15em; color: #636366; padding: 0.6rem 1rem; cursor: pointer;
+  letter-spacing: 0.15em; color: var(--muted); padding: 0.6rem 1rem; cursor: pointer;
   transition: color 0.15s, border-color 0.15s; margin-bottom: -1px;
 }
 .tab-btn:hover  { color: #AEAEB2; }
-.tab-btn.active { color: #4A9EFF; border-bottom-color: #4A9EFF; }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 
 /* KPIs */
 .kpi-row  { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
 .kpi-card { padding: 1.25rem; }
-.kpi-val  { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 900; color: #F0F0F0; line-height: 1; }
+.kpi-val  { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 900; color: var(--text); line-height: 1; }
 .kpi-unit { font-size: 1rem; margin-left: 0.2rem; }
-.kpi-label{ font-size: 0.67rem; color: #636366; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.35rem; }
+.kpi-label{ font-size: 0.67rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.35rem; }
 
 /* Charts */
 .charts-row  { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
@@ -699,23 +699,23 @@ onMounted(async () => {
 /* Tables */
 .table-panel { padding: 1.25rem; }
 .data-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 0.75rem; }
-.data-table th { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; color: #636366; padding: 0 0.5rem 0.6rem; text-align: left; border-bottom: 1px solid #252528; }
-.data-table td { padding: 0.55rem 0.5rem; border-bottom: 1px solid #1C1C1E; vertical-align: middle; }
+.data-table th { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; color: var(--muted); padding: 0 0.5rem 0.6rem; text-align: left; border-bottom: 1px solid var(--surface); }
+.data-table td { padding: 0.55rem 0.5rem; border-bottom: 1px solid var(--bg); vertical-align: middle; }
 
-.section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; color: #636366; }
-.td-rank  { color: #636366; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; }
+.section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; color: var(--muted); }
+.td-rank  { color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; }
 .td-name  { color: #C7C7CC; font-weight: 500; }
-.td-muted { color: #636366; font-size: 0.78rem; }
+.td-muted { color: var(--muted); font-size: 0.78rem; }
 .td-val   { color: #AEAEB2; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; }
-.td-empty { color: #3A3A3C; font-size: 0.8rem; text-align: center; padding: 1.5rem; }
+.td-empty { color: var(--border); font-size: 0.8rem; text-align: center; padding: 1.5rem; }
 
-.orange { color: #4A9EFF; }
+.orange { color: var(--accent); }
 .green  { color: #34C759; }
 
-.chip-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; background: #252528; border: 1px solid #3A3A3C; color: #8E8E93; padding: 0.15rem 0.4rem; text-transform: uppercase; }
+.chip-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; background: var(--surface); border: 1px solid var(--border); color: var(--sub); padding: 0.15rem 0.4rem; text-transform: uppercase; }
 
 .badge { font-family: 'Barlow Condensed', sans-serif; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em; padding: 0.1rem 0.4rem; border: 1px solid; }
-.badge.free  { color: #636366; border-color: #3A3A3C; }
+.badge.free  { color: var(--muted); border-color: var(--border); }
 .badge.paid  { color: #4DA6FF; border-color: rgba(77,166,255,0.4); background: rgba(77,166,255,0.08); }
 .badge.ultra { color: #FFD700; border-color: rgba(255,215,0,0.4); background: rgba(255,215,0,0.08); }
 </style>

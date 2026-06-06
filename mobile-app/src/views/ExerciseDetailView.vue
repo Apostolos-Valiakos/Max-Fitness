@@ -196,75 +196,75 @@ function addToWorkout() {
 </script>
 
 <style scoped>
-.view { color: #F0F0F0; font-family: 'DM Sans',sans-serif; background: #1C1C1E; min-height: 100vh; padding-bottom: 5rem; }
+.view { color: var(--text); font-family: 'DM Sans',sans-serif; background: var(--bg); min-height: 100vh; padding-bottom: 5rem; }
 
 .view-header { display: flex; align-items: flex-start; gap: 0.75rem; padding: 1.25rem 1rem 0.75rem; }
-.back-btn { background: none; border: none; color: #8E8E93; cursor: pointer; font-size: 1rem; padding-top: 0.25rem; flex-shrink: 0; }
+.back-btn { background: none; border: none; color: var(--sub); cursor: pointer; font-size: 1rem; padding-top: 0.25rem; flex-shrink: 0; }
 .header-body { flex: 1; min-width: 0; }
-.ex-name { font-family: 'Barlow Condensed',sans-serif; font-size: 1.6rem; font-weight: 900; color: #F0F0F0; line-height: 1; margin-bottom: 0.4rem; text-transform: uppercase; }
+.ex-name { font-family: 'Barlow Condensed',sans-serif; font-size: 1.6rem; font-weight: 900; color: var(--text); line-height: 1; margin-bottom: 0.4rem; text-transform: uppercase; }
 .ex-chips { display: flex; gap: 0.3rem; flex-wrap: wrap; }
-.chip { background: #252528; border: 1px solid #3A3A3C; padding: 0.2rem 0.5rem; font-family: 'Barlow Condensed',sans-serif; font-size: 0.65rem; font-weight: 700; color: #8E8E93; text-transform: capitalize; letter-spacing: 0.05em; }
-.chip.target { color: #4A9EFF; border-color: rgba(74,158,255,0.3); background: rgba(74,158,255,0.06); }
-.chip.custom { color: #FFB400; border-color: rgba(255,180,0,0.3); }
+.chip { background: var(--surface); border: 1px solid var(--border); padding: 0.2rem 0.5rem; font-family: 'Barlow Condensed',sans-serif; font-size: 0.65rem; font-weight: 700; color: var(--sub); text-transform: capitalize; letter-spacing: 0.05em; }
+.chip.target { color: var(--accent); border-color: rgba(74,158,255,0.3); background: rgba(74,158,255,0.06); }
+.chip.custom { color: var(--gold); border-color: rgba(255,180,0,0.3); }
 
 /* Tabs */
-.tab-nav { display: flex; border-bottom: 1px solid #252528; }
+.tab-nav { display: flex; border-bottom: 1px solid var(--surface); }
 .tab-btn {
   flex: 1; background: none; border: none; border-bottom: 2px solid transparent;
-  color: #636366; font-family: 'Barlow Condensed',sans-serif; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em;
+  color: var(--muted); font-family: 'Barlow Condensed',sans-serif; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em;
   padding: 0.65rem 0; cursor: pointer; transition: color 0.15s, border-color 0.15s; margin-bottom: -1px;
 }
-.tab-btn.active { color: #4A9EFF; border-bottom-color: #4A9EFF; }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 
 .tab-content { padding: 1.25rem 1rem 0; }
 
 /* About */
-.gif-wrap { width: 100%; background: #1C1C1E; border: 1px solid #252528; display: flex; justify-content: center; margin-bottom: 1.25rem; overflow: hidden; }
+.gif-wrap { width: 100%; background: var(--bg); border: 1px solid var(--surface); display: flex; justify-content: center; margin-bottom: 1.25rem; overflow: hidden; }
 .ex-gif { max-height: 280px; width: auto; max-width: 100%; object-fit: contain; display: block; }
 
 .muscle-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; }
-.muscle-chip { font-family: 'Barlow Condensed',sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: capitalize; padding: 0.2rem 0.55rem; border: 1px solid #3A3A3C; color: #AEAEB2; background: #252528; }
+.muscle-chip { font-family: 'Barlow Condensed',sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: capitalize; padding: 0.2rem 0.55rem; border: 1px solid var(--border); color: #AEAEB2; background: var(--surface); }
 
 .pr-block { background: rgba(255,180,0,0.05); border: 1px solid rgba(255,180,0,0.2); padding: 1.25rem; margin-bottom: 1.5rem; }
-.pr-label { font-family: 'Barlow Condensed',sans-serif; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.25em; color: #FFB400; margin-bottom: 0.5rem; }
-.pr-value { font-family: 'Barlow Condensed',sans-serif; font-size: 2rem; font-weight: 900; color: #FFB400; line-height: 1; }
+.pr-label { font-family: 'Barlow Condensed',sans-serif; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.25em; color: var(--gold); margin-bottom: 0.5rem; }
+.pr-value { font-family: 'Barlow Condensed',sans-serif; font-size: 2rem; font-weight: 900; color: var(--gold); line-height: 1; }
 .pr-e1rm { font-size: 0.8rem; color: #AEAEB2; margin-top: 0.3rem; }
-.pr-date { font-size: 0.7rem; color: #636366; margin-top: 0.1rem; }
+.pr-date { font-size: 0.7rem; color: var(--muted); margin-top: 0.1rem; }
 
 .section { margin-bottom: 1.5rem; }
 
 .steps { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem; }
 .step { display: flex; align-items: flex-start; gap: 0.65rem; font-size: 0.84rem; color: #AEAEB2; line-height: 1.55; }
-.step-num { font-family: 'Barlow Condensed',sans-serif; font-size: 1.1rem; font-weight: 900; color: #4A9EFF; min-width: 1.4rem; flex-shrink: 0; line-height: 1.3; }
+.step-num { font-family: 'Barlow Condensed',sans-serif; font-size: 1.1rem; font-weight: 900; color: var(--accent); min-width: 1.4rem; flex-shrink: 0; line-height: 1.3; }
 
-.sticky-ta { width: 100%; box-sizing: border-box; background: #1C1C1E; border: 1px solid #3A3A3C; border-left: 2px solid #FFB400; color: #C8900A; font-family: 'DM Sans',sans-serif; font-size: 0.82rem; padding: 0.6rem 0.75rem; resize: none; }
+.sticky-ta { width: 100%; box-sizing: border-box; background: var(--bg); border: 1px solid var(--border); border-left: 2px solid var(--gold); color: #C8900A; font-family: 'DM Sans',sans-serif; font-size: 0.82rem; padding: 0.6rem 0.75rem; resize: none; }
 .sticky-ta::placeholder { color: #3A3A00; }
-.sticky-ta:focus { outline: none; border-color: #FFB400; color: #F0F0F0; }
-.sticky-readonly { background: rgba(255,180,0,0.05); border-left: 2px solid #FFB400; color: #C8900A; font-size: 0.82rem; padding: 0.5rem 0.75rem; margin: 0; line-height: 1.5; }
+.sticky-ta:focus { outline: none; border-color: var(--gold); color: var(--text); }
+.sticky-readonly { background: rgba(255,180,0,0.05); border-left: 2px solid var(--gold); color: #C8900A; font-size: 0.82rem; padding: 0.5rem 0.75rem; margin: 0; line-height: 1.5; }
 
 .rest-presets { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-.rest-preset { background: #252528; border: 1px solid #3A3A3C; color: #8E8E93; font-family: 'Barlow Condensed',sans-serif; font-size: 0.82rem; font-weight: 700; padding: 0.35rem 0.7rem; cursor: pointer; letter-spacing: 0.05em; transition: border-color 0.15s, color 0.15s; }
-.rest-preset.active { border-color: #4A9EFF; color: #4A9EFF; }
+.rest-preset { background: var(--surface); border: 1px solid var(--border); color: var(--sub); font-family: 'Barlow Condensed',sans-serif; font-size: 0.82rem; font-weight: 700; padding: 0.35rem 0.7rem; cursor: pointer; letter-spacing: 0.05em; transition: border-color 0.15s, color 0.15s; }
+.rest-preset.active { border-color: var(--accent); color: var(--accent); }
 
 /* Charts */
 .chart-sub-nav { display: flex; gap: 0.4rem; margin-bottom: 1rem; }
-.csub-btn { background: #1C1C1E; border: 1px solid #3A3A3C; color: #636366; font-family: 'Barlow Condensed',sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; padding: 0.35rem 0.75rem; cursor: pointer; transition: all 0.15s; }
-.csub-btn.active { border-color: #4A9EFF; color: #4A9EFF; background: rgba(74,158,255,0.07); }
-.chart-card { background: #1C1C1E; border: 1px solid #252528; padding: 1rem; }
+.csub-btn { background: var(--bg); border: 1px solid var(--border); color: var(--muted); font-family: 'Barlow Condensed',sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; padding: 0.35rem 0.75rem; cursor: pointer; transition: all 0.15s; }
+.csub-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(74,158,255,0.07); }
+.chart-card { background: var(--bg); border: 1px solid var(--surface); padding: 1rem; }
 
 /* Records */
 .records-wrap { display: flex; flex-direction: column; gap: 0; }
-.rec-header { display: grid; grid-template-columns: 52px 1fr 1fr 1fr; padding: 0.35rem 0.5rem; border-bottom: 1px solid #252528; }
-.rec-header span { font-family: 'Barlow Condensed',sans-serif; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; color: #8E8E93; }
-.rec-row { display: grid; grid-template-columns: 52px 1fr 1fr 1fr; padding: 0.65rem 0.5rem; border-bottom: 1px solid #1C1C1E; align-items: center; }
-.rec-row:hover { background: #1C1C1E; }
-.rep-badge { font-family: 'Barlow Condensed',sans-serif; font-size: 0.85rem; font-weight: 800; color: #4A9EFF; }
-.rec-weight { font-size: 0.82rem; color: #F0F0F0; }
-.rec-e1rm { font-size: 0.78rem; color: #FFB400; }
-.rec-date { font-size: 0.7rem; color: #636366; }
+.rec-header { display: grid; grid-template-columns: 52px 1fr 1fr 1fr; padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--surface); }
+.rec-header span { font-family: 'Barlow Condensed',sans-serif; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; color: var(--sub); }
+.rec-row { display: grid; grid-template-columns: 52px 1fr 1fr 1fr; padding: 0.65rem 0.5rem; border-bottom: 1px solid var(--bg); align-items: center; }
+.rec-row:hover { background: var(--bg); }
+.rep-badge { font-family: 'Barlow Condensed',sans-serif; font-size: 0.85rem; font-weight: 800; color: var(--accent); }
+.rec-weight { font-size: 0.82rem; color: var(--text); }
+.rec-e1rm { font-size: 0.78rem; color: var(--gold); }
+.rec-date { font-size: 0.7rem; color: var(--muted); }
 
-.empty-state { text-align: center; padding: 3rem 1rem; color: #8E8E93; font-size: 0.85rem; }
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--sub); font-size: 0.85rem; }
 
-.add-to-workout-btn { width: calc(100% - 2rem); margin: 1.5rem 1rem 0; background: #4A9EFF; border: none; color: #fff; font-family: 'Barlow Condensed',sans-serif; font-size: 1rem; font-weight: 800; letter-spacing: 0.1em; padding: 1rem; cursor: pointer; clip-path: polygon(0 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%); display: block; }
+.add-to-workout-btn { width: calc(100% - 2rem); margin: 1.5rem 1rem 0; background: var(--accent); border: none; color: #fff; font-family: 'Barlow Condensed',sans-serif; font-size: 1rem; font-weight: 800; letter-spacing: 0.1em; padding: 1rem; cursor: pointer; clip-path: var(--clip-md); display: block; }
 .add-to-workout-btn:active { background: #3B8EEF; }
 </style>

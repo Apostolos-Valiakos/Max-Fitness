@@ -37,6 +37,6 @@ const headerStyle = computed(() => props.padded
 
 <style scoped>
 .view-header { display: flex; align-items: center; gap: 1rem; }
-.back-btn    { background: none; border: none; color: #8E8E93; cursor: pointer; font-size: 1rem; padding: 0; flex-shrink: 0; }
+.back-btn    { background: none; border: none; color: var(--sub); cursor: pointer; font-size: 1rem; padding: 0; flex-shrink: 0; }
 .view-title  { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; letter-spacing: 0.03em; flex: 1; }
 </style>

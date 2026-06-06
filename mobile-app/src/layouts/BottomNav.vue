@@ -48,7 +48,7 @@ function handleWorkoutStart() {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
   display: grid; grid-template-columns: 1fr 1fr 72px 1fr 1fr;
   align-items: center;
-  background: #1C1C1E; border-top: 1px solid #252528;
+  background: var(--bg); border-top: 1px solid var(--surface);
   padding: 0.5rem 0 calc(0.5rem + env(safe-area-inset-bottom, 0px));
   height: calc(64px + env(safe-area-inset-bottom, 0px));
 }
@@ -56,21 +56,21 @@ function handleWorkoutStart() {
 .nav-item {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 0.2rem; padding: 0.25rem;
-  color: #636366; text-decoration: none; font-family: 'DM Sans', sans-serif;
+  color: var(--muted); text-decoration: none; font-family: 'DM Sans', sans-serif;
   font-size: 0.65rem; font-weight: 500; letter-spacing: 0.02em;
   transition: color 0.2s;
 }
 .nav-item i { font-size: 1.2rem; }
-.nav-item.active { color: #4A9EFF; }
+.nav-item.active { color: var(--accent); }
 
 .nav-cta-wrap {
   display: flex; align-items: center; justify-content: center;
 }
 .nav-cta {
-  width: 54px; height: 54px; background: #4A9EFF; border: none;
+  width: 54px; height: 54px; background: var(--accent); border: none;
   display: flex; align-items: center; justify-content: center;
   color: #fff; cursor: pointer;
-  clip-path: polygon(0 0, 100% 0, 100% 75%, 88% 100%, 0 100%);
+  clip-path: var(--clip-btn);
   transition: background 0.2s, transform 0.1s;
   margin-top: -16px;
 }

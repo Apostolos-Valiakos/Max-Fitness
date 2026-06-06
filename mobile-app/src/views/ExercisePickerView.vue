@@ -67,8 +67,8 @@ async function handleAdd(ex: ExerciseDocument) {
 </script>
 
 <style scoped>
-.view { background: #1C1C1E; min-height: 100dvh; color: #F0F0F0; font-family: 'DM Sans',sans-serif; }
+.view { background: var(--bg); min-height: 100dvh; color: var(--text); font-family: 'DM Sans',sans-serif; }
 .search-padded { padding: 0 1rem; }
 .results { display: flex; flex-direction: column; gap: 1px; padding: 0 1rem; }
-.empty { text-align: center; color: #8E8E93; padding: 2rem; font-size: 0.85rem; }
+.empty { text-align: center; color: var(--sub); padding: 2rem; font-size: 0.85rem; }
 </style>

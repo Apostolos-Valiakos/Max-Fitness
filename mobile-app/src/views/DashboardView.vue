@@ -195,14 +195,14 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.view { padding: 1.5rem 1rem 0; color: #F0F0F0; font-family: 'DM Sans',sans-serif; background: #1C1C1E; min-height: 100vh; }
+.view { padding: 1.5rem 1rem 0; color: var(--text); font-family: 'DM Sans',sans-serif; background: var(--bg); min-height: 100vh; }
 .view-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
-.greeting { font-size: 0.72rem; color: #636366; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.2rem; }
-.view-title { font-family: 'Barlow Condensed',sans-serif; font-size: 2rem; font-weight: 900; color: #F0F0F0; line-height: 1; }
+.greeting { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.2rem; }
+.view-title { font-family: 'Barlow Condensed',sans-serif; font-size: 2rem; font-weight: 900; color: var(--text); line-height: 1; }
 .header-badge { padding: 0.3rem 0.6rem; font-family: 'Barlow Condensed',sans-serif; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.2em; }
-.header-badge.free  { background: #252528; color: #636366; }
-.header-badge.paid  { background: rgba(74,158,255,0.1); color: #4A9EFF; border: 1px solid rgba(74,158,255,0.3); }
-.header-badge.ultra { background: rgba(255,180,0,0.1); color: #FFB400; border: 1px solid rgba(255,180,0,0.3); }
+.header-badge.free  { background: var(--surface); color: var(--muted); }
+.header-badge.paid  { background: rgba(74,158,255,0.1); color: var(--accent); border: 1px solid rgba(74,158,255,0.3); }
+.header-badge.ultra { background: rgba(255,180,0,0.1); color: var(--gold); border: 1px solid rgba(255,180,0,0.3); }
 
 /* Today's workout card */
 .today-card {
@@ -213,12 +213,12 @@ onMounted(async () => {
   position: relative; transition: border-color 0.15s;
 }
 .today-card:hover { border-color: rgba(74,158,255,0.7); }
-.today-label { font-family: 'Barlow Condensed',sans-serif; font-size: 0.6rem; font-weight: 700; color: #4A9EFF; letter-spacing: 0.2em; }
-.today-name  { font-family: 'Barlow Condensed',sans-serif; font-size: 1.5rem; font-weight: 900; color: #F0F0F0; line-height: 1; }
+.today-label { font-family: 'Barlow Condensed',sans-serif; font-size: 0.6rem; font-weight: 700; color: var(--accent); letter-spacing: 0.2em; }
+.today-name  { font-family: 'Barlow Condensed',sans-serif; font-size: 1.5rem; font-weight: 900; color: var(--text); line-height: 1; }
 .today-plan  { font-size: 0.7rem; color: #AEAEB2; }
 .today-btn {
   position: absolute; right: 1rem; top: 50%; transform: translateY(-50%);
-  background: #4A9EFF; border: none; color: #fff;
+  background: var(--accent); border: none; color: #fff;
   display: flex; align-items: center; gap: 0.35rem;
   padding: 0.5rem 0.875rem; font-family: 'Barlow Condensed',sans-serif;
   font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; cursor: pointer;
@@ -231,9 +231,9 @@ onMounted(async () => {
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1.5rem; }
 .section { margin-bottom: 1.5rem; }
 .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
-.see-all { font-size: 0.72rem; color: #4A9EFF; text-decoration: none; }
-.chart-card { background: #1C1C1E; border: 1px solid #252528; padding: 1rem; }
+.see-all { font-size: 0.72rem; color: var(--accent); text-decoration: none; }
+.chart-card { background: var(--bg); border: 1px solid var(--surface); padding: 1rem; }
 .sessions-list { display: flex; flex-direction: column; gap: 0.5rem; }
-.empty-state { text-align: center; padding: 2rem 1rem; color: #8E8E93; }
-.cta-btn { background: #4A9EFF; border: none; color: #fff; font-family: 'Barlow Condensed',sans-serif; font-weight: 700; letter-spacing: 0.1em; padding: 0.75rem 1.5rem; cursor: pointer; margin-top: 1rem; clip-path: polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%); }
+.empty-state { text-align: center; padding: 2rem 1rem; color: var(--sub); }
+.cta-btn { background: var(--accent); border: none; color: #fff; font-family: 'Barlow Condensed',sans-serif; font-weight: 700; letter-spacing: 0.1em; padding: 0.75rem 1.5rem; cursor: pointer; margin-top: 1rem; clip-path: var(--clip-sm); }
 </style>

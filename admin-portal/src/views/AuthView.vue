@@ -75,7 +75,7 @@ async function handleLogin() {
 <style scoped>
 .auth-shell {
   min-height: 100vh;
-  background: #1C1C1E;
+  background: var(--bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -84,8 +84,8 @@ async function handleLogin() {
 .auth-card {
   width: 100%;
   max-width: 380px;
-  background: #1C1C1E;
-  border: 1px solid #252528;
+  background: var(--bg);
+  border: 1px solid var(--surface);
   padding: 2.5rem 2rem;
 }
 .auth-brand {
@@ -99,7 +99,7 @@ async function handleLogin() {
   font-family: "Barlow Condensed", sans-serif;
   font-size: 1.8rem;
   font-weight: 900;
-  color: #4A9EFF;
+  color: var(--accent);
 }
 .b-fit {
   font-family: "Barlow Condensed", sans-serif;
@@ -112,7 +112,7 @@ async function handleLogin() {
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.2em;
-  color: #636366;
+  color: var(--muted);
   width: 100%;
   margin-top: -0.25rem;
 }
@@ -131,7 +131,7 @@ async function handleLogin() {
   align-items: center;
   gap: 0.4rem;
   font-size: 0.8rem;
-  color: #4A9EFF;
+  color: var(--accent);
   background: rgba(74, 158, 255, 0.08);
   border: 1px solid rgba(74, 158, 255, 0.2);
   padding: 0.6rem 0.75rem;

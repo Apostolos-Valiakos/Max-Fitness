@@ -253,6 +253,7 @@ import { ref, computed, reactive, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
+import { useToast } from 'primevue/usetoast'
 import { v4 as uuidv4 } from 'uuid'
 import { fmtDate } from '@/lib/utils'
 import Button from 'primevue/button'
@@ -280,6 +281,7 @@ const QUESTION_TYPES = [
 const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
 
 const auth    = useAuthStore()
+const toast   = useToast()
 const route   = useRoute()
 const loading = ref(true)
 const tab     = ref<string>('submissions')
@@ -350,15 +352,22 @@ function openAssignFrom(t: any) { aForm.template_id = t.id; aForm.client_id = ro
 async function saveTemplate() {
   const trainerId = auth.user?.id; if (!trainerId) return
   const payload = { trainer_id: trainerId, name: tForm.name.trim(), description: tForm.description.trim() || null, questions: tForm.questions, updated_at: new Date().toISOString() }
-  if (editingTemplateId.value) {
-    await supabase.from('checkin_templates').update(payload).eq('id', editingTemplateId.value)
-    const idx = templates.value.findIndex(t => t.id === editingTemplateId.value)
-    if (idx >= 0) templates.value[idx] = { ...templates.value[idx], ...payload }
-  } else {
-    const { data } = await supabase.from('checkin_templates').insert({ id: uuidv4(), ...payload }).select().single()
-    if (data) templates.value.unshift(data)
+  try {
+    if (editingTemplateId.value) {
+      const { error } = await supabase.from('checkin_templates').update(payload).eq('id', editingTemplateId.value)
+      if (error) throw error
+      const idx = templates.value.findIndex(t => t.id === editingTemplateId.value)
+      if (idx >= 0) templates.value[idx] = { ...templates.value[idx], ...payload }
+    } else {
+      const { data, error } = await supabase.from('checkin_templates').insert({ id: uuidv4(), ...payload }).select().single()
+      if (error) throw error
+      if (data) templates.value.unshift(data)
+    }
+    templatePanelVisible.value = false
+    toast.add({ severity: 'success', summary: 'Template saved', life: 2500 })
+  } catch (e: any) {
+    toast.add({ severity: 'error', summary: 'Save failed', detail: e.message, life: 4000 })
   }
-  templatePanelVisible.value = false
 }
 
 async function deleteTemplate(id: string) {
@@ -389,14 +398,19 @@ async function deleteAssignment(id: string) {
 
 async function submitReply(s: any) {
   const reply = replyDraft.value[s.id]?.trim(); if (!reply) return
-  // Delete photos from storage first if any exist
-  if (s.photo_urls?.length && !s.photos_deleted) {
-    await supabase.storage.from('checkin-photos').remove(s.photo_urls)
+  try {
+    if (s.photo_urls?.length && !s.photos_deleted) {
+      await supabase.storage.from('checkin-photos').remove(s.photo_urls)
+    }
+    const { error } = await supabase.from('checkin_submissions').update({ trainer_reply: reply, is_read: true }).eq('id', s.id)
+    if (error) throw error
+    s.trainer_reply = reply; s.photo_urls = []; s.photos_deleted = true; s.is_read = true
+    delete signedPhotoUrls.value[s.id]
+    delete replyDraft.value[s.id]
+    toast.add({ severity: 'success', summary: 'Reply sent', life: 2500 })
+  } catch (e: any) {
+    toast.add({ severity: 'error', summary: 'Reply failed', detail: e.message, life: 4000 })
   }
-  await supabase.from('checkin_submissions').update({ trainer_reply: reply, is_read: true }).eq('id', s.id)
-  s.trainer_reply = reply; s.photo_urls = []; s.photos_deleted = true; s.is_read = true
-  delete signedPhotoUrls.value[s.id]
-  delete replyDraft.value[s.id]
 }
 
 async function markRead(s: any) {
@@ -435,33 +449,33 @@ onMounted(async () => {
 
 <style scoped>
 .page-sub   { display: flex; align-items: center; gap: 0.5rem; }
-.unread-badge { background: #4A9EFF; color: #fff; font-family: 'Barlow Condensed', sans-serif; font-size: 0.6rem; font-weight: 900; padding: 0.1rem 0.4rem; letter-spacing: 0.08em; }
-.tab-badge { background: #4A9EFF; color: #fff; font-size: 0.58rem; font-weight: 900; padding: 0.1rem 0.35rem; border-radius: 99px; }
+.unread-badge { background: var(--accent); color: #fff; font-family: 'Barlow Condensed', sans-serif; font-size: 0.6rem; font-weight: 900; padding: 0.1rem 0.4rem; letter-spacing: 0.08em; }
+.tab-badge { background: var(--accent); color: #fff; font-size: 0.58rem; font-weight: 900; padding: 0.1rem 0.35rem; border-radius: 99px; }
 
 .empty-state { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
-.empty-icon  { font-size: 2.5rem; color: #3A3A3C; }
-.empty-title { font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; font-weight: 700; color: #636366; }
+.empty-icon  { font-size: 2.5rem; color: var(--border); }
+.empty-title { font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--muted); }
 
 .submission-list { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem; }
 .submission-card { padding: 1.25rem; display: flex; flex-direction: column; gap: 0.875rem; border-left: 3px solid transparent; }
-.submission-card.unread { border-left-color: #4A9EFF; }
+.submission-card.unread { border-left-color: var(--accent); }
 .sub-header { display: flex; align-items: center; gap: 0.75rem; }
-.sub-client { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; color: #F0F0F0; }
-.sub-date   { font-size: 0.72rem; color: #636366; margin-left: auto; }
-.new-dot    { width: 7px; height: 7px; background: #4A9EFF; border-radius: 50%; flex-shrink: 0; }
-.sub-template { font-size: 0.72rem; color: #636366; text-transform: uppercase; letter-spacing: 0.08em; }
+.sub-client { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; color: var(--text); }
+.sub-date   { font-size: 0.72rem; color: var(--muted); margin-left: auto; }
+.new-dot    { width: 7px; height: 7px; background: var(--accent); border-radius: 50%; flex-shrink: 0; }
+.sub-template { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
 .sub-answers { display: flex; flex-direction: column; gap: 0.4rem; }
 .answer-row  { display: flex; gap: 0.75rem; font-size: 0.82rem; }
-.answer-label { color: #636366; min-width: 160px; }
+.answer-label { color: var(--muted); min-width: 160px; }
 .answer-val   { color: #C7C7CC; }
 .sub-photos  { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .sub-photos a { cursor: zoom-in; }
-.sub-photo   { width: 140px; height: 140px; object-fit: cover; border: 1px solid #3A3A3C; display: block; transition: border-color 0.15s; }
-.sub-photos a:hover .sub-photo { border-color: #4A9EFF; }
-.photo-warning { font-size: 0.68rem; color: #FFB400; }
-.photo-deleted-note { font-size: 0.72rem; color: #636366; display: flex; align-items: center; gap: 0.4rem; }
-.reply-box   { background: #1C1C1E; border: 1px solid #252528; border-left: 2px solid #4A9EFF; padding: 0.75rem; }
-.reply-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; color: #4A9EFF; margin-bottom: 0.35rem; }
+.sub-photo   { width: 140px; height: 140px; object-fit: cover; border: 1px solid var(--border); display: block; transition: border-color 0.15s; }
+.sub-photos a:hover .sub-photo { border-color: var(--accent); }
+.photo-warning { font-size: 0.68rem; color: var(--gold); }
+.photo-deleted-note { font-size: 0.72rem; color: var(--muted); display: flex; align-items: center; gap: 0.4rem; }
+.reply-box   { background: var(--bg); border: 1px solid var(--surface); border-left: 2px solid var(--accent); padding: 0.75rem; }
+.reply-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 0.35rem; }
 .reply-text  { font-size: 0.82rem; color: #C7C7CC; line-height: 1.5; }
 .reply-form  { display: flex; flex-direction: column; gap: 0.5rem; }
 .reply-textarea { min-height: 60px; font-size: 0.82rem; }
@@ -469,12 +483,12 @@ onMounted(async () => {
 
 .assign-actions { margin-bottom: 0.75rem; }
 .td-name  { color: #C7C7CC; font-weight: 500; }
-.td-muted { color: #636366; font-size: 0.78rem; }
+.td-muted { color: var(--muted); font-size: 0.78rem; }
 .td-val   { color: #AEAEB2; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; }
 .td-actions { display: flex; gap: 0.35rem; }
 .status-badge { font-family: 'Barlow Condensed', sans-serif; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; padding: 0.15rem 0.4rem; border: 1px solid; }
 .status-badge.active   { color: #34C759; border-color: rgba(76,175,80,0.3); background: rgba(76,175,80,0.08); }
-.status-badge.inactive { color: #636366; border-color: #3A3A3C; }
+.status-badge.inactive { color: var(--muted); border-color: var(--border); }
 .table-wrap { overflow: hidden; }
 
 .panel-body { display: flex; flex-direction: column; gap: 1.25rem; }
@@ -482,16 +496,16 @@ onMounted(async () => {
 
 /* Questions builder */
 .q-list { display: flex; flex-direction: column; gap: 0.75rem; }
-.q-row { background: #1C1C1E; border: 1px solid #252528; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.q-row { background: var(--bg); border: 1px solid var(--surface); padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
 .q-row-top { display: flex; align-items: center; gap: 0.5rem; }
-.q-num  { font-family: 'Barlow Condensed', sans-serif; font-size: 0.75rem; font-weight: 900; color: #4A9EFF; width: 16px; flex-shrink: 0; }
+.q-num  { font-family: 'Barlow Condensed', sans-serif; font-size: 0.75rem; font-weight: 900; color: var(--accent); width: 16px; flex-shrink: 0; }
 .q-type { flex: 1; }
-.q-req  { font-size: 0.68rem; color: #636366; display: flex; align-items: center; gap: 0.25rem; white-space: nowrap; cursor: pointer; }
+.q-req  { font-size: 0.68rem; color: var(--muted); display: flex; align-items: center; gap: 0.25rem; white-space: nowrap; cursor: pointer; }
 .q-row-actions { display: flex; gap: 0.25rem; }
 .add-q-btn { margin-top: 0.5rem; }
 
-.icon-btn { background: none; border: 1px solid #252528; color: #636366; cursor: pointer; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; }
+.icon-btn { background: none; border: 1px solid var(--surface); color: var(--muted); cursor: pointer; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; }
 .icon-btn:hover:not(:disabled) { color: #AEAEB2; }
 .icon-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-.icon-btn.danger:hover { color: #4A9EFF; border-color: #4A9EFF; }
+.icon-btn.danger:hover { color: var(--accent); border-color: var(--accent); }
 </style>

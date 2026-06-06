@@ -127,6 +127,7 @@ import { supabase } from '@/lib/supabase'
 import { adminSupabase } from '@/lib/adminSupabase'
 import { useAuthStore } from '@/stores/authStore'
 import { useAuthUsers } from '@/composables/useAuthUsers'
+import { useToast } from 'primevue/usetoast'
 import { initials, fmtDate } from '@/lib/utils'
 import type { UserRow, UserRole, UserTier } from '@/lib/database.types'
 import DataTable from 'primevue/datatable'
@@ -141,6 +142,7 @@ import Dialog from 'primevue/dialog'
 const auth    = useAuthStore()
 const selfId  = computed(() => auth.user?.id)
 const { authMap, fetchAuthUsers } = useAuthUsers()
+const toast   = useToast()
 const loading = ref(true)
 const users   = ref<UserRow[]>([])
 
@@ -189,12 +191,16 @@ onMounted(async () => {
 })
 
 async function updateRole(u: UserRow, role: UserRole) {
-  await supabase.from('profiles').update({ role }).eq('id', u.id)
+  const { error } = await supabase.from('profiles').update({ role }).eq('id', u.id)
+  if (error) { toast.add({ severity: 'error', summary: 'Error', detail: error.message, life: 4000 }); return }
   u.role = role
+  toast.add({ severity: 'success', summary: 'Role updated', life: 2500 })
 }
 async function updateTier(u: UserRow, tier: UserTier) {
-  await supabase.from('profiles').update({ tier }).eq('id', u.id)
+  const { error } = await supabase.from('profiles').update({ tier }).eq('id', u.id)
+  if (error) { toast.add({ severity: 'error', summary: 'Error', detail: error.message, life: 4000 }); return }
   u.tier = tier
+  toast.add({ severity: 'success', summary: 'Tier updated', life: 2500 })
 }
 
 function confirmDelete(u: UserRow) {
@@ -215,19 +221,19 @@ async function handleDelete() {
 
 .filters { padding: 1rem; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
 .filter-chips { display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
-.chip { background: #252528; border: 1px solid #3A3A3C; color: #636366; font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; padding: 0.2rem 0.65rem; cursor: pointer; transition: all 0.15s; }
-.chip.active { background: rgba(74,158,255,0.1); border-color: #4A9EFF; color: #4A9EFF; }
-.divider { width: 1px; height: 18px; background: #3A3A3C; margin: 0 0.25rem; }
+.chip { background: var(--surface); border: 1px solid var(--border); color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; padding: 0.2rem 0.65rem; cursor: pointer; transition: all 0.15s; }
+.chip.active { background: rgba(74,158,255,0.1); border-color: var(--accent); color: var(--accent); }
+.divider { width: 1px; height: 18px; background: var(--border); margin: 0 0.25rem; }
 
 .table-wrap { overflow: hidden; }
 .user-cell  { display: flex; align-items: center; gap: 0.75rem; }
-.user-avatar { width: 30px; height: 30px; background: #252528; border: 1px solid #3A3A3C; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; font-weight: 800; color: #8E8E93; flex-shrink: 0; }
+.user-avatar { width: 30px; height: 30px; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; font-weight: 800; color: var(--sub); flex-shrink: 0; }
 .user-avatar-img { width: 30px; height: 30px; object-fit: cover; flex-shrink: 0; }
 .user-name  { font-size: 0.85rem; color: #C7C7CC; font-weight: 500; }
-.user-email { font-size: 0.72rem; color: #636366; margin-top: 0.05rem; }
-.td-muted   { color: #636366; font-size: 0.78rem; }
-.td-empty   { color: #3A3A3C; font-size: 0.8rem; text-align: center; padding: 2rem; }
+.user-email { font-size: 0.72rem; color: var(--muted); margin-top: 0.05rem; }
+.td-muted   { color: var(--muted); font-size: 0.78rem; }
+.td-empty   { color: var(--border); font-size: 0.8rem; text-align: center; padding: 2rem; }
 .td-actions { display: flex; gap: 0.25rem; }
 .modal-body { font-size: 0.85rem; color: #AEAEB2; line-height: 1.5; }
-.modal-body strong { color: #F0F0F0; }
+.modal-body strong { color: var(--text); }
 </style>
