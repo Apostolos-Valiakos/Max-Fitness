@@ -29,3 +29,17 @@ supabase/volumes/api/kong.yml
 
 .env*
 *.sql.bak
+
+# Supabase temp
+supabase/.temp/
+
+# Playwright / Vitest (tests live outside VCS)
+playwright.config.ts
+**/vitest.config.*
+**/__tests__/
+e2e/
+playwright-report/
+test-results/
+
+# Generated reports
+MAX_FITNESS_REPORT.html
