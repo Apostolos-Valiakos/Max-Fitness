@@ -6,6 +6,16 @@
   "scripts": {
     "build": "npm run build -w mobile-app && npx cap add android",
     "ionic:build": "npm run build -w mobile-app",
-    "ionic:serve": "npm run dev -w mobile-app"
+    "ionic:serve": "npm run dev -w mobile-app",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.0.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.105.3"
   }
 }
