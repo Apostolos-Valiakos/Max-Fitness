@@ -19,6 +19,7 @@ export interface Exercise {
   instructions: string | null
   is_custom: boolean
   created_by: string | null
+  gym_id: string | null
   updated_at: string
   target_muscle: string | null
   secondary_muscles: string[] | null
@@ -59,6 +60,28 @@ export const useExerciseStore = defineStore('exercises', () => {
     return list
   })
 
+  let bootstrappedFromSupabase = false
+
+  async function _bootstrapExercisesFromSupabase() {
+    try {
+      const { data } = await supabase
+        .from('exercises')
+        .select('id, name, body_part, equipment, image_url, instructions, is_custom, created_by, gym_id, updated_at, target_muscle, secondary_muscles, exercise_db_id, sticky_note')
+        .order('name')
+      if (!data || data.length === 0) return
+      const db = getDatabase()
+      await db.exercises.bulkUpsert(
+        data.map((e: any) => ({
+          ...e,
+          updated_at: (e.updated_at as string).slice(0, 32),
+          is_custom: Boolean(e.is_custom),
+        })),
+      )
+    } catch {
+      // silently ignore — background sync will catch up
+    }
+  }
+
   function subscribeToExercises() {
     const db = getDatabase()
     db.exercises
@@ -66,6 +89,11 @@ export const useExerciseStore = defineStore('exercises', () => {
       .$
       .subscribe(docs => {
         exercises.value = docs.map(d => d.toJSON() as Exercise)
+        // If RxDB is empty on first subscription (sync not yet complete), load from Supabase
+        if (docs.length === 0 && !bootstrappedFromSupabase) {
+          bootstrappedFromSupabase = true
+          _bootstrapExercisesFromSupabase()
+        }
       })
   }
 
@@ -93,6 +121,7 @@ export const useExerciseStore = defineStore('exercises', () => {
       instructions:      params.instructions ?? null,
       is_custom:         true,
       created_by:        authStore.user?.id ?? null,
+      gym_id:            null,
       updated_at:        now,
       target_muscle:     null,
       secondary_muscles: null,

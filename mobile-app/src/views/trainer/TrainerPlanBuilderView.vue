@@ -207,7 +207,7 @@ onMounted(async () => {
 .day-clear:hover { color: var(--accent); }
 
 /* Modal shared */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: flex; align-items: flex-end; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; align-items: flex-end; }
 .modal { width: 100%; background: var(--bg); border-top: 1px solid var(--border); max-height: 80vh; overflow-y: auto; }
 .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem; border-bottom: 1px solid var(--surface); }
 .modal-title { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 800; color: var(--text); letter-spacing: 0.08em; }

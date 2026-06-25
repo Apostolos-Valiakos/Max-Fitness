@@ -212,60 +212,66 @@ function toggleSubmission(id: string) {
 }
 
 onMounted(async () => {
-  if (!auth.user?.id) return
+  const userId = auth.user?.id
+  if (!userId) { loading.value = false; return }
+
   const endOfToday = new Date()
   endOfToday.setUTCHours(23, 59, 59, 999)
 
-  // Load pending assignments
-  const { data: pendingData } = await supabase
-    .from('checkin_assignments')
-    .select('id, template_id, trainer_id, next_due_at, checkin_templates ( name, questions )')
-    .eq('client_id', auth.user.id)
-    .eq('is_active', true)
-    .not('next_due_at', 'is', null)
-    .lte('next_due_at', endOfToday.toISOString())
+  try {
+    // Load pending assignments
+    const { data: pendingData } = await supabase
+      .from('checkin_assignments')
+      .select('id, template_id, trainer_id, next_due_at, checkin_templates ( name, questions )')
+      .eq('client_id', userId)
+      .eq('is_active', true)
+      .not('next_due_at', 'is', null)
+      .lte('next_due_at', endOfToday.toISOString())
 
-  pendingAssignments.value = (pendingData ?? []).map((row: any) => ({
-    id:            row.id,
-    template_id:   row.template_id,
-    trainer_id:    row.trainer_id,
-    next_due_at:   row.next_due_at,
-    template_name: row.checkin_templates?.name ?? 'Check-in',
-    questions:     (row.checkin_templates?.questions ?? []) as Question[],
-  }))
+    pendingAssignments.value = (pendingData ?? []).map((row: any) => ({
+      id:            row.id,
+      template_id:   row.template_id,
+      trainer_id:    row.trainer_id,
+      next_due_at:   row.next_due_at,
+      template_name: row.checkin_templates?.name ?? 'Check-in',
+      questions:     (row.checkin_templates?.questions ?? []) as Question[],
+    }))
 
-  // Load past submissions with their template questions for label lookup
-  const { data: subData } = await supabase
-    .from('checkin_submissions')
-    .select(`
-      id, assignment_id, submitted_at, answers,
-      photo_urls, photos_deleted,
-      trainer_reply, trainer_replied_at,
-      checkin_assignments ( template_id, checkin_templates ( name, questions ) )
-    `)
-    .eq('client_id', auth.user.id)
-    .order('submitted_at', { ascending: false })
-    .limit(20)
+    // Load past submissions with their template questions for label lookup
+    const { data: subData } = await supabase
+      .from('checkin_submissions')
+      .select(`
+        id, assignment_id, submitted_at, answers,
+        photo_urls, photos_deleted,
+        trainer_reply, trainer_replied_at,
+        checkin_assignments ( template_id, checkin_templates ( name, questions ) )
+      `)
+      .eq('client_id', userId)
+      .order('submitted_at', { ascending: false })
+      .limit(20)
 
-  pastSubmissions.value = (subData ?? []).map((row: any) => {
-    const tmpl = row.checkin_assignments?.checkin_templates
-    const questions: Question[] = tmpl?.questions ?? []
-    const questionLabels = Object.fromEntries(questions.map(q => [q.id, q.label]))
-    return {
-      id:               row.id,
-      assignment_id:    row.assignment_id,
-      template_name:    tmpl?.name ?? 'Check-in',
-      submitted_at:     row.submitted_at,
-      answers:          row.answers ?? {},
-      photo_urls:       row.photo_urls ?? [],
-      photos_deleted:   row.photos_deleted,
-      trainer_reply:    row.trainer_reply,
-      trainer_replied_at: row.trainer_replied_at,
-      questionLabels,
-    }
-  })
-
-  loading.value = false
+    pastSubmissions.value = (subData ?? []).map((row: any) => {
+      const tmpl = row.checkin_assignments?.checkin_templates
+      const questions: Question[] = tmpl?.questions ?? []
+      const questionLabels = Object.fromEntries(questions.map(q => [q.id, q.label]))
+      return {
+        id:               row.id,
+        assignment_id:    row.assignment_id,
+        template_name:    tmpl?.name ?? 'Check-in',
+        submitted_at:     row.submitted_at,
+        answers:          row.answers ?? {},
+        photo_urls:       row.photo_urls ?? [],
+        photos_deleted:   row.photos_deleted,
+        trainer_reply:    row.trainer_reply,
+        trainer_replied_at: row.trainer_replied_at,
+        questionLabels,
+      }
+    })
+  } catch (err) {
+    console.error('[CheckInView] load error:', err)
+  } finally {
+    loading.value = false
+  }
 })
 
 function openForm(a: PendingAssignment) {

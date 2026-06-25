@@ -4,8 +4,8 @@
       <h1 class="view-title">PROFILE</h1>
     </header>
 
-    <!-- Avatar + name -->
-    <div class="profile-hero">
+    <!-- Avatar + name — guard on auth.profile so beforeEach waits for real data -->
+    <div v-if="auth.profile" class="profile-hero">
       <div class="avatar-wrap" @click="triggerAvatarPick">
         <img v-if="auth.profile?.avatar_url" :src="auth.profile.avatar_url" class="avatar-img" />
         <div v-else class="avatar">{{ initials }}</div>
@@ -19,6 +19,70 @@
         <div v-if="avatarUploading" class="avatar-status">Uploading photo…</div>
       </div>
     </div>
+
+    <!-- Subscription / plan upgrade -->
+    <section class="section">
+      <h2 class="section-title">MY PLAN</h2>
+
+      <!-- Current plan status -->
+      <div class="plan-current" :class="auth.profile?.tier">
+        <div class="plan-info">
+          <div class="plan-label">CURRENT PLAN</div>
+          <div class="plan-name">{{ TIER_INFO[auth.profile?.tier ?? 'free'].name }}</div>
+          <div class="plan-price-line">{{ TIER_INFO[auth.profile?.tier ?? 'free'].price }}</div>
+        </div>
+        <span class="plan-badge" :class="auth.profile?.tier">
+          {{ (auth.profile?.tier ?? 'free').toUpperCase() }}
+        </span>
+      </div>
+
+      <!-- Verifying payment -->
+      <div v-if="verifyingPayment" class="verifying-state">
+        <i class="pi pi-spin pi-spinner" /> Verifying payment…
+      </div>
+
+      <!-- Upgrade options (shown when not on ultra and not verifying) -->
+      <div v-else-if="auth.profile?.tier !== 'ultra'" class="upgrade-options">
+        <div
+          v-for="opt in upgradeOptions"
+          :key="opt.tier"
+          class="upgrade-card"
+        >
+          <div class="uc-header">
+            <div>
+              <div class="uc-name">{{ opt.name }}</div>
+              <div class="uc-price">{{ opt.price }}<span class="uc-period">/mo</span></div>
+            </div>
+            <span class="uc-badge" :class="opt.tier">{{ opt.tier.toUpperCase() }}</span>
+          </div>
+          <ul class="uc-features">
+            <li v-for="f in opt.features" :key="f"><i class="pi pi-check" /> {{ f }}</li>
+          </ul>
+          <button
+            class="uc-btn"
+            :disabled="upgradeLoading === opt.tier"
+            @click="startUpgrade(opt.tier)"
+          >
+            <i v-if="upgradeLoading === opt.tier" class="pi pi-spin pi-spinner" />
+            <span v-else>UPGRADE TO {{ opt.tier.toUpperCase() }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Manage billing (paid/ultra users) -->
+      <button
+        v-if="auth.profile?.tier !== 'free' && !verifyingPayment"
+        class="manage-btn"
+        :disabled="portalLoading"
+        @click="openPortal"
+      >
+        <i v-if="portalLoading" class="pi pi-spin pi-spinner" />
+        <span v-else><i class="pi pi-external-link" /> Manage Billing</span>
+      </button>
+
+      <div v-if="upgradeError" class="upgrade-error">{{ upgradeError }}</div>
+      <div v-if="upgradeSuccess" class="upgrade-success"><i class="pi pi-check-circle" /> Plan upgraded successfully!</div>
+    </section>
 
     <!-- Trainer (any user with an active trainer assignment) -->
     <section v-if="profileStore.trainer" class="section">
@@ -153,7 +217,24 @@
           <span>Member since</span>
           <span class="settings-val">{{ memberSince }}</span>
         </div>
+        <div class="settings-row">
+          <span>Gym</span>
+          <span v-if="auth.profile?.gym_name" class="settings-val gym-val">{{ auth.profile.gym_name }}</span>
+          <span v-else class="settings-val muted-val">None</span>
+        </div>
       </div>
+    </section>
+
+    <!-- Join gym (standalone users only) -->
+    <section v-if="!auth.hasGym" class="section">
+      <h2 class="section-title">GYM</h2>
+      <div class="settings-list">
+        <div class="settings-row link-row" @click="router.push('/join-gym')">
+          <span><i class="pi pi-building" style="margin-right:0.5rem;font-size:0.8rem;color:var(--accent)" />Join a Gym</span>
+          <i class="pi pi-chevron-right settings-val" />
+        </div>
+      </div>
+      <p class="section-sub" style="margin-top:0.5rem">Have a join code from your gym admin? Tap above to connect your account.</p>
     </section>
 
     <!-- Admin panel link -->
@@ -176,20 +257,112 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import Dialog    from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import { useAuthStore }         from '@/stores/authStore'
 import { useProfileStore }      from '@/stores/profileStore'
 import { useUserSettingsStore } from '@/stores/userSettingsStore'
 import BodyweightChart from '@/components/BodyweightChart.vue'
+import { supabase } from '@/lib/supabase'
 import { format } from 'date-fns'
 
-const BAR_PRESETS  = [10, 15, 20]
-const ALL_PLATES   = [25, 20, 15, 10, 5, 2.5, 1.25, 0.5]
+const BAR_PRESETS = [10, 15, 20]
+const ALL_PLATES  = [25, 20, 15, 10, 5, 2.5, 1.25, 0.5]
 
-const router       = useRouter()
-const auth         = useAuthStore()
+const TIER_INFO: Record<string, { name: string; price: string }> = {
+  free:  { name: 'Free',  price: '€0/mo'    },
+  paid:  { name: 'Paid',  price: '€9.99/mo' },
+  ultra: { name: 'Ultra', price: '€19.99/mo' },
+}
+
+const UPGRADE_OPTIONS = [
+  {
+    tier: 'paid',
+    name: 'Paid',
+    price: '€9.99',
+    features: ['Access to all standard workouts', 'Progress tracking', 'Priority support'],
+  },
+  {
+    tier: 'ultra',
+    name: 'Ultra',
+    price: '€19.99',
+    features: ['Everything in Paid', 'Personal trainer assignment', 'Custom workout plans', 'Weekly check-ins'],
+  },
+]
+
+const upgradeOptions = computed(() => {
+  const tier = auth.profile?.tier ?? 'free'
+  if (tier === 'free')  return UPGRADE_OPTIONS
+  if (tier === 'paid')  return UPGRADE_OPTIONS.filter(o => o.tier === 'ultra')
+  return []
+})
+
+const upgradeLoading   = ref<string | null>(null)
+const portalLoading    = ref(false)
+const upgradeError     = ref('')
+const upgradeSuccess   = ref(false)
+const verifyingPayment = ref(false)
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
+
+async function getAuthHeader(): Promise<string | null> {
+  const { data: { session } } = await supabase.auth.getSession()
+  return session ? `Bearer ${session.access_token}` : null
+}
+
+async function startUpgrade(tier: string) {
+  upgradeError.value = ''; upgradeSuccess.value = false
+  upgradeLoading.value = tier
+
+  const authHeader = await getAuthHeader()
+  if (!authHeader) { upgradeLoading.value = null; return }
+
+  try {
+    const res = await fetch(`${supabaseUrl}/functions/v1/create-user-checkout`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: authHeader },
+      body:    JSON.stringify({
+        tier,
+        success_url: `${window.location.origin}/profile?upgraded=1`,
+        cancel_url:  `${window.location.origin}/profile`,
+      }),
+    })
+    const json = await res.json()
+    if (!res.ok) { upgradeError.value = json.error ?? 'Checkout failed'; return }
+    window.location.href = json.url
+  } catch (err: any) {
+    upgradeError.value = err.message
+  } finally {
+    upgradeLoading.value = null
+  }
+}
+
+async function openPortal() {
+  upgradeError.value = ''; portalLoading.value = true
+
+  const authHeader = await getAuthHeader()
+  if (!authHeader) { portalLoading.value = false; return }
+
+  try {
+    const res = await fetch(`${supabaseUrl}/functions/v1/create-user-portal`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: authHeader },
+      body:    JSON.stringify({ return_url: `${window.location.origin}/profile` }),
+    })
+    const json = await res.json()
+    if (!res.ok) { upgradeError.value = json.error ?? 'Could not open billing portal'; return }
+    window.location.href = json.url
+  } catch (err: any) {
+    upgradeError.value = err.message
+  } finally {
+    portalLoading.value = false
+  }
+}
+
+const router = useRouter()
+const route  = useRoute()
+const auth   = useAuthStore()
 const profileStore = useProfileStore()
 const settings     = useUserSettingsStore()
 
@@ -228,6 +401,39 @@ onMounted(async () => {
   if (auth.user?.id) {
     await profileStore.fetchBodyweightLog(auth.user.id)
     await profileStore.fetchTrainerAssignment(auth.user.id)
+  }
+  if (route.query.upgraded === '1' && auth.user?.id) {
+    const sessionId = route.query.session_id as string | undefined
+    router.replace('/profile')
+    verifyingPayment.value = true
+
+    if (sessionId) {
+      // Verify payment directly with Stripe — no webhook timing dependency
+      const authHeader = await getAuthHeader()
+      if (authHeader) {
+        try {
+          const res = await fetch(`${supabaseUrl}/functions/v1/verify-user-checkout`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: authHeader },
+            body:    JSON.stringify({ session_id: sessionId }),
+          })
+          const json = await res.json()
+          if (res.ok && json.tier) {
+            // Re-fetch profile to sync the updated tier into the store
+            await auth.fetchProfile(auth.user.id)
+          }
+        } catch (err) {
+          console.error('verify-user-checkout failed:', err)
+        }
+      }
+    } else {
+      // Fallback: re-fetch profile (webhook may have already updated it)
+      await auth.fetchProfile(auth.user.id)
+    }
+
+    verifyingPayment.value = false
+    upgradeSuccess.value = true
+    setTimeout(() => { upgradeSuccess.value = false }, 4000)
   }
 })
 
@@ -303,6 +509,53 @@ async function handleSignOut() {
 .tier-pill.free  { background: var(--surface); color: var(--muted); }
 .tier-pill.paid  { background: rgba(74,158,255,0.1); color: var(--accent); border: 1px solid rgba(74,158,255,0.3); }
 .tier-pill.ultra { background: rgba(255,180,0,0.1); color: var(--gold); border: 1px solid rgba(255,180,0,0.3); }
+/* ── MY PLAN section ── */
+.plan-current {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1rem; border: 1px solid var(--surface); margin-bottom: 1rem;
+}
+.plan-current.paid  { border-color: rgba(74,158,255,0.3); background: rgba(74,158,255,0.04); }
+.plan-current.ultra { border-color: rgba(255,180,0,0.3);  background: rgba(255,180,0,0.04);  }
+.plan-label      { font-family: 'Barlow Condensed',sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.2em; color: var(--muted); margin-bottom: 0.2rem; }
+.plan-name       { font-family: 'Barlow Condensed',sans-serif; font-size: 1.4rem; font-weight: 900; color: var(--text); line-height: 1; }
+.plan-price-line { font-size: 0.75rem; color: var(--muted); margin-top: 0.15rem; }
+.plan-badge      { font-family: 'Barlow Condensed',sans-serif; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.15em; padding: 0.2rem 0.6rem; border: 1px solid; }
+.plan-badge.free  { color: var(--muted); border-color: var(--border); }
+.plan-badge.paid  { color: var(--accent); border-color: rgba(74,158,255,0.4); background: rgba(74,158,255,0.08); }
+.plan-badge.ultra { color: var(--gold);   border-color: rgba(255,180,0,0.4);  background: rgba(255,180,0,0.08);  }
+
+.upgrade-options { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 0.75rem; }
+.upgrade-card { border: 1px solid var(--surface); padding: 1rem; }
+.uc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; }
+.uc-name  { font-family: 'Barlow Condensed',sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.15em; color: var(--muted); margin-bottom: 0.2rem; }
+.uc-price { font-family: 'Barlow Condensed',sans-serif; font-size: 1.8rem; font-weight: 900; color: var(--text); line-height: 1; }
+.uc-period { font-size: 0.85rem; color: var(--muted); }
+.uc-badge { font-family: 'Barlow Condensed',sans-serif; font-size: 0.6rem; font-weight: 800; letter-spacing: 0.15em; padding: 0.15rem 0.5rem; border: 1px solid; }
+.uc-badge.paid  { color: var(--accent); border-color: rgba(74,158,255,0.4); background: rgba(74,158,255,0.08); }
+.uc-badge.ultra { color: var(--gold);   border-color: rgba(255,180,0,0.4);  background: rgba(255,180,0,0.08);  }
+.uc-features { list-style: none; padding: 0; margin: 0 0 1rem; display: flex; flex-direction: column; gap: 0.3rem; }
+.uc-features li { font-size: 0.78rem; color: var(--sub); display: flex; align-items: center; gap: 0.4rem; }
+.uc-features .pi-check { color: #34C759; font-size: 0.68rem; }
+.uc-btn {
+  width: 100%; background: var(--accent); border: none; color: #fff;
+  font-family: 'Barlow Condensed',sans-serif; font-size: 0.9rem; font-weight: 800;
+  letter-spacing: 0.12em; padding: 0.75rem; cursor: pointer;
+  clip-path: var(--clip-sm); display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+}
+.uc-btn:disabled { background: var(--border); cursor: not-allowed; }
+
+.manage-btn {
+  width: 100%; background: none; border: 1px solid var(--border); color: var(--muted);
+  font-family: 'Barlow Condensed',sans-serif; font-size: 0.82rem; font-weight: 700;
+  letter-spacing: 0.1em; padding: 0.65rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 0.4rem; margin-top: 0.5rem;
+}
+.manage-btn:disabled { opacity: 0.5; }
+
+.verifying-state { font-size: 0.82rem; color: var(--muted); padding: 1rem 0; display: flex; align-items: center; gap: 0.5rem; }
+.upgrade-error   { font-size: 0.78rem; color: var(--accent); margin-top: 0.5rem; display: flex; align-items: center; gap: 0.35rem; }
+.upgrade-success { font-size: 0.78rem; color: #34C759; margin-top: 0.5rem; display: flex; align-items: center; gap: 0.35rem; }
+
 .section { margin-bottom: 2rem; }
 .trainer-card { display: flex; align-items: flex-start; gap: 1rem; background: rgba(255,180,0,0.04); border: 1px solid rgba(255,180,0,0.2); padding: 1rem; }
 .trainer-avatar-img { width: 44px; height: 44px; object-fit: cover; flex-shrink: 0; border: 1px solid rgba(255,180,0,0.3); }
@@ -347,6 +600,8 @@ async function handleSignOut() {
 .plate-grid { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 .plate-chip { background: var(--surface); border: 1px solid var(--border); color: var(--muted); font-family: 'Barlow Condensed',sans-serif; font-size: 0.82rem; font-weight: 700; padding: 0.35rem 0.75rem; cursor: pointer; transition: all 0.15s; min-width: 52px; text-align: center; }
 .plate-chip.active { background: rgba(74,158,255,0.1); border-color: var(--accent); color: var(--accent); }
+.gym-val   { color: #34C759; font-weight: 600; }
+.muted-val { color: var(--border); }
 .create-form { display: flex; flex-direction: column; gap: 1rem; }
 .dialog-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
 .dialog-btn { flex: 1; border: none; font-family: 'Barlow Condensed',sans-serif; font-weight: 700; letter-spacing: 0.1em; font-size: 0.9rem; padding: 0.75rem; cursor: pointer; }

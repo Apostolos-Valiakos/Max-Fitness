@@ -9,18 +9,12 @@
       </template>
     </ViewHeader>
 
-    <div v-if="history.sessions.length === 0" class="empty-state">
-      <i class="pi pi-calendar empty-icon" />
-      <p>No sessions logged yet.</p>
-      <button class="cta-btn" @click="router.push('/workout/start')">Start a workout</button>
-    </div>
-
-    <!-- Calendar view -->
-    <div v-else-if="calendarMode" class="calendar-wrap">
+    <!-- Calendar view (shown first when calendarMode=true, even with no sessions) -->
+    <div v-if="calendarMode" class="calendar-wrap">
       <div class="cal-nav">
-        <button class="cal-nav-btn" @click="prevMonth"><i class="pi pi-chevron-left" /></button>
-        <span class="cal-month">{{ calMonthLabel }}</span>
-        <button class="cal-nav-btn" @click="nextMonth"><i class="pi pi-chevron-right" /></button>
+        <button class="cal-nav-btn" aria-label="prev" @click="prevMonth"><i class="pi pi-chevron-left" /></button>
+        <span class="cal-month month-label">{{ calMonthLabel }}</span>
+        <button class="cal-nav-btn" aria-label="next" @click="nextMonth"><i class="pi pi-chevron-right" /></button>
       </div>
 
       <div class="cal-grid">
@@ -55,6 +49,11 @@
 
     <!-- List view -->
     <div v-else>
+      <div v-if="history.sessions.length === 0" class="empty-state">
+        <i class="pi pi-calendar empty-icon" />
+        <p>No sessions logged yet.</p>
+        <button class="cta-btn" @click="router.push('/workout/start')">Start a workout</button>
+      </div>
       <div v-for="(group, week) in grouped" :key="week" class="week-group">
         <div class="week-label">{{ week }}</div>
         <SessionCard
@@ -66,7 +65,7 @@
         />
       </div>
 
-      <div class="load-more-wrap">
+      <div class="load-more-wrap" v-if="history.sessions.length > 0">
         <button
           v-if="history.canLoadMore"
           class="load-more-btn"
@@ -95,7 +94,7 @@ const router  = useRouter()
 const history = useHistoryStore()
 const auth    = useAuthStore()
 const enriched    = ref<any[]>([])
-const calendarMode = ref(false)
+const calendarMode = ref(true)
 
 // Calendar state
 const calYear  = ref(new Date().getFullYear())

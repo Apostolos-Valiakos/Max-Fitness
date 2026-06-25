@@ -59,6 +59,7 @@ export const useWorkoutStore = defineStore('workout', () => {
     const session: WorkoutSessionDocument = {
       id: uuidv4(), user_id: user.id, template_id: templateId ?? null,
       name, started_at: now, finished_at: null, updated_at: now,
+      notes: null, is_completed: false,
     }
     await db.workout_sessions.insert(session)
     activeSession.value   = session

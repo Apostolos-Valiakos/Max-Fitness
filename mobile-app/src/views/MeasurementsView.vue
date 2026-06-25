@@ -37,7 +37,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="e in entries" :key="e.id">
+            <tr v-for="e in entries" :key="e.id" class="measurement-entry">
               <td class="date-cell">{{ format(new Date(e.measured_at), 'MMM d') }}</td>
               <td v-for="f in FIELDS" :key="f.key">{{ e[f.key as keyof typeof e] ?? '—' }}</td>
             </tr>

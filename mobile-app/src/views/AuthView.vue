@@ -1,5 +1,5 @@
 <template>
-  <div class="auth-wrap">
+  <div class="auth-page">
     <div class="auth-card">
       <div class="auth-logo">MAX<span class="accent">FITNES</span></div>
       <div class="auth-subtitle">TRACK. PROGRESS. DOMINATE.</div>
@@ -36,8 +36,10 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
+import { useAuthStore } from '@/stores/authStore'
 
 const router   = useRouter()
+const auth     = useAuthStore()
 const mode     = ref<'login' | 'register'>('login')
 const email    = ref('')
 const password = ref('')
@@ -49,22 +51,25 @@ async function handleSubmit() {
   error.value = ''; loading.value = true
   try {
     if (mode.value === 'login') {
-      const { error: e } = await supabase.auth.signInWithPassword({ email: email.value, password: password.value })
-      if (e) { error.value = e.message; return }
+      // Use store's signIn so auth.user is set before router guard runs
+      const errMsg = await auth.signIn(email.value, password.value)
+      if (errMsg) { error.value = errMsg; return }
+      router.replace('/dashboard')
     } else {
       const { error: e } = await supabase.auth.signUp({
         email: email.value, password: password.value,
         options: { data: { full_name: fullName.value } },
       })
       if (e) { error.value = e.message; return }
+      // New users land on join-gym so they can optionally link to a gym
+      router.replace('/join-gym?onboarding=1')
     }
-    router.replace('/dashboard')
   } finally { loading.value = false }
 }
 </script>
 
 <style scoped>
-.auth-wrap{min-height:100dvh;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:1.5rem;}
+.auth-page{min-height:100dvh;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:1.5rem;}
 .auth-card{width:100%;max-width:360px;}
 .auth-logo{font-family:'Barlow Condensed',sans-serif;font-size:3rem;font-weight:900;color:var(--text);letter-spacing:-0.02em;line-height:1;margin-bottom:0.25rem;}
 .accent{color:var(--accent);}

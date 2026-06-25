@@ -7,18 +7,20 @@ import type { User } from '@supabase/supabase-js'
 
 export interface Profile {
   id: string
-  role: 'user' | 'trainer' | 'admin'
+  role: 'user' | 'trainer' | 'admin' | 'owner'
   tier: 'free' | 'paid' | 'ultra'
   full_name: string | null
   avatar_url: string | null
   bio: string | null
+  gym_id: string | null
+  gym_name: string | null
 }
 
 const CACHE_KEY   = 'auth_cache'
 const BYPASS_AUTH = import.meta.env.VITE_BYPASS_AUTH === 'true'
 
 const BYPASS_USER: User    = { id: 'local-test-user-000000000001', email: 'test@maxfitness.local' } as unknown as User
-const BYPASS_PROFILE: Profile = { id: 'local-test-user-000000000001', role: 'user', tier: 'ultra', full_name: 'Test User', avatar_url: null, bio: null }
+const BYPASS_PROFILE: Profile = { id: 'local-test-user-000000000001', role: 'user', tier: 'ultra', full_name: 'Test User', avatar_url: null, bio: null, gym_id: null, gym_name: null }
 
 export const useAuthStore = defineStore('auth', () => {
   const user      = ref<User | null>(null)
@@ -30,6 +32,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isTrainer = computed(() => profile.value?.role === 'trainer' || profile.value?.role === 'admin')
   const isFree    = computed(() => profile.value?.tier === 'free')
   const isUltra   = computed(() => profile.value?.tier === 'ultra')
+  const hasGym    = computed(() => !!profile.value?.gym_id)
 
   async function init() {
     loading.value = true
@@ -66,21 +69,49 @@ export const useAuthStore = defineStore('auth', () => {
 
     loading.value = false
 
-    supabase.auth.onAuthStateChange(async (_event, session) => {
-      user.value = session?.user ?? null
-      if (session?.user) {
-        await fetchProfile(session.user.id)
-        await _cacheAuth()
-        isOffline.value = false
-      } else if (!isOffline.value) {
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
+        user.value = null
         profile.value = null
+        isOffline.value = false
+        return
       }
+      if (session?.user) {
+        user.value = session.user
+        isOffline.value = false
+        // Fire-and-forget: don't block signInWithPassword() while fetching profile.
+        // The auth store's signIn() already set user.value synchronously; profile
+        // arrives a moment later without stalling the router navigation.
+        fetchProfile(session.user.id).then(() => _cacheAuth()).catch(() => {})
+      }
+      // For INITIAL_SESSION or TOKEN_REFRESH_FAILURE with no session,
+      // preserve existing user/profile so the UI doesn't flicker to logged-out state.
     })
   }
 
   async function fetchProfile(userId: string) {
-    const { data } = await supabase.from('profiles').select('*').eq('id', userId).single()
-    if (data) profile.value = data as Profile
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, role, tier, full_name, avatar_url, bio, gym_id, gyms(name)')
+      .eq('id', userId)
+      .single()
+    if (error) {
+      console.error('[authStore] fetchProfile error, retrying without join:', error.message)
+      // Fallback: fetch without the gyms join
+      const { data: data2 } = await supabase
+        .from('profiles')
+        .select('id, role, tier, full_name, avatar_url, bio, gym_id')
+        .eq('id', userId)
+        .single()
+      if (data2) {
+        profile.value = { ...data2, gym_name: null } as Profile
+      }
+      return
+    }
+    if (data) {
+      const { gyms, ...rest } = data as any
+      profile.value = { ...rest, gym_name: (gyms as any)?.name ?? null } as Profile
+    }
   }
 
   async function updateProfile(updates: Partial<Pick<Profile, 'full_name' | 'avatar_url' | 'bio'>>) {
@@ -137,9 +168,18 @@ export const useAuthStore = defineStore('auth', () => {
     isOffline.value = true
   }
 
+  async function signIn(email: string, password: string): Promise<string | null> {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) return error.message
+    // Set user synchronously so the router guard sees it before router.replace() runs.
+    // onAuthStateChange will handle fetchProfile + _cacheAuth asynchronously.
+    if (data.session?.user) user.value = data.session.user
+    return null
+  }
+
   return {
     user, profile, loading, isOffline,
-    isAdmin, isTrainer, isFree, isUltra,
-    init, fetchProfile, updateProfile, uploadAvatar, changePassword, signOut,
+    isAdmin, isTrainer, isFree, isUltra, hasGym,
+    init, signIn, fetchProfile, updateProfile, uploadAvatar, changePassword, signOut,
   }
 })

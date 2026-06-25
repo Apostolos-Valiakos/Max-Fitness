@@ -6,7 +6,7 @@
           (timer.isRunning.value || timer.isFinished.value) &&
           !timer.isMinimized.value
         "
-        class="timer-overlay"
+        class="timer-overlay rest-timer"
         @click.self="timer.minimize()"
       >
         <div class="timer-card">

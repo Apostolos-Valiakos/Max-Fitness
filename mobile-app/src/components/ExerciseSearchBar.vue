@@ -13,6 +13,11 @@
 
     <div class="filters">
       <button
+        class="filter-chip"
+        :class="{ active: bodyPart === null }"
+        @click="$emit('update:bodyPart', null)"
+      >All</button>
+      <button
         v-for="bp in bodyParts" :key="bp"
         class="filter-chip"
         :class="{ active: bodyPart === bp }"

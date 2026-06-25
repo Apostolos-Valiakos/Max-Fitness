@@ -29,6 +29,7 @@ export interface ExerciseDocument {
   instructions: string | null;
   is_custom: boolean;
   created_by: string | null;
+  gym_id: string | null;
   updated_at: string;
   target_muscle: string | null;
   secondary_muscles: string[] | null;
@@ -99,7 +100,7 @@ export const templateExerciseSchema: RxJsonSchema<TemplateExerciseDocument> = {
 }
 
 export const exerciseSchema: RxJsonSchema<ExerciseDocument> = {
-  version: 3,
+  version: 4,
   primaryKey: "id",
   type: "object",
   properties: {
@@ -111,6 +112,7 @@ export const exerciseSchema: RxJsonSchema<ExerciseDocument> = {
     instructions: { type: ["string", "null"] },
     is_custom: { type: "boolean" },
     created_by: { type: ["string", "null"], maxLength: 36 },
+    gym_id: { type: ["string", "null"], maxLength: 36 },
     updated_at: { type: "string", maxLength: 32 },
     target_muscle: { type: ["string", "null"] },
     secondary_muscles: { type: ["array", "null"], items: { type: "string" } },

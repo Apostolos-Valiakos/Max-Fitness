@@ -146,13 +146,21 @@ watch(() => templates.templates, async (list) => {
 
 async function startEmpty() {
   const name = `Workout — ${new Date().toLocaleDateString('en', { weekday:'short', month:'short', day:'numeric' })}`
-  await workout.startSession(name)
-  router.push('/workout/active')
+  try {
+    await workout.startSession(name)
+  } catch (err) {
+    console.error('[WorkoutStart] startSession failed:', err)
+  }
+  if (workout.hasActiveSession) router.push('/workout/active')
 }
 
 async function startFromTemplate(t: WorkoutTemplateDocument) {
-  await workout.startSession(t.name, t.id)
-  router.push('/workout/active')
+  try {
+    await workout.startSession(t.name, t.id)
+  } catch (err) {
+    console.error('[WorkoutStart] startSession failed:', err)
+  }
+  if (workout.hasActiveSession) router.push('/workout/active')
 }
 </script>
 

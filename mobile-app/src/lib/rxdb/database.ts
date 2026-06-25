@@ -1,7 +1,7 @@
 import { createRxDatabase, addRxPlugin } from "rxdb";
 import { getRxStorageDexie } from "rxdb/plugins/storage-dexie";
-import { RxDBDevModePlugin } from "rxdb/plugins/dev-mode";
 import { wrappedValidateAjvStorage } from "rxdb/plugins/validate-ajv";
+import { RxDBDevModePlugin } from "rxdb/plugins/dev-mode";
 import { RxDBQueryBuilderPlugin } from "rxdb/plugins/query-builder";
 import { RxDBUpdatePlugin } from "rxdb/plugins/update";
 import { RxDBMigrationSchemaPlugin } from "rxdb/plugins/migration-schema";
@@ -39,6 +39,7 @@ addRxPlugin(RxDBMigrationSchemaPlugin);
 let db: Awaited<ReturnType<typeof buildDatabase>> | null = null;
 
 async function buildDatabase() {
+  // DevMode requires a schema-validating storage wrapper; production uses plain Dexie.
   const storage = import.meta.env.DEV
     ? wrappedValidateAjvStorage({ storage: getRxStorageDexie() })
     : getRxStorageDexie();
@@ -60,6 +61,7 @@ async function buildDatabase() {
         1: (doc: any) => doc,
         2: (doc: any) => ({ ...doc, target_muscle: null, secondary_muscles: null, exercise_db_id: null }),
         3: (doc: any) => ({ ...doc, sticky_note: null }),
+        4: (doc: any) => ({ ...doc, gym_id: null }),
       },
     },
     workout_sessions: {

@@ -1,5 +1,5 @@
 <template>
-  <div class="ex-card" @click="$emit('click')">
+  <div class="ex-card exercise-card" @click="$emit('click')">
     <div class="ex-icon">{{ exercise.name[0] }}</div>
     <div class="ex-body">
       <div class="ex-name">{{ exercise.name }}</div>

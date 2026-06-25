@@ -108,11 +108,10 @@ async function boot() {
   // 1. RxDB first
   await initDatabase();
 
-  // 2. Vue app
+  // 2. Vue app + plugins (no router yet — router guard needs auth state)
   const app = createApp(App);
   const pinia = createPinia();
   app.use(pinia);
-  app.use(router);
   app.use(PrimeVue, {
     theme: {
       preset: MaxFitnessTheme,
@@ -125,25 +124,31 @@ async function boot() {
   // 3. Activate dark mode globally (app is always dark)
   document.documentElement.classList.add('dark');
 
-  // 4. Init auth store (loads session + profile)
+  // 4. Init auth store BEFORE installing the router.
+  //    Vue Router starts its initial navigation the moment it's registered,
+  //    so the beforeEach guard would fire with auth.user === null (race condition)
+  //    if we register the router before the session is restored from localStorage.
   const auth = useAuthStore();
   await auth.init();
 
-  // 5. Load user settings (unit, bar weight, plates) — non-blocking is fine
+  // 5. Router after auth is ready — guard will always see the correct user state
+  app.use(router);
+
+  // 6. Load user settings (unit, bar weight, plates) — non-blocking is fine
   useUserSettingsStore()
     .load()
     .catch(() => {});
 
-  // 6. Recover any unfinished workout
+  // 7. Recover any unfinished workout
   const workout = useWorkoutStore();
   await workout.recoverSession();
 
-  // 7. Start sync (non-blocking, skipped in bypass/offline mode)
+  // 8. Start sync (non-blocking, skipped in bypass/offline mode)
   if (import.meta.env.VITE_BYPASS_AUTH !== 'true') {
     initSyncManager().catch((err) => console.error("[boot] sync failed:", err))
   }
 
-  // 8. Mount
+  // 9. Mount
   app.mount("#app");
 }
 

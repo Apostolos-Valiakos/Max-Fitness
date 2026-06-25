@@ -34,6 +34,12 @@ const router = createRouter({
       ],
     },
     {
+      path: '/join-gym',
+      name: 'JoinGym',
+      component: () => import('@/views/JoinGymView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/workout/start',
       name: 'WorkoutStart',
       component: () => import('@/views/WorkoutStartView.vue'),
