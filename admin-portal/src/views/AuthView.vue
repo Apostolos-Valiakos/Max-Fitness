@@ -6,38 +6,57 @@
         <span class="b-admin">ADMIN PORTAL</span>
       </div>
 
-      <form class="auth-form" @submit.prevent="handleLogin">
+      <form class="auth-form" @submit.prevent="isSignUp ? handleSignUp() : handleLogin()">
         <div class="field">
           <label class="mf-label">EMAIL</label>
           <InputText v-model="email" type="email" placeholder="admin@example.com" autocomplete="email" required />
         </div>
         <div class="field">
           <label class="mf-label">PASSWORD</label>
-          <InputText v-model="password" type="password" placeholder="••••••••" autocomplete="current-password" required />
+          <InputText v-model="password" type="password" placeholder="••••••••"
+            :autocomplete="isSignUp ? 'new-password' : 'current-password'" required />
         </div>
 
         <div v-if="error" class="auth-error">
           <i class="pi pi-exclamation-triangle" /> {{ error }}
         </div>
 
-        <Button label="SIGN IN" type="submit" :loading="loading" class="auth-btn" />
+        <Button :label="isSignUp ? 'CREATE ACCOUNT' : 'SIGN IN'" type="submit" :loading="loading" class="auth-btn" />
       </form>
+
+      <div class="mode-toggle">
+        <template v-if="isSignUp">
+          Already have an account?
+          <a href="#" @click.prevent="mode = 'signin'; error = ''">Sign in</a>
+        </template>
+        <template v-else>
+          Need an account?
+          <a href="#" @click.prevent="mode = 'signup'; error = ''">Create one</a>
+        </template>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { ref, computed } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { supabase } from "@/lib/supabase";
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 
-const email = ref("");
-const password = ref("");
-const error = ref("");
-const loading = ref(false);
 const router = useRouter();
+const route  = useRoute();
+
+const mode     = ref<'signin' | 'signup'>(route.query.mode === 'signup' ? 'signup' : 'signin')
+const isSignUp = computed(() => mode.value === 'signup')
+
+const email    = ref((route.query.email as string) ?? "");
+const password = ref("");
+const error    = ref("");
+const loading  = ref(false);
+
+const redirect = route.query.redirect as string | undefined
 
 async function handleLogin() {
   error.value = "";
@@ -47,28 +66,46 @@ async function handleLogin() {
     password: password.value,
   });
   loading.value = false;
-  if (e) {
-    error.value = e.message;
-    return;
-  }
+  if (e) { error.value = e.message; return }
 
-  // Verify this user is admin
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
     .single();
-  if (profile?.role !== "admin" && profile?.role !== "trainer") {
+  if (!['admin', 'trainer', 'owner'].includes(profile?.role ?? '')) {
     await supabase.auth.signOut();
-    error.value = "Access denied. This portal is for admins and trainers only.";
+    error.value = "Access denied. This portal is for gym staff only.";
     return;
   }
 
-  router.push(profile?.role === "trainer" ? "/trainer/clients" : "/dashboard");
+  if (redirect) { router.push(redirect); return }
+  if (profile?.role === 'owner')   { router.push('/owner/gyms'); return }
+  if (profile?.role === 'trainer') { router.push('/trainer/clients'); return }
+  router.push('/dashboard');
+}
+
+async function handleSignUp() {
+  error.value = "";
+  loading.value = true;
+  const { data, error: e } = await supabase.auth.signUp({
+    email: email.value,
+    password: password.value,
+  });
+  loading.value = false;
+  if (e) { error.value = e.message; return }
+
+  // Email confirmation required — session is null until confirmed
+  if (!data.session) {
+    error.value = "Check your email to confirm your account, then click the invite link again."
+    return
+  }
+
+  // Signed in immediately — redirect to invite or default landing
+  if (redirect) { router.push(redirect); return }
+  router.push('/dashboard');
 }
 </script>
 
@@ -137,4 +174,16 @@ async function handleLogin() {
   padding: 0.6rem 0.75rem;
 }
 .auth-btn { width: 100%; justify-content: center; margin-top: 0.25rem; }
+.mode-toggle {
+  text-align: center;
+  margin-top: 1.25rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.mode-toggle a {
+  color: var(--accent);
+  text-decoration: none;
+  margin-left: 0.25rem;
+}
+.mode-toggle a:hover { text-decoration: underline; }
 </style>

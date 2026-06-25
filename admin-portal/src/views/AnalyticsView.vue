@@ -13,7 +13,7 @@
     <template v-else>
 
       <!-- ── OVERVIEW ──────────────────────────────────────────────────── -->
-      <div v-if="tabLoaded.overview" v-show="activeTab === 'overview'">
+      <div v-if="tabLoaded.overview && activeTab === 'overview'">
         <div class="kpi-row">
           <div class="kpi-card card"><div class="kpi-val">{{ ov.totalUsers }}</div><div class="kpi-label">Total Users</div></div>
           <div class="kpi-card card"><div class="kpi-val">{{ ov.totalSessions.toLocaleString() }}</div><div class="kpi-label">Sessions (12w)</div></div>
@@ -33,7 +33,7 @@
       </div>
 
       <!-- ── GROWTH ─────────────────────────────────────────────────────── -->
-      <div v-if="tabLoaded.growth" v-show="activeTab === 'growth'">
+      <div v-if="tabLoaded.growth && activeTab === 'growth'">
         <div class="kpi-row">
           <div class="kpi-card card"><div class="kpi-val">{{ gr.newThisMonth }}</div><div class="kpi-label">New This Month</div></div>
           <div class="kpi-card card"><div class="kpi-val">{{ gr.active7 }}</div><div class="kpi-label">Active (7d)</div></div>
@@ -65,7 +65,7 @@
       </div>
 
       <!-- ── REVENUE ─────────────────────────────────────────────────────── -->
-      <div v-if="tabLoaded.revenue" v-show="activeTab === 'revenue'">
+      <div v-if="tabLoaded.revenue && activeTab === 'revenue'">
         <div class="kpi-row">
           <div class="kpi-card card"><div class="kpi-val green">€{{ rv.mrr.toLocaleString() }}</div><div class="kpi-label">Est. MRR</div></div>
           <div class="kpi-card card"><div class="kpi-val">{{ rv.ultraCount }}</div><div class="kpi-label">Ultra (€30/mo)</div></div>
@@ -114,7 +114,7 @@
       </div>
 
       <!-- ── ENGAGEMENT ──────────────────────────────────────────────────── -->
-      <div v-if="tabLoaded.engagement" v-show="activeTab === 'engagement'">
+      <div v-if="tabLoaded.engagement && activeTab === 'engagement'">
         <div class="kpi-row">
           <div class="kpi-card card"><div class="kpi-val">{{ eg.avgDuration }}<span class="kpi-unit">min</span></div><div class="kpi-label">Avg Session Duration</div></div>
           <div class="kpi-card card"><div class="kpi-val">{{ eg.avgSets }}</div><div class="kpi-label">Avg Sets / Session</div></div>
@@ -138,7 +138,7 @@
       </div>
 
       <!-- ── TRAINERS ────────────────────────────────────────────────────── -->
-      <div v-if="tabLoaded.trainers" v-show="activeTab === 'trainers'">
+      <div v-if="tabLoaded.trainers && activeTab === 'trainers'">
         <div class="kpi-row">
           <div class="kpi-card card"><div class="kpi-val">{{ tr.totalTrainers }}</div><div class="kpi-label">Trainers</div></div>
           <div class="kpi-card card"><div class="kpi-val">{{ tr.totalClients }}</div><div class="kpi-label">Active Clients</div></div>
@@ -179,7 +179,7 @@
       </div>
 
       <!-- ── CONTENT ─────────────────────────────────────────────────────── -->
-      <div v-if="tabLoaded.content" v-show="activeTab === 'content'">
+      <div v-if="tabLoaded.content && activeTab === 'content'">
         <div class="kpi-row">
           <div class="kpi-card card"><div class="kpi-val">{{ ct.templateCount }}</div><div class="kpi-label">Total Templates</div></div>
           <div class="kpi-card card"><div class="kpi-val">{{ ct.totalSessionsAllTime.toLocaleString() }}</div><div class="kpi-label">Sessions (All Time)</div></div>
@@ -229,7 +229,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { Bar, Line } from 'vue-chartjs'
 import {
   Chart as ChartJS, CategoryScale, LinearScale, BarElement,
@@ -237,6 +237,7 @@ import {
 } from 'chart.js'
 import { adminSupabase } from '@/lib/adminSupabase'
 import { useAuthUsers } from '@/composables/useAuthUsers'
+import { useGymFilter } from '@/composables/useGymFilter'
 import { subDays, subMonths, format, startOfMonth, endOfMonth, eachWeekOfInterval, endOfWeek, eachMonthOfInterval, differenceInDays } from 'date-fns'
 import { fmtDate } from '@/lib/utils'
 
@@ -270,6 +271,17 @@ const tabLoading = ref(false)
 const tabLoaded  = reactive({ overview: false, growth: false, revenue: false, engagement: false, trainers: false, content: false })
 
 const { authUsers, fetchAuthUsers } = useAuthUsers()
+const { activeGymId } = useGymFilter()
+
+// IDs of users in the active gym (null = no filter, [] = empty gym)
+const gymUserIds = ref<string[] | null>(null)
+// authUsers filtered to the active gym
+const gymAuthUsers = computed(() => {
+  const ids = gymUserIds.value
+  if (ids === null) return authUsers.value
+  const set = new Set(ids)
+  return authUsers.value.filter(u => set.has(u.id))
+})
 
 // ── Shared data (loaded with overview) ──────────────────────────────────────
 const allProfiles  = ref<any[]>([])
@@ -331,16 +343,33 @@ async function loadOverview() {
   const from = subDays(now, 84)
   const weeks = eachWeekOfInterval({ start: from, end: now })
   const weekLabels = weeks.map(w => format(w, 'MMM d'))
+  const gymId = activeGymId.value
 
-  const [profilesRes, , sessRes] = await Promise.all([
-    adminSupabase.from('profiles').select('id, tier, role, created_at'),
+  // Round 1: profiles + authUsers in parallel (profiles filtered by gym_id)
+  let profilesQuery = adminSupabase.from('profiles').select('id, tier, role, created_at')
+  if (gymId) profilesQuery = profilesQuery.eq('gym_id', gymId)
+
+  const [profilesRes] = await Promise.all([
+    profilesQuery,
     fetchAuthUsers().catch(() => {}),
-    adminSupabase.from('workout_sessions').select('id, user_id, started_at, finished_at')
-      .gte('started_at', from.toISOString()).not('finished_at', 'is', null),
   ])
 
   allProfiles.value = profilesRes.data ?? []
-  sessions84.value  = sessRes.data ?? []
+  const userIds = allProfiles.value.map(p => p.id)
+  gymUserIds.value  = gymId ? userIds : null
+
+  // Round 2: sessions filtered by gym user IDs
+  let sessQuery = adminSupabase.from('workout_sessions')
+    .select('id, user_id, started_at, finished_at')
+    .gte('started_at', from.toISOString()).not('finished_at', 'is', null)
+  if (gymId) {
+    sessQuery = userIds.length
+      ? sessQuery.in('user_id', userIds)
+      : sessQuery.eq('user_id', '00000000-0000-0000-0000-000000000000')
+  }
+
+  const sessRes = await sessQuery
+  sessions84.value = sessRes.data ?? []
 
   // Load sets for those sessions
   const ids = sessions84.value.map(s => s.id)
@@ -371,10 +400,10 @@ async function loadOverview() {
   })
   ov.sessionsChart = makeBar(weekLabels, sessWeekly, '#4A9EFF')
 
-  // Signups per week from authUsers
+  // Signups per week — use gymAuthUsers (filtered to this gym's users)
   const signupWeekly = weeks.map(w => {
     const end = endOfWeek(w).toISOString()
-    return authUsers.value.filter(u => u.created_at >= w.toISOString() && u.created_at <= end).length
+    return gymAuthUsers.value.filter(u => u.created_at >= w.toISOString() && u.created_at <= end).length
   })
   ov.signupsChart = makeLine(weekLabels, signupWeekly, '#4A9EFF')
 
@@ -388,12 +417,20 @@ async function loadGrowth() {
   const from30 = subDays(now, 30).toISOString()
   const from90 = subDays(now, 90).toISOString()
 
+  // Apply gym user filter to session queries
+  const uids = gymUserIds.value
+  function gymSess(base: any) {
+    if (uids === null) return base
+    return uids.length ? base.in('user_id', uids) : base.eq('user_id', '00000000-0000-0000-0000-000000000000')
+  }
+
+  type SessRow = { data: { user_id: string }[] | null }
   const [s7Res, s30Res, s90Res, everRes] = await Promise.all([
-    adminSupabase.from('workout_sessions').select('user_id').gte('started_at', from7).not('finished_at', 'is', null),
-    adminSupabase.from('workout_sessions').select('user_id').gte('started_at', from30).not('finished_at', 'is', null),
-    adminSupabase.from('workout_sessions').select('user_id').gte('started_at', from90).not('finished_at', 'is', null),
-    adminSupabase.from('workout_sessions').select('user_id').lt('started_at', from30).not('finished_at', 'is', null),
-  ])
+    gymSess(adminSupabase.from('workout_sessions').select('user_id').gte('started_at', from7).not('finished_at', 'is', null)),
+    gymSess(adminSupabase.from('workout_sessions').select('user_id').gte('started_at', from30).not('finished_at', 'is', null)),
+    gymSess(adminSupabase.from('workout_sessions').select('user_id').gte('started_at', from90).not('finished_at', 'is', null)),
+    gymSess(adminSupabase.from('workout_sessions').select('user_id').lt('started_at', from30).not('finished_at', 'is', null)),
+  ]) as [SessRow, SessRow, SessRow, SessRow]
 
   const active7Set  = new Set((s7Res.data ?? []).map(s => s.user_id))
   const active30Set = new Set((s30Res.data ?? []).map(s => s.user_id))
@@ -406,15 +443,16 @@ async function loadGrowth() {
   gr.churned  = [...everSet].filter(id => !active30Set.has(id)).length
   gr.neverTrained = allProfiles.value.filter(p => !active90Set.has(p.id) && !everSet.has(p.id)).length
 
+  // Use gymAuthUsers (gym-filtered) for signup metrics
   const thisMonth = startOfMonth(now)
-  gr.newThisMonth = authUsers.value.filter(u => u.created_at >= thisMonth.toISOString()).length
+  gr.newThisMonth = gymAuthUsers.value.filter(u => u.created_at >= thisMonth.toISOString()).length
 
   // Signups by month (last 12 months)
   const months = eachMonthOfInterval({ start: subMonths(now, 11), end: now })
   const monthLabels = months.map(m => format(m, 'MMM yy'))
   const signupsByMonth = months.map(m => {
     const end = endOfMonth(m).toISOString()
-    return authUsers.value.filter(u => u.created_at >= m.toISOString() && u.created_at <= end).length
+    return gymAuthUsers.value.filter(u => u.created_at >= m.toISOString() && u.created_at <= end).length
   })
   gr.signupsByMonth = makeBar(monthLabels, signupsByMonth, '#4A9EFF')
 
@@ -535,10 +573,11 @@ async function loadTrainers() {
   const nameMap: Record<string, string> = {}
   for (const p of allProfiles.value) if (p.role === 'trainer' || p.role === 'admin') nameMap[p.id] = p.full_name ?? '—'
 
+  // trainerIds comes from allProfiles which is already gym-scoped via loadOverview
   const [assignRes, caRes, subRes] = await Promise.all([
-    adminSupabase.from('trainer_assignments').select('trainer_id, client_id').eq('is_active', true),
-    adminSupabase.from('checkin_assignments').select('id, trainer_id').eq('is_active', true),
-    adminSupabase.from('checkin_submissions').select('id, trainer_id, created_at, trainer_replied_at, trainer_reply'),
+    adminSupabase.from('trainer_assignments').select('trainer_id, client_id').eq('is_active', true).in('trainer_id', trainerIds),
+    adminSupabase.from('checkin_assignments').select('id, trainer_id').eq('is_active', true).in('trainer_id', trainerIds),
+    adminSupabase.from('checkin_submissions').select('id, trainer_id, created_at, trainer_replied_at, trainer_reply').in('trainer_id', trainerIds),
   ])
 
   const assignments   = assignRes.data ?? []
@@ -590,9 +629,22 @@ async function loadTrainers() {
 
 // ── Load: CONTENT ─────────────────────────────────────────────────────────────
 async function loadContent() {
+  const gymId = activeGymId.value
+  const uids  = gymUserIds.value
+
+  let allSessQuery = adminSupabase.from('workout_sessions').select('template_id, user_id').not('template_id', 'is', null)
+  if (uids !== null) {
+    allSessQuery = uids.length
+      ? allSessQuery.in('user_id', uids)
+      : allSessQuery.eq('user_id', '00000000-0000-0000-0000-000000000000')
+  }
+
+  let templatesQuery = adminSupabase.from('workout_templates').select('id, name, owner_id, is_public')
+  if (gymId) templatesQuery = templatesQuery.eq('gym_id', gymId)
+
   const [allSessRes, templatesRes, exercisesRes] = await Promise.all([
-    adminSupabase.from('workout_sessions').select('template_id').not('template_id', 'is', null),
-    adminSupabase.from('workout_templates').select('id, name, owner_id, is_public'),
+    allSessQuery,
+    templatesQuery,
     adminSupabase.from('exercises').select('id, name, body_part, created_by'),
   ])
 
@@ -656,18 +708,30 @@ async function switchTab(id: string) {
   activeTab.value = id
   if (tabLoaded[id as keyof typeof tabLoaded]) return
   tabLoading.value = true
-  if (id === 'growth')     await loadGrowth()
-  if (id === 'revenue')    loadRevenue()
-  if (id === 'engagement') loadEngagement()
-  if (id === 'trainers')   await loadTrainers()
-  if (id === 'content')    await loadContent()
-  tabLoading.value = false
+  try {
+    if (id === 'growth')     await loadGrowth()
+    if (id === 'revenue')    await loadRevenue()
+    if (id === 'engagement') await loadEngagement()
+    if (id === 'trainers')   await loadTrainers()
+    if (id === 'content')    await loadContent()
+  } catch (err) {
+    console.error(`[Analytics] load${id} error:`, err)
+    ;(tabLoaded as any)[id] = true
+  } finally {
+    tabLoading.value = false
+  }
 }
 
 onMounted(async () => {
   tabLoading.value = true
-  await loadOverview()
-  tabLoading.value = false
+  try {
+    await loadOverview()
+  } catch (err) {
+    console.error('[Analytics] loadOverview error:', err)
+    tabLoaded.overview = true
+  } finally {
+    tabLoading.value = false
+  }
 })
 </script>
 
@@ -688,7 +752,7 @@ onMounted(async () => {
 .kpi-card { padding: 1.25rem; }
 .kpi-val  { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 900; color: var(--text); line-height: 1; }
 .kpi-unit { font-size: 1rem; margin-left: 0.2rem; }
-.kpi-label{ font-size: 0.67rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.35rem; }
+.kpi-label{ font-size: 0.67rem; color: var(--muted); letter-spacing: 0.1em; margin-top: 0.35rem; }
 
 /* Charts */
 .charts-row  { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }

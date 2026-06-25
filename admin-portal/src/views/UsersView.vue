@@ -127,6 +127,8 @@ import { supabase } from '@/lib/supabase'
 import { adminSupabase } from '@/lib/adminSupabase'
 import { useAuthStore } from '@/stores/authStore'
 import { useAuthUsers } from '@/composables/useAuthUsers'
+import { useGymFilter } from '@/composables/useGymFilter'
+import { useGymStore } from '@/stores/gymStore'
 import { useToast } from 'primevue/usetoast'
 import { initials, fmtDate } from '@/lib/utils'
 import type { UserRow, UserRole, UserTier } from '@/lib/database.types'
@@ -139,10 +141,12 @@ import Select from 'primevue/select'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 
-const auth    = useAuthStore()
-const selfId  = computed(() => auth.user?.id)
+const auth     = useAuthStore()
+const selfId   = computed(() => auth.user?.id)
 const { authMap, fetchAuthUsers } = useAuthUsers()
-const toast   = useToast()
+const { activeGymId } = useGymFilter()
+const gymStore = useGymStore()
+const toast    = useToast()
 const loading = ref(true)
 const users   = ref<UserRow[]>([])
 
@@ -178,9 +182,12 @@ const filtered = computed(() => {
 
 onMounted(async () => {
   loading.value = true
+  let profilesQuery = supabase.from('profiles').select('*').order('created_at', { ascending: false })
+  if (activeGymId.value) profilesQuery = profilesQuery.eq('gym_id', activeGymId.value)
+
   const [, { data: profiles }] = await Promise.all([
     fetchAuthUsers(),
-    supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+    profilesQuery,
   ])
   users.value = (profiles ?? []).map(p => ({
     ...p,
@@ -191,6 +198,24 @@ onMounted(async () => {
 })
 
 async function updateRole(u: UserRow, role: UserRole) {
+  const STAFF_ROLES = ['trainer', 'admin']
+  const isPromotingToStaff = STAFF_ROLES.includes(role) && !STAFF_ROLES.includes(u.role)
+  if (isPromotingToStaff && activeGymId.value && gymStore.gym) {
+    const { count } = await supabase
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('gym_id', activeGymId.value)
+      .in('role', STAFF_ROLES)
+    if ((count ?? 0) >= gymStore.gym.max_trainers) {
+      toast.add({
+        severity: 'warn',
+        summary: 'Trainer limit reached',
+        detail: `Your plan allows a maximum of ${gymStore.gym.max_trainers} trainers/admins. Upgrade your plan to add more.`,
+        life: 6000,
+      })
+      return
+    }
+  }
   const { error } = await supabase.from('profiles').update({ role }).eq('id', u.id)
   if (error) { toast.add({ severity: 'error', summary: 'Error', detail: error.message, life: 4000 }); return }
   u.role = role

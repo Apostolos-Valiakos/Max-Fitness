@@ -8,7 +8,10 @@
     "build": "vue-tsc && vite build",
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit",
-    "db:types": "npx supabase gen types typescript --db-url postgresql://postgres:postgres@127.0.0.1:54322/postgres > src/lib/database.types.ts"
+    "db:types": "npx supabase gen types typescript --db-url postgresql://postgres:postgres@127.0.0.1:54322/postgres > src/lib/database.types.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@primevue/themes": "^4.5.4",
@@ -26,11 +29,16 @@
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
+    "@pinia/testing": "^1.0.3",
     "@types/node": "^22.0.0",
     "@vitejs/plugin-vue": "^5.2.1",
+    "@vitest/coverage-v8": "^4.1.8",
+    "@vue/test-utils": "^2.4.11",
     "@vue/tsconfig": "^0.7.0",
+    "happy-dom": "^20.10.3",
     "typescript": "^5.7.2",
     "vite": "^6.0.5",
+    "vitest": "^4.1.8",
     "vue-tsc": "^2.2.0"
   }
 }

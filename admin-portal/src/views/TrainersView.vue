@@ -108,6 +108,8 @@
 import { ref, computed, onMounted, reactive } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useAuthUsers } from '@/composables/useAuthUsers'
+import { useGymFilter } from '@/composables/useGymFilter'
+import { useGymStore } from '@/stores/gymStore'
 import { initials, fmtDate } from '@/lib/utils'
 import type { TrainerRow, ClientRow } from '@/lib/database.types'
 import DataTable from 'primevue/datatable'
@@ -117,7 +119,9 @@ import Select from 'primevue/select'
 import Drawer from 'primevue/drawer'
 
 const { emailMap, fetchAuthUsers } = useAuthUsers()
-const loading         = ref(true)
+const { activeGymId } = useGymFilter()
+const gymStore  = useGymStore()
+const loading   = ref(true)
 const trainers        = ref<TrainerRow[]>([])
 const allUsers        = ref<any[]>([])
 const showAssignPanel = ref(false)
@@ -134,10 +138,16 @@ onMounted(async () => { await load() })
 
 async function load() {
   loading.value = true
+  let profilesQuery = supabase.from('profiles').select('*')
+  if (activeGymId.value) profilesQuery = profilesQuery.eq('gym_id', activeGymId.value)
+
+  let assignQuery = supabase.from('trainer_assignments').select('*').eq('is_active', true)
+  if (activeGymId.value) assignQuery = assignQuery.eq('gym_id', activeGymId.value)
+
   const [, { data: profiles }, { data: assignments }] = await Promise.all([
     fetchAuthUsers(),
-    supabase.from('profiles').select('*'),
-    supabase.from('trainer_assignments').select('*').eq('is_active', true),
+    profilesQuery,
+    assignQuery,
   ])
 
   allUsers.value = (profiles ?? []).map(p => ({ ...p, email: emailMap.value[p.id] ?? '' }))
@@ -156,6 +166,14 @@ async function load() {
 
 async function handleAssign() {
   assignError.value = ''
+
+  if (gymStore.gym && activeGymId.value && gymStore.gym.max_clients < 9999) {
+    if (gymStore.clientCount >= gymStore.gym.max_clients) {
+      assignError.value = `Client limit reached (${gymStore.gym.max_clients} max on your plan). Upgrade to add more clients.`
+      return
+    }
+  }
+
   const { error } = await supabase
     .from('trainer_assignments')
     .upsert(

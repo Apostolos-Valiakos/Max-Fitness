@@ -236,7 +236,6 @@
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
-import { listAuthUsers } from '@/lib/adminSupabase'
 import { fmtDate } from '@/lib/utils'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
@@ -298,7 +297,7 @@ async function load() {
   const [plansRes, assignRes, templRes, taRes] = await Promise.all([
     supabase.from('workout_plans').select('*, plan_day_templates(day_of_week, template_id, workout_templates(name))').eq('trainer_id', user.id).order('created_at', { ascending: false }),
     supabase.from('client_plan_assignments').select('*').eq('trainer_id', user.id),
-    supabase.from('workout_templates').select('id, name').eq('owner_id', user.id).order('name'),
+    supabase.from('workout_templates').select('id, name').is('assigned_by', null).order('name'),
     supabase.from('trainer_assignments').select('client_id, profiles!trainer_assignments_client_id_fkey(id, full_name)').eq('trainer_id', user.id).eq('is_active', true),
   ])
 
@@ -312,12 +311,10 @@ async function load() {
   allAssignments.value = assignRes.data ?? []
   myTemplates.value = templRes.data ?? []
 
-  // Build client list from trainer_assignments
-  const authUsers = await listAuthUsers().catch(() => [])
-  const emailMap = Object.fromEntries(authUsers.map(u => [u.id, u.email]))
+  // Build client list from trainer_assignments using profile full_name
   myClients.value = (taRes.data ?? []).map(ta => {
     const p = ta.profiles as any
-    return { id: p.id, full_name: p.full_name, email: emailMap[p.id] ?? '' }
+    return { id: p.id, full_name: p.full_name, email: '' }
   })
 
   loading.value = false

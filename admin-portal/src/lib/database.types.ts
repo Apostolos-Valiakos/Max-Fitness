@@ -1,7 +1,7 @@
 // Stub for supabase.ts import
 export interface Database { public: { Tables: Record<string, never>; Views: Record<string, never>; Functions: Record<string, never>; Enums: Record<string, never> } }
 
-export type UserRole = 'user' | 'trainer' | 'admin'
+export type UserRole = 'user' | 'trainer' | 'admin' | 'owner'
 export type UserTier = 'free' | 'paid' | 'ultra'
 export type BodyPart = 'chest' | 'back' | 'shoulders' | 'biceps' | 'triceps' | 'forearms' | 'quads' | 'hamstrings' | 'glutes' | 'calves' | 'core' | 'full_body'
 export type Equipment = 'barbell' | 'dumbbell' | 'cable' | 'machine' | 'bodyweight' | 'kettlebell' | 'band' | 'other'
@@ -37,6 +37,7 @@ export interface Exercise {
   instructions: string | null
   is_custom: boolean
   created_by: string | null
+  gym_id: string | null
   created_at: string
   updated_at: string
   target_muscle: string | null

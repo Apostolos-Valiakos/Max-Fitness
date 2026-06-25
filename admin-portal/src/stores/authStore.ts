@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { supabase } from '@/lib/supabase'
 import type { UserRole, UserTier } from '@/lib/database.types'
 import type { User } from '@supabase/supabase-js'
+import { useGymStore } from './gymStore'
 
 export interface AdminProfile {
   id: string
@@ -12,6 +13,7 @@ export interface AdminProfile {
   email: string
   avatar_url: string | null
   bio: string | null
+  gym_id: string | null
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -21,7 +23,8 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAdmin   = computed(() => profile.value?.role === 'admin')
   const isTrainer = computed(() => profile.value?.role === 'trainer')
-  const isStaff   = computed(() => profile.value?.role === 'admin' || profile.value?.role === 'trainer')
+  const isOwner   = computed(() => profile.value?.role === 'owner')
+  const isStaff   = computed(() => ['admin', 'trainer', 'owner'].includes(profile.value?.role ?? ''))
 
   async function init() {
     loading.value = true
@@ -32,21 +35,34 @@ export const useAuthStore = defineStore('auth', () => {
     }
     loading.value = false
 
-    supabase.auth.onAuthStateChange(async (_event, session) => {
-      user.value = session?.user ?? null
-      if (session?.user) await fetchProfile(session.user)
-      else profile.value = null
+    supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT') {
+        user.value = null
+        profile.value = null
+        return
+      }
+      if (session?.user) {
+        user.value = session.user
+        await fetchProfile(session.user)
+      }
+      // Preserve existing state for INITIAL_SESSION with null (token refresh in progress)
     })
   }
 
   async function fetchProfile(authUser: User) {
     const { data } = await supabase
       .from('profiles')
-      .select('id, role, tier, full_name, avatar_url, bio')
+      .select('id, role, tier, full_name, avatar_url, bio, gym_id')
       .eq('id', authUser.id)
       .single()
     if (data) {
       profile.value = { ...data, email: authUser.email ?? '' } as AdminProfile
+      const gymStore = useGymStore()
+      if (data.gym_id) {
+        gymStore.load(data.gym_id)
+      } else {
+        gymStore.clear()
+      }
     }
   }
 
@@ -81,7 +97,8 @@ export const useAuthStore = defineStore('auth', () => {
     await supabase.auth.signOut()
     user.value = null
     profile.value = null
+    useGymStore().clear()
   }
 
-  return { user, profile, loading, isAdmin, isTrainer, isStaff, init, updateProfile, uploadAvatar, changePassword, signOut }
+  return { user, profile, loading, isAdmin, isTrainer, isOwner, isStaff, init, updateProfile, uploadAvatar, changePassword, signOut }
 })

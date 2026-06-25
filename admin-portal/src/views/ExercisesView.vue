@@ -3,7 +3,7 @@
     <div class="page-header">
       <div>
         <h1 class="page-title">EXERCISES</h1>
-        <div class="page-sub">Global library — {{ filtered.length }} exercises</div>
+        <div class="page-sub">{{ activeGymId ? 'Global + gym library' : 'Global library' }} — {{ filtered.length }} exercises</div>
       </div>
       <div class="header-actions">
         <Button severity="secondary" @click="exportCSV"><i class="pi pi-download" /> Export CSV</Button>
@@ -20,7 +20,15 @@
         <InputText v-model="query" placeholder="Search exercises..." style="width:100%" />
       </IconField>
       <div class="filter-chips">
-        <button class="chip" :class="{ active: !bpFilter }" @click="bpFilter = ''">ALL</button>
+        <button class="chip src-chip" :class="{ active: sourceFilter === '' }" @click="sourceFilter = ''">ALL</button>
+        <button class="chip src-chip" :class="{ active: sourceFilter === 'global' }" @click="sourceFilter = 'global'">
+          <i class="pi pi-globe" /> GLOBAL
+        </button>
+        <button v-if="activeGymId" class="chip src-chip gym-src" :class="{ active: sourceFilter === 'gym' }" @click="sourceFilter = 'gym'">
+          <i class="pi pi-building" /> GYM LIBRARY
+        </button>
+        <div class="chip-divider" />
+        <button class="chip" :class="{ active: !bpFilter }" @click="bpFilter = ''">ALL MUSCLES</button>
         <button v-for="bp in BODY_PARTS" :key="bp" class="chip" :class="{ active: bpFilter === bp }" @click="bpFilter = bpFilter === bp ? '' : bp">
           {{ bp.replace('_', ' ').toUpperCase() }}
         </button>
@@ -56,11 +64,21 @@
             <span class="td-instructions">{{ data.instructions ? data.instructions.slice(0, 60) + (data.instructions.length > 60 ? '…' : '') : '—' }}</span>
           </template>
         </Column>
-        <Column header="">
+        <Column header="Source" style="width: 100px">
+          <template #body="{ data }">
+            <span class="src-badge" :class="data.gym_id ? 'src-gym' : 'src-global'">
+              {{ data.gym_id ? 'GYM' : 'GLOBAL' }}
+            </span>
+          </template>
+        </Column>
+        <Column header="" style="width: 90px">
           <template #body="{ data }">
             <div class="td-actions">
-              <Button severity="secondary" size="small" @click="openEdit(data)"><i class="pi pi-pencil" /></Button>
-              <Button severity="danger" size="small" @click="confirmDelete(data)"><i class="pi pi-trash" /></Button>
+              <template v-if="canEdit(data)">
+                <Button severity="secondary" size="small" @click="openEdit(data)"><i class="pi pi-pencil" /></Button>
+                <Button severity="danger" size="small" @click="confirmDelete(data)"><i class="pi pi-trash" /></Button>
+              </template>
+              <span v-else class="td-readonly" title="Global exercises can only be edited by the platform owner">—</span>
             </div>
           </template>
         </Column>
@@ -116,6 +134,8 @@
 import { ref, computed, onMounted, reactive } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { supabase } from '@/lib/supabase'
+import { useGymFilter } from '@/composables/useGymFilter'
+import { useAuthStore } from '@/stores/authStore'
 import type { Exercise, BodyPart, Equipment } from '@/lib/database.types'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
@@ -134,12 +154,21 @@ const EQUIPMENT: Equipment[] = ['barbell','dumbbell','cable','machine','bodyweig
 const BODY_PARTS_OPTIONS = BODY_PARTS.map(bp => ({ label: bp.replace('_', ' '), value: bp }))
 const EQUIPMENT_OPTIONS  = EQUIPMENT.map(eq => ({ label: eq, value: eq }))
 
-const toast = useToast()
+const toast        = useToast()
+const auth         = useAuthStore()
+const { activeGymId } = useGymFilter()
 
 const loading      = ref(true)
 const exercises    = ref<Exercise[]>([])
 const query        = ref('')
 const bpFilter     = ref('')
+const sourceFilter = ref<'' | 'global' | 'gym'>('')
+
+// Owners can edit global exercises; gym admins can only edit gym-scoped ones
+function canEdit(ex: Exercise) {
+  if (auth.isOwner) return true
+  return ex.gym_id !== null
+}
 const panel        = ref<'create' | 'edit' | null>(null)
 const drawerVisible = ref(false)
 const editingId    = ref<string | null>(null)
@@ -158,6 +187,8 @@ const form = reactive({
 
 const filtered = computed(() => {
   let list = exercises.value
+  if (sourceFilter.value === 'global') list = list.filter(e => e.gym_id === null)
+  else if (sourceFilter.value === 'gym') list = list.filter(e => e.gym_id !== null)
   if (bpFilter.value) list = list.filter(e => e.body_part === bpFilter.value)
   if (query.value.trim()) list = list.filter(e => e.name.toLowerCase().includes(query.value.toLowerCase()))
   return list
@@ -167,7 +198,12 @@ onMounted(async () => { await loadExercises() })
 
 async function loadExercises() {
   loading.value = true
-  const { data } = await supabase.from('exercises').select('*').is('created_by', null).order('body_part').order('name')
+  const gymId = activeGymId.value
+  let q = supabase.from('exercises').select('*')
+  // Show global exercises (created_by IS NULL) plus this gym's exercises (gym_id match)
+  if (gymId) q = q.or(`created_by.is.null,gym_id.eq.${gymId}`)
+  else q = q.is('created_by', null)
+  const { data } = await q.order('body_part').order('name')
   exercises.value = (data ?? []) as Exercise[]
   loading.value = false
 }
@@ -185,9 +221,14 @@ function openEdit(ex: Exercise) {
 }
 
 async function handleSave() {
+  const { data: { user } } = await supabase.auth.getUser()
+  const gymId = activeGymId.value
   const payload = {
     name: form.name, body_part: form.body_part, equipment: form.equipment,
-    instructions: form.instructions || null, is_custom: false, created_by: null,
+    instructions: form.instructions || null,
+    is_custom: gymId !== null,
+    created_by: gymId ? (user?.id ?? null) : null,
+    gym_id: gymId ?? null,
     target_muscle: form.target_muscle || null,
     sticky_note: form.sticky_note || null,
   }
@@ -258,6 +299,8 @@ async function handleImport(e: Event) {
     return cols
   }
 
+  const importGymId = activeGymId.value
+  const { data: { user: importUser } } = await supabase.auth.getUser()
   const toInsert = lines.slice(1).map(line => {
     const cols = parseRow(line)
     return {
@@ -267,7 +310,9 @@ async function handleImport(e: Event) {
       target_muscle: tmIdx >= 0 && cols[tmIdx] ? cols[tmIdx] : null,
       instructions: instrIdx >= 0 && cols[instrIdx] ? cols[instrIdx] : null,
       sticky_note: snIdx >= 0 && cols[snIdx] ? cols[snIdx] : null,
-      is_custom: false, created_by: null,
+      is_custom: importGymId !== null,
+      created_by: importGymId ? (importUser?.id ?? null) : null,
+      gym_id: importGymId ?? null,
     }
   }).filter(r => r.name.length > 0)
 
@@ -286,9 +331,17 @@ async function handleImport(e: Event) {
 .header-actions { display: flex; gap: 0.5rem; align-items: center; }
 
 .filters { padding: 1rem; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
-.filter-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
-.chip { background: var(--surface); border: 1px solid var(--border); color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; padding: 0.2rem 0.65rem; cursor: pointer; transition: all 0.15s; }
+.filter-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center; }
+.chip { background: var(--surface); border: 1px solid var(--border); color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; padding: 0.2rem 0.65rem; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 0.3rem; }
 .chip.active { background: rgba(74,158,255,0.1); border-color: var(--accent); color: var(--accent); }
+.chip.gym-src.active { background: rgba(52,199,89,0.1); border-color: #34C759; color: #34C759; }
+.chip-divider { width: 1px; height: 16px; background: var(--border); margin: 0 0.15rem; flex-shrink: 0; }
+
+.src-badge { font-family: 'Barlow Condensed', sans-serif; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; padding: 0.12rem 0.4rem; border: 1px solid; }
+.src-global { color: var(--muted); border-color: var(--border); background: var(--surface); }
+.src-gym    { color: #34C759; border-color: rgba(52,199,89,0.35); background: rgba(52,199,89,0.08); }
+
+.td-readonly { font-size: 0.72rem; color: var(--border); }
 
 .table-wrap { overflow: hidden; }
 .loading { padding: 2rem; text-align: center; color: var(--muted); font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }

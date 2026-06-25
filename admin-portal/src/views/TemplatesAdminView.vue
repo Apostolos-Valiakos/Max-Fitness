@@ -3,7 +3,7 @@
     <div class="page-header">
       <div>
         <h1 class="page-title">TEMPLATES</h1>
-        <div class="page-sub">Public templates visible to users based on tier</div>
+        <div class="page-sub">{{ auth.isTrainer ? 'Your templates and gym-shared templates' : 'Public templates visible to users based on tier' }}</div>
       </div>
       <Button @click="openCreate">
         <i class="pi pi-plus" /> NEW TEMPLATE
@@ -14,7 +14,7 @@
     <div class="filters card">
       <div class="filter-chips">
         <button class="chip" :class="{ active: visFilter === '' && folderFilter === '' }" @click="visFilter = ''; folderFilter = ''">ALL</button>
-        <button v-for="v in VISIBILITIES" :key="v.value" class="chip" :class="{ active: visFilter === v.value }" @click="visFilter = visFilter === v.value ? '' : v.value; folderFilter = ''">
+        <button v-for="v in visibilityOptions" :key="v.value" class="chip" :class="{ active: visFilter === v.value }" @click="visFilter = visFilter === v.value ? '' : v.value; folderFilter = ''">
           {{ v.label }}
         </button>
         <div v-if="allFolders.length" class="filter-divider" />
@@ -55,7 +55,7 @@
         </Column>
         <Column header="">
           <template #body="{ data }">
-            <div class="td-actions">
+            <div v-if="canEdit(data)" class="td-actions">
               <Button severity="secondary" size="small" @click="openEdit(data)"><i class="pi pi-pencil" /></Button>
               <Button severity="danger" size="small" @click="deleteTemplate(data.id)"><i class="pi pi-trash" /></Button>
             </div>
@@ -75,7 +75,7 @@
           </div>
           <div class="field">
             <label class="mf-label">VISIBILITY</label>
-            <Select v-model="form.visibility" :options="VISIBILITIES_ALL" option-label="label" option-value="value" style="width:100%" />
+            <Select v-model="form.visibility" :options="visibilityOptions" option-label="label" option-value="value" style="width:100%" />
             <div class="field-hint">{{ visHint(form.visibility) }}</div>
           </div>
           <div class="field">
@@ -180,6 +180,8 @@
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted, watch } from 'vue'
 import { supabase } from '@/lib/supabase'
+import { useGymFilter } from '@/composables/useGymFilter'
+import { useAuthStore } from '@/stores/authStore'
 import Fuse from 'fuse.js'
 import { v4 as uuidv4 } from 'uuid'
 import Button from 'primevue/button'
@@ -208,22 +210,41 @@ function defaultSets(n = 3): SetConfig[] {
   return Array.from({ length: n }, () => ({ set_type: 'working' as const, target_reps: null }))
 }
 
-const VISIBILITIES = [
+const VISIBILITIES_TRAINER = [
+  { value: 'private', label: 'Private'   },
+  { value: 'gym',     label: 'Gym Team'  },
+]
+const VISIBILITIES_ADMIN = [
   { value: 'private', label: 'Private'      },
+  { value: 'gym',     label: 'Gym Team'     },
   { value: 'free',    label: 'All Users'    },
   { value: 'paid',    label: 'Paid & Ultra' },
   { value: 'ultra',   label: 'Ultra Only'   },
 ]
-const VISIBILITIES_ALL = VISIBILITIES
 
-function visLabel(v: string) { return VISIBILITIES.find(x => x.value === v)?.label ?? v }
+const auth = useAuthStore()
+const currentUserId = computed(() => auth.profile?.id ?? '')
+const visibilityOptions = computed(() => auth.isTrainer ? VISIBILITIES_TRAINER : VISIBILITIES_ADMIN)
+
+function canEdit(data: AdminTemplate) {
+  if (!auth.isTrainer) return true
+  return data.owner_id === currentUserId.value
+}
+
+function visLabel(v: string) {
+  if (v === 'gym') return 'Gym Team'
+  return VISIBILITIES_ADMIN.find(x => x.value === v)?.label ?? v
+}
 function visHint(v: string) {
   if (v === 'private') return 'Only visible to you.'
+  if (v === 'gym')     return 'Visible to all trainers and admins in your gym.'
   if (v === 'free')    return 'Visible to all users regardless of tier.'
   if (v === 'paid')    return 'Visible to Paid and Ultra users.'
   if (v === 'ultra')   return 'Visible to Ultra users only.'
   return ''
 }
+
+const { activeGymId } = useGymFilter()
 
 const loading   = ref(true)
 const saving    = ref(false)
@@ -303,9 +324,21 @@ function removeEx(idx: number) { form.exercises.splice(idx, 1) }
 
 async function load() {
   loading.value = true
+  const gymId = activeGymId.value
+
+  // Templates: scoped to this gym by RLS for admins; explicit filter for owner-impersonating
+  let templQuery = supabase.from('workout_templates')
+    .select('id, owner_id, name, notes, visibility, folder_name').is('assigned_by', null).order('name')
+  if (gymId) templQuery = templQuery.eq('gym_id', gymId)
+
+  // Exercises: global library + gym-specific exercises
+  let exQuery = supabase.from('exercises').select('id, name, body_part')
+  if (gymId) exQuery = exQuery.or(`created_by.is.null,gym_id.eq.${gymId}`)
+  else exQuery = exQuery.is('created_by', null)
+
   const [templRes, exRes] = await Promise.all([
-    supabase.from('workout_templates').select('id, owner_id, name, notes, visibility, folder_name').is('assigned_by', null).order('name'),
-    supabase.from('exercises').select('id, name, body_part').is('created_by', null).order('name'),
+    templQuery,
+    exQuery.order('name'),
   ])
   const rawTemplates = templRes.data ?? []
   if (rawTemplates.length) {
@@ -370,7 +403,7 @@ async function handleSave() {
 
   if (panel.value === 'create') {
     const id = uuidv4()
-    const { error } = await supabase.from('workout_templates').insert({ id, owner_id: user.id, assigned_by: null, ...basePayload })
+    const { error } = await supabase.from('workout_templates').insert({ id, owner_id: user.id, assigned_by: null, gym_id: activeGymId.value ?? null, ...basePayload })
     if (error) { saveError.value = error.message; saving.value = false; return }
     if (exRows.length) {
       await supabase.from('template_exercises').insert(exRows.map(r => ({ ...r, template_id: id })))
@@ -408,6 +441,7 @@ onMounted(load)
 
 .vis-badge { font-family: 'Barlow Condensed', sans-serif; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; padding: 0.15rem 0.4rem; border: 1px solid; }
 .vis-badge.private { color: var(--muted); border-color: var(--border); }
+.vis-badge.gym     { color: #FF9F0A; border-color: rgba(255,159,10,0.3); background: rgba(255,159,10,0.08); }
 .vis-badge.free    { color: #34C759; border-color: rgba(76,175,80,0.3); background: rgba(76,175,80,0.08); }
 .vis-badge.paid    { color: #4DA6FF; border-color: rgba(77,166,255,0.3); background: rgba(77,166,255,0.08); }
 .vis-badge.ultra   { color: #FFD700; border-color: rgba(255,215,0,0.3); background: rgba(255,215,0,0.08); }

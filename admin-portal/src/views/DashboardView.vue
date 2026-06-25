@@ -5,6 +5,18 @@
       <div class="page-sub">{{ today }}</div>
     </div>
 
+    <!-- Billing status banner -->
+    <router-link
+      v-if="gymStore.gym && (gymStore.isTrialing || gymStore.gym.subscription_status === 'past_due' || gymStore.gym.subscription_status === 'canceled' || gymStore.gym.subscription_status === 'suspended')"
+      to="/billing"
+      class="billing-banner"
+      :class="bannerClass"
+    >
+      <i :class="bannerIcon" />
+      <span>{{ bannerMessage }}</span>
+      <span class="banner-cta">{{ gymStore.isTrialing ? 'Subscribe now' : 'Manage billing' }} →</span>
+    </router-link>
+
     <!-- KPI row -->
     <div class="kpi-grid">
       <div class="kpi-card" v-for="k in kpis" :key="k.label">
@@ -149,6 +161,8 @@
 import { ref, onMounted, computed } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useAuthUsers } from '@/composables/useAuthUsers'
+import { useGymFilter } from '@/composables/useGymFilter'
+import { useGymStore } from '@/stores/gymStore'
 import { initials } from '@/lib/utils'
 import {
   format, differenceInDays,
@@ -156,8 +170,39 @@ import {
   subWeeks, subMonths,
 } from 'date-fns'
 
-const today = format(new Date(), 'EEEE, MMMM d yyyy')
+const today    = format(new Date(), 'EEEE, MMMM d yyyy')
+const gymStore = useGymStore()
 const { authUsers, emailMap, fetchAuthUsers } = useAuthUsers()
+const { activeGymId } = useGymFilter()
+
+const bannerClass = computed(() => {
+  const s = gymStore.gym?.subscription_status
+  if (gymStore.isTrialing) return 'banner-trial'
+  if (s === 'past_due')    return 'banner-warn'
+  return 'banner-danger'
+})
+
+const bannerIcon = computed(() => {
+  if (gymStore.isTrialing)                              return 'pi pi-clock'
+  if (gymStore.gym?.subscription_status === 'past_due') return 'pi pi-exclamation-triangle'
+  return 'pi pi-times-circle'
+})
+
+const bannerMessage = computed(() => {
+  const s = gymStore.gym?.subscription_status
+  if (gymStore.isTrialing) {
+    const days = gymStore.gym?.trial_ends_at
+      ? differenceInDays(new Date(gymStore.gym.trial_ends_at), new Date())
+      : 0
+    return days <= 0
+      ? 'Your trial has ended. Subscribe to keep access.'
+      : `Trial ends in ${days} day${days !== 1 ? 's' : ''}. Subscribe to keep access after that.`
+  }
+  if (s === 'past_due')  return 'Payment failed. Update your payment method to restore access.'
+  if (s === 'canceled')  return 'Subscription canceled. Renew to restore full access.'
+  if (s === 'suspended') return 'Account suspended. Contact support.'
+  return ''
+})
 
 // ── KPI state ──────────────────────────────────────────────────────────────
 const totalUsers          = ref<number | null>(null)
@@ -248,6 +293,16 @@ onMounted(async () => {
   const lastWeekStart  = startOfWeek(subWeeks(now, 1), { weekStartsOn: 1 }).toISOString()
   const lastMonthStart = startOfMonth(subMonths(now, 1)).toISOString()
 
+  // Build gym-scoped queries (owner impersonating needs explicit filter; admin RLS handles it)
+  const gymId = activeGymId.value
+
+  let profilesQuery = supabase.from('profiles').select('*')
+  if (gymId) profilesQuery = profilesQuery.eq('gym_id', gymId)
+
+  let assignmentsQuery = supabase.from('trainer_assignments')
+    .select('trainer_id, client_id').eq('is_active', true)
+  if (gymId) assignmentsQuery = assignmentsQuery.eq('gym_id', gymId)
+
   // Fire all DB queries in parallel
   const [
     { count: st },
@@ -268,8 +323,8 @@ onMounted(async () => {
     supabase.from('workout_sessions').select('*', { count: 'exact', head: true })
       .gte('started_at', lastWeekStart).lt('started_at', weekStart)
       .not('finished_at', 'is', null),
-    supabase.from('profiles').select('*'),
-    supabase.from('trainer_assignments').select('trainer_id, client_id').eq('is_active', true),
+    profilesQuery,
+    assignmentsQuery,
     supabase.from('checkin_submissions')
       .select('id, trainer_id, client_id, submitted_at')
       .is('trainer_reply', null)
@@ -284,11 +339,14 @@ onMounted(async () => {
 
   try {
     await fetchAuthUsers()
-    totalUsers.value   = authUsers.value.length
-    newThisMonth.value = authUsers.value.filter(u => u.created_at >= monthStart).length
-    const newLastMonth = authUsers.value.filter(u => u.created_at >= lastMonthStart && u.created_at < monthStart).length
+    // Use profiles (gym-scoped by RLS for admins, or explicit filter for owner) for user count metrics.
+    // authUsers from the Auth API is used only for email/last-sign-in lookups via emailMap.
+    totalUsers.value   = (profiles ?? []).length
+    newThisMonth.value = (profiles ?? []).filter(p => (p as any).created_at >= monthStart).length
+    const newLastMonth = (profiles ?? []).filter(p => (p as any).created_at >= lastMonthStart && (p as any).created_at < monthStart).length
     newMonthDelta.value = (newThisMonth.value ?? 0) - newLastMonth
 
+    const gymProfileIds  = gymId ? new Set((profiles ?? []).map(p => p.id)) : null
     const assignedSet    = new Set((assignments ?? []).map(a => a.client_id))
     const profileMap     = Object.fromEntries((profiles ?? []).map(p => [p.id, p]))
 
@@ -324,13 +382,15 @@ onMounted(async () => {
       .map(p => ({ id: p.id, full_name: p.full_name, email: emailMap.value[p.id] ?? '' }))
       .slice(0, 8)
 
-    // Pending check-ins with resolved names
-    pendingCheckins.value = (pendingSubs ?? []).map(s => ({
-      id:          s.id,
-      clientName:  profileMap[s.client_id]?.full_name  ?? emailMap.value[s.client_id]  ?? '?',
-      trainerName: profileMap[s.trainer_id]?.full_name ?? emailMap.value[s.trainer_id] ?? '?',
-      daysAgo:     differenceInDays(now, new Date(s.submitted_at)),
-    }))
+    // Pending check-ins — post-filter to gym members only when owner is impersonating
+    pendingCheckins.value = (pendingSubs ?? [])
+      .filter(s => !gymProfileIds || (gymProfileIds.has(s.trainer_id) && gymProfileIds.has(s.client_id)))
+      .map(s => ({
+        id:          s.id,
+        clientName:  profileMap[s.client_id]?.full_name  ?? emailMap.value[s.client_id]  ?? '?',
+        trainerName: profileMap[s.trainer_id]?.full_name ?? emailMap.value[s.trainer_id] ?? '?',
+        daysAgo:     differenceInDays(now, new Date(s.submitted_at)),
+      }))
 
   } catch (e) {
     console.error('[dashboard]', e)
@@ -342,6 +402,20 @@ onMounted(async () => {
 .page        { padding: 2.5rem; }
 .page-header { margin-bottom: 2rem; }
 .page-title  { line-height: 1; }
+
+/* Billing banner */
+.billing-banner {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.75rem 1rem; margin-bottom: 1.25rem;
+  font-size: 0.82rem; font-weight: 500; text-decoration: none;
+  border: 1px solid; border-left-width: 3px;
+  transition: opacity 0.15s;
+}
+.billing-banner:hover { opacity: 0.85; }
+.billing-banner .banner-cta { margin-left: auto; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; letter-spacing: 0.05em; font-size: 0.8rem; white-space: nowrap; }
+.banner-trial  { color: var(--accent); border-color: rgba(74,158,255,0.4); background: rgba(74,158,255,0.06); }
+.banner-warn   { color: var(--gold);   border-color: rgba(255,180,0,0.4);  background: rgba(255,180,0,0.06);  }
+.banner-danger { color: var(--danger); border-color: rgba(255,107,107,0.4); background: rgba(255,107,107,0.06); }
 .page-sub    { margin-top: 0.3rem; }
 
 /* ── KPI cards ──────────────────────────────────────────────────────────── */
