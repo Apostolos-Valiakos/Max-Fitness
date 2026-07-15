@@ -36,14 +36,14 @@ services:
 
   landing:
     build:
-      context: ../landing
+      context: ./landing
       dockerfile: Dockerfile
     restart: unless-stopped
     logging: *default-logging
 
   admin-portal:
     build:
-      context: ../admin-portal
+      context: ./admin-portal
       dockerfile: Dockerfile
       args:
         VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
@@ -54,7 +54,7 @@ services:
 
   mobile-app:
     build:
-      context: ../mobile-app
+      context: ./mobile-app
       dockerfile: Dockerfile
       args:
         VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
