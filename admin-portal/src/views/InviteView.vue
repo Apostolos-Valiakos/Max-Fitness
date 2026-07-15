@@ -4,7 +4,8 @@
 
       <!-- Brand -->
       <div class="brand">
-        <span class="b-max">MAX</span><span class="b-fit">FITNESS</span>
+        <BrandMark :size="26" />
+        <span class="b-word">FERRUM</span>
       </div>
 
       <!-- Loading -->
@@ -70,9 +71,10 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { supabase } from '@/lib/supabase'
-import { adminSupabase } from '@/lib/adminSupabase'
+import { callAdminFunction, callPublicFunction } from '@/lib/adminApi'
 import { format } from 'date-fns'
 import Button from 'primevue/button'
+import BrandMark from '@/components/BrandMark.vue'
 
 const route = useRoute()
 
@@ -88,18 +90,17 @@ const acceptError = ref('')
 function fmtDate(iso: string) { return format(new Date(iso), 'MMM d, yyyy') }
 
 onMounted(async () => {
-  // Load invite details via service role (public access needed before login)
-  const { data, error } = await adminSupabase
-    .from('gym_invites')
-    .select('id, gym_id, email, role, token, expires_at, accepted_at, gyms(name)')
-    .eq('token', token)
-    .maybeSingle()
-
-  if (error || !data) {
+  // Public lookup by token — works before the visitor has signed in.
+  let data: any
+  try {
+    const result = await callPublicFunction<{ invite: any }>('invite-details', { token })
+    data = result.invite
+  } catch {
     errorState.value = 'Invite not found.'
     loading.value = false
     return
   }
+
   if (data.accepted_at) {
     errorState.value = 'This invite has already been accepted.'
     loading.value = false
@@ -130,45 +131,14 @@ async function acceptInvite() {
   if (!invite.value || !currentUser.value) return
   accepting.value = true; acceptError.value = ''
 
-  // For trainer invites, verify the gym hasn't hit its limit since the invite was created
-  if (invite.value.role === 'trainer') {
-    const { data: gym } = await adminSupabase
-      .from('gyms')
-      .select('max_trainers')
-      .eq('id', invite.value.gym_id)
-      .single()
-    const { count } = await adminSupabase
-      .from('profiles')
-      .select('id', { count: 'exact', head: true })
-      .eq('gym_id', invite.value.gym_id)
-      .eq('role', 'trainer')
-    if (gym && (count ?? 0) >= gym.max_trainers) {
-      acceptError.value = 'This gym has reached its trainer limit. Ask the admin to upgrade their plan.'
-      accepting.value = false
-      return
-    }
-  }
-
-  // Update profile: set gym_id + role (requires service role since user can't self-elevate)
-  const { error: profErr } = await adminSupabase
-    .from('profiles')
-    .update({ gym_id: invite.value.gym_id, role: invite.value.role })
-    .eq('id', currentUser.value.id)
-
-  if (profErr) {
-    acceptError.value = profErr.message
+  try {
+    const { role } = await callAdminFunction<{ ok: true; role: string }>('accept-invite', { token })
+    // Hard-navigate so authStore re-initialises with the new profile
+    window.location.href = role === 'trainer' ? '/trainer/clients' : '/dashboard'
+  } catch (err: any) {
+    acceptError.value = err.message ?? 'Failed to accept invite'
     accepting.value = false
-    return
   }
-
-  // Mark invite accepted
-  await adminSupabase
-    .from('gym_invites')
-    .update({ accepted_at: new Date().toISOString() })
-    .eq('token', token)
-
-  // Hard-navigate so authStore re-initialises with the new profile
-  window.location.href = invite.value.role === 'trainer' ? '/trainer/clients' : '/dashboard'
 }
 </script>
 
@@ -182,9 +152,8 @@ async function acceptInvite() {
   background: var(--bg); border: 1px solid var(--surface); padding: 2.5rem 2rem;
 }
 
-.brand { display: flex; align-items: baseline; gap: 0.25rem; margin-bottom: 2rem; }
-.b-max { font-family: 'Barlow Condensed', sans-serif; font-size: 1.4rem; font-weight: 900; color: var(--accent); letter-spacing: 0.05em; }
-.b-fit { font-family: 'Barlow Condensed', sans-serif; font-size: 1.4rem; font-weight: 900; color: var(--text); letter-spacing: 0.05em; }
+.brand { display: flex; align-items: center; gap: 0.55rem; margin-bottom: 2rem; }
+.b-word { font-family: 'Barlow Condensed', sans-serif; font-size: 1.4rem; font-weight: 900; color: var(--text); letter-spacing: 0.05em; }
 
 .state-center { text-align: center; padding: 1.5rem 0; }
 .err-icon  { font-size: 2rem; color: var(--danger); display: block; margin-bottom: 0.75rem; }

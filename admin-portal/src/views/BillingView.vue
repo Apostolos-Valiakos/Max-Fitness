@@ -118,20 +118,20 @@ const auth     = useAuthStore()
 const checkoutLoading = ref<string | null>(null)
 const portalLoading   = ref(false)
 
-const PLAN_PRICES: Record<string, number> = { basic: 49, pro: 149, elite: 299 }
+const PLAN_PRICES: Record<string, number> = { basic: 39, pro: 99, elite: 199 }
 function planPrice(plan: string) { return PLAN_PRICES[plan] ?? 0 }
 
 const PLANS = [
   {
-    id: 'basic', label: 'Basic', price: 49,
+    id: 'basic', label: 'Basic', price: 39,
     features: ['Up to 3 trainers', 'Up to 30 clients', 'Core features'],
   },
   {
-    id: 'pro', label: 'Pro', price: 149,
+    id: 'pro', label: 'Pro', price: 99,
     features: ['Up to 10 trainers', 'Up to 100 clients', 'Analytics', 'Priority support'],
   },
   {
-    id: 'elite', label: 'Elite', price: 299,
+    id: 'elite', label: 'Elite', price: 199,
     features: ['Unlimited trainers', 'Unlimited clients', 'All features', 'Dedicated support'],
   },
 ]

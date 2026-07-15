@@ -104,11 +104,11 @@
 import { ref, computed, onMounted } from 'vue'
 import { Bar } from 'vue-chartjs'
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip } from 'chart.js'
-import { adminSupabase } from '@/lib/adminSupabase'
+import { callAdminFunction } from '@/lib/adminApi'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip)
 
-const PLAN_MRR: Record<string, number> = { basic: 49, pro: 149, elite: 299 }
+const PLAN_MRR: Record<string, number> = { basic: 39, pro: 99, elite: 199 }
 const PLAN_COLOR: Record<string, string> = {
   basic: '#636366',
   pro:   '#4A9EFF',
@@ -180,22 +180,13 @@ const planChart = computed(() => {
 // ── Load ─────────────────────────────────────────────────────────────────────
 async function load() {
   loading.value = true
-  const [gymsRes, profilesRes] = await Promise.all([
-    adminSupabase.from('gyms').select('*').order('created_at', { ascending: false }),
-    adminSupabase.from('profiles').select('gym_id, role').not('gym_id', 'is', null),
-  ])
+  const result = await callAdminFunction<{
+    gyms: any[]
+    counts: Record<string, { total: number; trainers: number; clients: number }>
+  }>('owner-gyms', { action: 'list' })
 
-  gyms.value = gymsRes.data ?? []
-
-  const map: Record<string, { total: number; trainers: number; clients: number }> = {}
-  for (const p of profilesRes.data ?? []) {
-    const gid = p.gym_id
-    if (!map[gid]) map[gid] = { total: 0, trainers: 0, clients: 0 }
-    map[gid].total++
-    if (p.role === 'trainer') map[gid].trainers++
-    else if (p.role === 'user') map[gid].clients++
-  }
-  counts.value = map
+  gyms.value   = result.gyms
+  counts.value = result.counts
   loading.value = false
 }
 

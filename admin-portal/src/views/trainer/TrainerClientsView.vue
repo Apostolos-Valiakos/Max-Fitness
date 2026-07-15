@@ -7,6 +7,7 @@
       </div>
     </div>
 
+    <div v-if="verifyingPayment" class="loading-state"><i class="pi pi-spin pi-spinner" /> Confirming your subscription...</div>
     <div v-if="loading" class="loading-state"><i class="pi pi-spin pi-spinner" /> Loading...</div>
 
     <div v-else-if="clients.length === 0" class="empty-state card">
@@ -55,7 +56,7 @@
             outlined
             size="small"
             class="action-btn"
-            @click="router.push(`/trainer/plan-builder?client=${c.id}`)"
+            @click="router.push('/my-plans')"
           />
           <Button
             icon="pi pi-chart-line"
@@ -72,13 +73,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 import { initials } from '@/lib/utils'
 import Button from 'primevue/button'
 
 const router = useRouter()
+const route  = useRoute()
 
 interface TrainerClient {
   id: string; full_name: string | null; email: string; tier: string; avatar_url: string | null
@@ -86,12 +88,37 @@ interface TrainerClient {
 
 const auth    = useAuthStore()
 const loading = ref(true)
+const verifyingPayment = ref(false)
 const clients = ref<TrainerClient[]>([])
 const sessionCounts  = ref<Record<string, number>>({})
 const pendingCheckins = ref<Record<string, number>>({})
 
+async function verifyUpgradeIfNeeded() {
+  if (route.query.upgraded !== '1' || !auth.user?.id) return
+  const sessionId = route.query.session_id as string | undefined
+  router.replace('/trainer/clients')
+  if (!sessionId) { await auth.fetchProfile(auth.user); return }
+
+  verifyingPayment.value = true
+  const { data: { session } } = await supabase.auth.getSession()
+  if (session) {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/verify-trainer-checkout`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body:    JSON.stringify({ session_id: sessionId }),
+      })
+      if (res.ok) await auth.fetchProfile(auth.user)
+    } catch (err) {
+      console.error('verify-trainer-checkout failed:', err)
+    }
+  }
+  verifyingPayment.value = false
+}
 
 onMounted(async () => {
+  await verifyUpgradeIfNeeded()
+
   const trainerId = auth.user?.id
   if (!trainerId) return
 

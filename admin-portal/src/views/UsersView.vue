@@ -61,14 +61,7 @@
 
         <Column header="Tier" style="width: 140px">
           <template #body="{ data: u }">
-            <Select
-              :model-value="u.tier"
-              :options="TIER_OPTIONS"
-              option-label="label"
-              option-value="value"
-              :disabled="u.id === selfId"
-              @update:model-value="(v) => updateTier(u, v)"
-            />
+            <span class="badge" :class="u.tier">{{ u.tier.toUpperCase() }}</span>
           </template>
         </Column>
 
@@ -124,14 +117,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
-import { adminSupabase } from '@/lib/adminSupabase'
+import { callAdminFunction } from '@/lib/adminApi'
 import { useAuthStore } from '@/stores/authStore'
 import { useAuthUsers } from '@/composables/useAuthUsers'
 import { useGymFilter } from '@/composables/useGymFilter'
 import { useGymStore } from '@/stores/gymStore'
 import { useToast } from 'primevue/usetoast'
 import { initials, fmtDate } from '@/lib/utils'
-import type { UserRow, UserRole, UserTier } from '@/lib/database.types'
+import type { UserRow, UserRole } from '@/lib/database.types'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import InputText from 'primevue/inputtext'
@@ -161,11 +154,6 @@ const ROLE_OPTIONS = [
   { label: 'user',    value: 'user' },
   { label: 'trainer', value: 'trainer' },
   { label: 'admin',   value: 'admin' },
-]
-const TIER_OPTIONS = [
-  { label: 'free',  value: 'free' },
-  { label: 'paid',  value: 'paid' },
-  { label: 'ultra', value: 'ultra' },
 ]
 
 const filtered = computed(() => {
@@ -221,20 +209,13 @@ async function updateRole(u: UserRow, role: UserRole) {
   u.role = role
   toast.add({ severity: 'success', summary: 'Role updated', life: 2500 })
 }
-async function updateTier(u: UserRow, tier: UserTier) {
-  const { error } = await supabase.from('profiles').update({ tier }).eq('id', u.id)
-  if (error) { toast.add({ severity: 'error', summary: 'Error', detail: error.message, life: 4000 }); return }
-  u.tier = tier
-  toast.add({ severity: 'success', summary: 'Tier updated', life: 2500 })
-}
-
 function confirmDelete(u: UserRow) {
   deleteTarget.value = u
   deleteDialogVisible.value = true
 }
 async function handleDelete() {
   if (!deleteTarget.value) return
-  await adminSupabase.auth.admin.deleteUser(deleteTarget.value.id)
+  await callAdminFunction('admin-users', { action: 'delete', user_id: deleteTarget.value.id })
   users.value = users.value.filter(u => u.id !== deleteTarget.value!.id)
   deleteDialogVisible.value = false
   deleteTarget.value = null

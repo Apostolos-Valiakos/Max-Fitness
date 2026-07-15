@@ -1,0 +1,77 @@
+###############################################################################
+#  FERRUM — Caddy + frontend apps
+#
+#  Always run together with ../supabase/docker-compose.yml via deploy/up.sh —
+#  they share one Docker network (ferrum-net) so Caddy can reach `kong` by
+#  service name. Don't run this file alone.
+###############################################################################
+
+name: ferrum-apps
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    logging: *default-logging
+    depends_on:
+      - landing
+      - admin-portal
+      - mobile-app
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+  landing:
+    build:
+      context: ../landing
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    logging: *default-logging
+
+  admin-portal:
+    build:
+      context: ../admin-portal
+      dockerfile: Dockerfile
+      args:
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
+        VITE_APP_ENV: production
+    restart: unless-stopped
+    logging: *default-logging
+
+  mobile-app:
+    build:
+      context: ../mobile-app
+      dockerfile: Dockerfile
+      args:
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
+        VITE_APP_ENV: production
+        VITE_APP_NAME: Ferrum
+        VITE_RXDB_SYNC_DAYS: ${VITE_RXDB_SYNC_DAYS}
+        VITE_RXDB_PULL_INTERVAL: ${VITE_RXDB_PULL_INTERVAL}
+    restart: unless-stopped
+    logging: *default-logging
+
+volumes:
+  caddy_data:
+    driver: local
+  caddy_config:
+    driver: local
+
+networks:
+  default:
+    name: ferrum-net

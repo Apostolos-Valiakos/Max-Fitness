@@ -1,0 +1,24 @@
+# Ferrum — reverse proxy + automatic HTTPS
+#
+# {$DOMAIN} is read from deploy/.env (see deploy/.env.example). Caddy issues
+# and renews Let's Encrypt certs for each subdomain automatically the first
+# time it starts — no certbot, no manual renewal.
+#
+# Requires all four A/AAAA DNS records already pointing at this VPS's IP:
+#   {$DOMAIN}, admin.{$DOMAIN}, app.{$DOMAIN}, api.{$DOMAIN}
+
+{$DOMAIN} {
+	reverse_proxy landing:80
+}
+
+admin.{$DOMAIN} {
+	reverse_proxy admin-portal:80
+}
+
+app.{$DOMAIN} {
+	reverse_proxy mobile-app:80
+}
+
+api.{$DOMAIN} {
+	reverse_proxy kong:8000
+}

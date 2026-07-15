@@ -1,7 +1,7 @@
 <template>
   <div class="auth-page">
     <div class="auth-card">
-      <div class="auth-logo">MAX<span class="accent">FITNES</span></div>
+      <div class="auth-logo"><BrandMark :size="34" /><span>FERRUM</span></div>
       <div class="auth-subtitle">TRACK. PROGRESS. DOMINATE.</div>
 
       <div class="tab-row">
@@ -37,6 +37,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
+import BrandMark from '@/components/BrandMark.vue'
 
 const router   = useRouter()
 const auth     = useAuthStore()
@@ -71,8 +72,7 @@ async function handleSubmit() {
 <style scoped>
 .auth-page{min-height:100dvh;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:1.5rem;}
 .auth-card{width:100%;max-width:360px;}
-.auth-logo{font-family:'Barlow Condensed',sans-serif;font-size:3rem;font-weight:900;color:var(--text);letter-spacing:-0.02em;line-height:1;margin-bottom:0.25rem;}
-.accent{color:var(--accent);}
+.auth-logo{display:flex;align-items:center;gap:0.6rem;font-family:'Barlow Condensed',sans-serif;font-size:2.4rem;font-weight:900;color:var(--text);letter-spacing:0.02em;line-height:1;margin-bottom:0.25rem;}
 .auth-subtitle{font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.3em;color:var(--muted);margin-bottom:2.5rem;}
 .tab-row{display:flex;gap:0;margin-bottom:1.5rem;border-bottom:1px solid var(--surface);}
 .tab{flex:1;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:0.85rem;font-weight:700;letter-spacing:0.2em;padding:0.65rem;cursor:pointer;margin-bottom:-1px;transition:all 0.2s;}

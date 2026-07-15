@@ -2,8 +2,8 @@
   <div class="shell">
     <aside class="sidebar">
       <div class="brand">
-        <span class="brand-max">MAX</span>
-        <span class="brand-fit">FITNESS</span>
+        <BrandMark :size="26" />
+        <span class="brand-word">FERRUM</span>
         <span class="brand-owner">OWNER</span>
       </div>
 
@@ -39,6 +39,7 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
+import BrandMark from '@/components/BrandMark.vue'
 
 const route  = useRoute()
 const router = useRouter()
@@ -72,11 +73,10 @@ async function handleSignOut() {
 .brand {
   padding: 1.5rem 1.25rem 1.25rem;
   border-bottom: 1px solid var(--surface);
-  display: flex; align-items: baseline; gap: 0.3rem;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 0.55rem;
 }
-.brand-max   { font-family: 'Barlow Condensed', sans-serif; font-size: 1.4rem; font-weight: 900; color: var(--accent); letter-spacing: 0.05em; }
-.brand-fit   { font-family: 'Barlow Condensed', sans-serif; font-size: 1.4rem; font-weight: 900; color: var(--text); letter-spacing: 0.05em; }
-.brand-owner { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em; color: var(--gold); margin-left: 0.25rem; align-self: flex-end; padding-bottom: 0.1rem; }
+.brand-word  { font-family: 'Barlow Condensed', sans-serif; font-size: 1.4rem; font-weight: 900; color: var(--text); letter-spacing: 0.05em; }
+.brand-owner { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em; color: var(--gold); }
 
 .nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 0.15rem; }
 

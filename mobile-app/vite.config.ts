@@ -10,8 +10,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'icons/*.png'],
       manifest: {
-        name:             'max-fitnes',
-        short_name:       'max-fitnes',
+        name:             'Ferrum',
+        short_name:       'Ferrum',
         description:      'Offline-first workout tracker',
         theme_color:      '#0A0A0A',
         background_color: '#0A0A0A',

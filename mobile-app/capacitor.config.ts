@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
   appId: 'com.maxfitness.app',
-  appName: 'Max Fitness',
+  appName: 'Ferrum',
   webDir: 'dist',
   server: {
     // During development, point to the Vite dev server on your LAN IP

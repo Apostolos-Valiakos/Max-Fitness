@@ -40,7 +40,7 @@
         <span v-else>{{ found ? 'CONFIRM JOIN' : 'FIND GYM' }}</span>
       </button>
 
-      <button v-if="!fromOnboarding" class="skip-btn" @click="router.replace('/dashboard')">
+      <button class="skip-btn" @click="router.replace('/dashboard')">
         Skip for now
       </button>
     </div>

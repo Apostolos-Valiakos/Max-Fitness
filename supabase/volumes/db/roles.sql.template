@@ -1,0 +1,19 @@
+-- Synchronizes every internal service-role password with ${POSTGRES_PASSWORD}.
+--
+-- supabase/postgres's own migrate.sh looks for an optional file at
+-- /etc/postgresql.schema.sql and, if present, runs it as the very last init
+-- step ("run any post migration script to update role passwords"). The base
+-- image creates these roles (supabase_auth_admin, supabase_storage_admin,
+-- etc.) via its own init-scripts/migrations, but does NOT set their
+-- passwords to match our POSTGRES_PASSWORD — without this file, auth/rest/
+-- storage/meta all fail with "password authentication failed".
+--
+-- This file is a ${VAR}-placeholder TEMPLATE (safe to commit, no real
+-- secret). docker-compose.yml's `db` entrypoint resolves it into
+-- /etc/postgresql.schema.sql inside the container at startup, the same
+-- bash eval/echo trick used for Kong's kong.yml — never written back here.
+
+ALTER USER authenticator          WITH PASSWORD '${POSTGRES_PASSWORD}';
+ALTER USER supabase_auth_admin    WITH PASSWORD '${POSTGRES_PASSWORD}';
+ALTER USER supabase_storage_admin WITH PASSWORD '${POSTGRES_PASSWORD}';
+ALTER USER supabase_admin         WITH PASSWORD '${POSTGRES_PASSWORD}';

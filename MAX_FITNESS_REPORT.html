@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Max Fitness — Τεχνική & Οικονομική Αναφορά</title>
+    <title>Ferrum — Τεχνική & Οικονομική Αναφορά</title>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@300;400;500;600&display=swap");
 
@@ -475,9 +475,9 @@
     <!-- ════════════════════════════════════════════════════════════ COVER -->
     <div class="cover">
       <div>
-        <div class="cover-logo"><span>MAX</span>FITNESS</div>
+        <div class="cover-logo">FERRUM</div>
         <div class="cover-tagline">
-          Ολοκληρωμένη Πλατφόρμα Διαχείρισης Γυμναστηρίου
+          Multi-Tenant SaaS Πλατφόρμα Διαχείρισης Γυμναστηρίων
         </div>
         <div class="cover-divider"></div>
         <div class="cover-title">
@@ -494,8 +494,8 @@
           <div class="cover-dev-title">Full-Stack Developer</div>
         </div>
         <div class="cover-date">
-          Μάιος 2026<br />
-          Έκδοση 1.0
+          Ιούνιος 2026<br />
+          Έκδοση 2.0
         </div>
       </div>
     </div>
@@ -508,10 +508,11 @@
       <div class="h2-rule"></div>
 
       <p>
-        Το <strong>Max Fitness</strong> είναι μια ολοκληρωμένη ψηφιακή πλατφόρμα
+        Το <strong>Ferrum</strong> είναι μια ολοκληρωμένη ψηφιακή πλατφόρμα
         σχεδιασμένη αποκλειστικά για τις ανάγκες σύγχρονων γυμναστηρίων.
-        Αποτελείται από τρία αλληλένδετα συστήματα: μια
-        <strong>πύλη διαχείρισης</strong> για τους υπευθύνους του γυμναστηρίου,
+        Αποτελείται από τέσσερα αλληλένδετα συστήματα: μια
+        <strong>πύλη ιδιοκτήτη</strong> για τη διαχείριση πολλαπλών γυμναστηρίων,
+        μια <strong>πύλη διαχείρισης</strong> για τους υπευθύνους κάθε γυμναστηρίου,
         μια <strong>πύλη προπονητή</strong> για τους personal trainers, και μια
         <strong>εφαρμογή κινητού</strong> για τους πελάτες.
       </p>
@@ -521,12 +522,20 @@
         διαχείριση προγραμμάτων άσκησης, εβδομαδιαία check-ins με φωτογραφίες,
         παρακολούθηση σωματικών μετρήσεων και εκτενής ανάλυση στατιστικών.
       </p>
+      <p>
+        Στην <strong>έκδοση 2.0</strong>, η πλατφόρμα μετασχηματίστηκε σε πλήρες
+        <strong>multi-tenant SaaS</strong> σύστημα: ένα μοναδικό deployment
+        εξυπηρετεί απεριόριστα γυμναστήρια ταυτόχρονα με πλήρη απομόνωση δεδομένων,
+        αυτοματοποιημένη χρέωση μέσω Stripe και ιεραρχικό σύστημα ρόλων τεσσάρων
+        επιπέδων.
+      </p>
 
       <div class="info-box">
         <strong>Τι λύνει:</strong> Αντικαθιστά spreadsheets, WhatsApp ομάδες και
         χαρτί–μολύβι με ένα ενιαίο, ασφαλές σύστημα που εξοικονομεί χρόνο στον
         προπονητή, αυξάνει τη διατηρησιμότητα πελατών και δίνει στον διαχειριστή
-        πλήρη εικόνα της επιχείρησης σε πραγματικό χρόνο.
+        πλήρη εικόνα της επιχείρησης σε πραγματικό χρόνο — σε οποιοδήποτε
+        γυμναστήριο επιλέξει να ενταχθεί στην πλατφόρμα.
       </div>
 
       <!-- ── 2. Τεχνολογίες ── -->
@@ -581,6 +590,27 @@
             Διαδραστικά γραφήματα για analytics και χρονοσειρές δεδομένων.
           </div>
         </div>
+        <div class="tech-card">
+          <div class="tech-name">Stripe</div>
+          <div class="tech-desc">
+            Αυτοματοποιημένη χρέωση συνδρομών γυμναστηρίων, webhooks για
+            ακυρώσεις/ανανεώσεις, customer portal.
+          </div>
+        </div>
+        <div class="tech-card">
+          <div class="tech-name">Supabase Edge Functions</div>
+          <div class="tech-desc">
+            Serverless λειτουργίες για Stripe webhooks, δημιουργία checkout
+            sessions και διαχείριση συνδρομών.
+          </div>
+        </div>
+        <div class="tech-card">
+          <div class="tech-name">Multi-Tenant RLS</div>
+          <div class="tech-desc">
+            Πολιτικές απομόνωσης δεδομένων ανά γυμναστήριο — κανένα γυμναστήριο
+            δεν μπορεί να δει δεδομένα άλλου.
+          </div>
+        </div>
       </div>
 
       <!-- ── 3. Λειτουργίες ── -->
@@ -588,9 +618,82 @@
       <h2>Λειτουργίες Πλατφόρμας</h2>
       <div class="h2-rule"></div>
 
-      <!-- 3.1 Admin -->
+      <!-- 3.0 Owner -->
       <div class="role-header">
-        <h3 style="margin: 0">3.1 Πύλη Διαχειριστή</h3>
+        <h3 style="margin: 0">3.1 Πύλη Ιδιοκτήτη</h3>
+        <span class="role-badge" style="color:#ffd700;border-color:#ffd700;background:rgba(255,215,0,0.06)">OWNER</span>
+      </div>
+      <p>
+        Ο ιδιοκτήτης της πλατφόρμας διαχειρίζεται το σύνολο των γυμναστηρίων
+        από μια κεντρική πύλη, χωρίς να χρειάζεται να αποσυνδεθεί.
+      </p>
+
+      <h4>Διαχείριση Γυμναστηρίων</h4>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Λίστα όλων των γυμναστηρίων με κατάσταση συνδρομής, αριθμό χρηστών
+            και πλάνο (Basic / Pro / Elite)
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Δημιουργία νέου γυμναστηρίου με αυτόματη παραγωγή μοναδικού κωδικού
+            εισόδου (join code)
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            <strong>Impersonation:</strong> «Manage» button — είσοδος σε
+            gym-scoped admin view οποιουδήποτε γυμναστηρίου χωρίς αποσύνδεση
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Αναστολή ή διαγραφή γυμναστηρίου — άμεσος αποκλεισμός πρόσβασης
+            διαχειριστή
+          </div>
+        </div>
+      </div>
+
+      <h4>Revenue Dashboard</h4>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            <strong>MRR / ARR:</strong> Μηνιαία και ετήσια επαναλαμβανόμενα
+            έσοδα από Stripe σε πραγματικό χρόνο
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Γράφημα εξέλιξης MRR ανά μήνα, ανάλυση ανά πλάνο (Basic/Pro/Elite)
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Churn rate, νέες συνδρομές και ληγμένες — αναλυτική καρτέλα ανά
+            γυμναστήριο
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Αριθμός active/trial/past_due γυμναστηρίων με χρωματική ένδειξη
+            κατάστασης
+          </div>
+        </div>
+      </div>
+
+      <!-- 3.1 Admin -->
+      <div class="role-header" style="margin-top:28px">
+        <h3 style="margin: 0">3.2 Πύλη Διαχειριστή Γυμναστηρίου</h3>
         <span class="role-badge admin">ADMIN</span>
       </div>
       <p>
@@ -694,21 +797,100 @@
         <div class="feature-item">
           <span class="fi-icon">▸</span>
           <div>
-            Διαχείριση παγκόσμιας βιβλιοθήκης ασκήσεων (muscle group, equipment,
-            οδηγίες)
+            Πρόσβαση στη <strong>παγκόσμια</strong> βιβλιοθήκη ασκήσεων (muscle
+            group, equipment, οδηγίες, εικόνες)
           </div>
         </div>
         <div class="feature-item">
           <span class="fi-icon">▸</span>
           <div>
-            Δημιουργία προτύπων προγραμμάτων άσκησης για όλους τους χρήστες
+            Δημιουργία <strong>γυμναστηρίου-ιδιωτικών</strong> ασκήσεων — ορατές
+            μόνο στους χρήστες του συγκεκριμένου γυμναστηρίου
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Φίλτρο πηγής: ALL / GLOBAL / GYM LIBRARY — διαχωρισμός παγκόσμιων
+            και ιδιωτικών ασκήσεων
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Templates προγραμμάτων άσκησης εντός του γυμναστηρίου — δεν
+            εμφανίζονται σε άλλα γυμναστήρια
           </div>
         </div>
       </div>
 
-      <!-- 3.2 Trainer -->
+      <h4>Ρυθμίσεις Γυμναστηρίου & Πρόσκληση Προσωπικού</h4>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            <strong>Join Code:</strong> Μοναδικός 6ψήφιος κωδικός για σύνδεση
+            χρηστών mobile στο γυμναστήριο — αντιγράφεται με ένα κλικ
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            <strong>Invite Link:</strong> Αποστολή πρόσκλησης σε trainer ή admin
+            μέσω email — ο σύνδεσμος λήγει σε 7 ημέρες
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Λίστα εκκρεμών προσκλήσεων με δυνατότητα αντιγραφής συνδέσμου ή
+            ανάκλησης πρόσκλησης
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Αποδοχή πρόσκλησης → αυτόματη σύνδεση λογαριασμού με το γυμναστήριο
+            και ανύψωση ρόλου
+          </div>
+        </div>
+      </div>
+
+      <h4>Χρέωση & Συνδρομή</h4>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Προβολή τρέχοντος πλάνου (Basic / Pro / Elite), κατάστασης
+            συνδρομής και επόμενης ημερομηνίας χρέωσης
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Αναβάθμιση / Υποβάθμιση πλάνου μέσω Stripe Checkout — χωρίς χειροκίνητη
+            επέμβαση
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Customer Portal Stripe: ιστορικό τιμολογίων, αλλαγή κάρτας,
+            ακύρωση συνδρομής
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Αυτόματος αποκλεισμός διαχειριστή σε ληγμένη συνδρομή — trainers
+            και clients συνεχίζουν κανονικά
+          </div>
+        </div>
+      </div>
+
+      <!-- 3.3 Trainer -->
       <div class="role-header" style="margin-top: 28px">
-        <h3 style="margin: 0">3.2 Πύλη Προπονητή</h3>
+        <h3 style="margin: 0">3.3 Πύλη Προπονητή</h3>
         <span class="role-badge trainer">TRAINER</span>
       </div>
       <p>
@@ -796,9 +978,9 @@
         </div>
       </div>
 
-      <!-- 3.3 Mobile -->
+      <!-- 3.4 Mobile -->
       <div class="role-header no-break" style="margin-top: 28px">
-        <h3 style="margin: 0">3.3 Εφαρμογή Κινητού (Πελάτες)</h3>
+        <h3 style="margin: 0">3.4 Εφαρμογή Κινητού (Πελάτες)</h3>
         <span class="role-badge client">CLIENT</span>
       </div>
       <p>
@@ -889,6 +1071,52 @@
         </div>
       </div>
 
+      <h4>Ένταξη σε Γυμναστήριο</h4>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            <strong>Onboarding Join Code:</strong> Κατά την εγγραφή, ο χρήστης
+            καλείται προαιρετικά να εισάγει τον κωδικό του γυμναστηρίου
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Auto-lookup γυμναστηρίου με 6 χαρακτήρες — εμφανίζεται το όνομα
+            πριν την επιβεβαίωση
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Όνομα γυμναστηρίου εμφανίζεται στο Προφίλ — ορατό και μετά
+            σύνδεση από το profile screen
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            <strong>Standalone mode:</strong> Χρήστες χωρίς γυμναστήριο
+            χρησιμοποιούν την εφαρμογή για προσωπική παρακολούθηση
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Γυμναστήριο-ιδιωτικές ασκήσεις εμφανίζονται αυτόματα μόλις ο
+            χρήστης συνδεθεί με γυμναστήριο
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            Δυνατότητα σύνδεσης μέσω invite link (email) ή join code οποιαδήποτε
+            στιγμή από το Προφίλ
+          </div>
+        </div>
+      </div>
+
       <h4>Προφίλ & Ρυθμίσεις</h4>
       <div class="feature-grid">
         <div class="feature-item">
@@ -919,23 +1147,38 @@
         <div class="feature-item">
           <span class="fi-icon">▸</span>
           <div>
-            <strong>Row Level Security (RLS):</strong> Κάθε χρήστης βλέπει
-            αποκλειστικά τα δικά του δεδομένα — σε επίπεδο βάσης, όχι μόνο
-            κώδικα
+            <strong>Multi-Tenant RLS:</strong> Κάθε γυμναστήριο βλέπει
+            αποκλειστικά τα δικά του δεδομένα — απομόνωση σε επίπεδο βάσης
+            δεδομένων, όχι μόνο κώδικα
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            <strong>Τέσσερα Επίπεδα Ρόλων:</strong> owner → admin → trainer →
+            user, με κλιμακούμενα δικαιώματα και αυστηρό διαχωρισμό
           </div>
         </div>
         <div class="feature-item">
           <span class="fi-icon">▸</span>
           <div>
             <strong>JWT Authentication:</strong> Ασφαλής είσοδος με
-            κρυπτογραφημένα tokens που λήγουν αυτόματα
+            κρυπτογραφημένα tokens — το gym_id του χρήστη φέρεται στο JWT
           </div>
         </div>
         <div class="feature-item">
           <span class="fi-icon">▸</span>
           <div>
-            <strong>Role-Based Access:</strong> Τρία επίπεδα δικαιωμάτων (admin
-            / trainer / user) με αυστηρό διαχωρισμό
+            <strong>Service Role για Κρίσιμες Λειτουργίες:</strong> Αποδοχή
+            πρόσκλησης και ανύψωση ρόλου γίνονται μέσω server-side service role
+            — ο χρήστης δεν μπορεί να αναβαθμίσει μόνος του
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="fi-icon">▸</span>
+          <div>
+            <strong>Stripe Webhook Validation:</strong> Επαλήθευση υπογραφής
+            HMAC σε κάθε webhook — αδύνατη η πλαστογράφηση πληρωμής
           </div>
         </div>
         <div class="feature-item">
@@ -969,156 +1212,168 @@
       <h2>Οικονομική Ανάλυση</h2>
       <div class="h2-rule"></div>
 
-      <p style="margin-bottom: 24px">
-        Παρακάτω παρουσιάζονται δύο εναλλακτικά μοντέλα τιμολόγησης. Και τα δύο
-        καλύπτουν πλήρως την ανάπτυξη, την εγκατάσταση και την παροχή υπηρεσιών
-        συντήρησης.
+      <p style="margin-bottom: 8px">
+        Η πλατφόρμα προσφέρεται ως <strong>SaaS συνδρομή</strong> — το γυμναστήριο
+        πληρώνει μηνιαία συνδρομή ανάλογα με το μέγεθός του, χωρίς κόστος
+        ανάπτυξης ή εγκατάστασης. Παρέχεται επίσης η επιλογή εφάπαξ απόκτησης
+        για γυμναστήρια που επιθυμούν πλήρη ιδιοκτησία.
       </p>
 
-      <div class="pricing-cards">
-        <!-- Option A -->
+      <h3 style="margin-top: 28px">Πλάνα Συνδρομής SaaS</h3>
+      <p style="margin-bottom: 16px; color: #aaa; font-size: 9pt">
+        Κάθε πλάνο περιλαμβάνει πλήρη πρόσβαση στο admin portal, την εφαρμογή
+        κινητού για απεριόριστους πελάτες, updates και support.
+      </p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:28px">
+        <!-- Basic -->
         <div class="pricing-card no-break">
-          <div class="pricing-card-title">Επιλογή Α — Εφάπαξ</div>
-          <div class="pricing-card-subtitle">
-            Μία πληρωμή, πλήρης ιδιοκτησία κώδικα
-          </div>
-          <div class="pricing-amount">€9.500 <span>εφάπαξ</span></div>
-          <div style="margin-top: 20px">
-            <div class="price-row">
-              <span class="label">Ανάπτυξη & Design</span
-              ><span class="value">περιλαμβάνεται</span>
-            </div>
-            <div class="price-row">
-              <span class="label">Εγκατάσταση & Configuration</span
-              ><span class="value">περιλαμβάνεται</span>
-            </div>
-            <div class="price-row">
-              <span class="label">Εκπαίδευση διαχειριστή</span
-              ><span class="value">περιλαμβάνεται</span>
-            </div>
-            <div class="price-row">
-              <span class="label">Εγγύηση bugs (3 μήνες)</span
-              ><span class="value">περιλαμβάνεται</span>
-            </div>
-            <div class="price-row">
-              <span class="label">Μηνιαία συντήρηση / updates</span
-              ><span class="value highlight">+ €250/μήνα</span>
-            </div>
-            <div class="price-row">
-              <span class="label">Κόστος έτους 1</span
-              ><span class="value highlight">€12.500</span>
-            </div>
-            <div class="price-row">
-              <span class="label">Κόστος από έτος 2+</span
-              ><span class="value">€3.000/έτος</span>
-            </div>
+          <div class="pricing-card-title">Basic</div>
+          <div class="pricing-card-subtitle">Μικρό γυμναστήριο ή studio</div>
+          <div class="pricing-amount">€39 <span>/ μήνα</span></div>
+          <div style="margin-top: 16px">
+            <div class="price-row"><span class="label">Trainers</span><span class="value">έως 3</span></div>
+            <div class="price-row"><span class="label">Ενεργοί πελάτες</span><span class="value">έως 30</span></div>
+            <div class="price-row"><span class="label">Admin portal</span><span class="value green">✓</span></div>
+            <div class="price-row"><span class="label">Εφαρμογή κινητού</span><span class="value green">✓</span></div>
+            <div class="price-row"><span class="label">Gym βιβλιοθήκη ασκήσεων</span><span class="value green">✓</span></div>
+            <div class="price-row"><span class="label">Invite system</span><span class="value green">✓</span></div>
+            <div class="price-row"><span class="label">Ετήσια χρέωση</span><span class="value">€390/έτος</span></div>
           </div>
         </div>
 
-        <!-- Option B -->
+        <!-- Pro -->
         <div class="pricing-card recommended no-break">
-          <div class="rec-badge">✦ Συνιστάται</div>
-          <div class="pricing-card-title">Επιλογή Β — Ποσοστό Εσόδων</div>
-          <div class="pricing-card-subtitle">
-            Χαμηλό upfront, επαναλαμβανόμενο μοντέλο ανάπτυξης
+          <div class="rec-badge">✦ Δημοφιλές</div>
+          <div class="pricing-card-title">Pro</div>
+          <div class="pricing-card-subtitle">Μεσαίο γυμναστήριο</div>
+          <div class="pricing-amount">€99 <span>/ μήνα</span></div>
+          <div style="margin-top: 16px">
+            <div class="price-row"><span class="label">Trainers</span><span class="value">έως 10</span></div>
+            <div class="price-row"><span class="label">Ενεργοί πελάτες</span><span class="value">έως 100</span></div>
+            <div class="price-row"><span class="label">Admin portal</span><span class="value green">✓</span></div>
+            <div class="price-row"><span class="label">Εφαρμογή κινητού</span><span class="value green">✓</span></div>
+            <div class="price-row"><span class="label">Analytics dashboard</span><span class="value green">✓</span></div>
+            <div class="price-row"><span class="label">Priority support</span><span class="value green">✓</span></div>
+            <div class="price-row"><span class="label">Ετήσια χρέωση</span><span class="value highlight">€990/έτος</span></div>
           </div>
-          <div class="pricing-amount">4% <span>μηνιαίων εσόδων</span></div>
-          <div style="margin-top: 20px">
-            <div class="price-row">
-              <span class="label">Εφάπαξ setup fee</span
-              ><span class="value highlight">€1.500</span>
-            </div>
-            <div class="price-row">
-              <span class="label">Ελάχιστο μηνιαίο ποσό</span
-              ><span class="value">€150/μήνα</span>
-            </div>
-            <div class="price-row">
-              <span class="label">Συντήρηση & νέες λειτουργίες</span
-              ><span class="value green">περιλαμβάνεται</span>
-            </div>
-            <div class="price-row">
-              <span class="label">SLA support</span
-              ><span class="value green">περιλαμβάνεται</span>
-            </div>
+        </div>
+
+        <!-- Elite -->
+        <div class="pricing-card no-break">
+          <div class="pricing-card-title">Elite</div>
+          <div class="pricing-card-subtitle">Μεγάλο γυμναστήριο ή αλυσίδα</div>
+          <div class="pricing-amount">€199 <span>/ μήνα</span></div>
+          <div style="margin-top: 16px">
+            <div class="price-row"><span class="label">Trainers</span><span class="value">Απεριόριστοι</span></div>
+            <div class="price-row"><span class="label">Ενεργοί πελάτες</span><span class="value">Απεριόριστοι</span></div>
+            <div class="price-row"><span class="label">Όλα τα χαρακτηριστικά Pro</span><span class="value green">✓</span></div>
+            <div class="price-row"><span class="label">Dedicated onboarding</span><span class="value green">✓</span></div>
+            <div class="price-row"><span class="label">SLA 24ωρης υποστήριξης</span><span class="value green">✓</span></div>
+            <div class="price-row"><span class="label">Ετήσια χρέωση</span><span class="value">€1.990/έτος</span></div>
           </div>
         </div>
       </div>
 
       <!-- Scenario table -->
-      <h3 style="margin-top: 28px">Ανάλυση Σεναρίων — Επιλογή Β (4% εσόδων)</h3>
+      <h3 style="margin-top: 8px">Σύγκριση Κόστους vs. Αξίας</h3>
       <p style="margin-bottom: 10px">
-        Για γυμναστήριο με μηνιαία έσοδα €5.000 – €20.000+:
+        Εκτίμηση εξοικονόμησης χρόνου (€18/ώρα) ανά μέγεθος γυμναστηρίου:
       </p>
       <table class="scenario-table">
         <thead>
           <tr>
-            <th>Μηνιαία Έσοδα Γυμναστηρίου</th>
-            <th>4% Ποσοστό</th>
-            <th>Ετήσιο Κόστος</th>
-            <th>ROI (εξοικ. χρόνου)</th>
+            <th>Πλάνο</th>
+            <th>Μηνιαίο Κόστος</th>
+            <th>Εκτιμ. Εξοικονόμηση Χρόνου</th>
+            <th>Μηνιαία Αξία</th>
+            <th>ROI</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>€5.000 / μήνα</td>
-            <td class="highlight">€200</td>
-            <td>€3.900 (incl. setup)</td>
-            <td class="green">~8–10 ώρες/μήνα</td>
+            <td>Basic</td>
+            <td class="highlight">€39</td>
+            <td>8–10 ώρες/μήνα</td>
+            <td class="green">€144–180</td>
+            <td class="green">+269%–362%</td>
           </tr>
           <tr>
-            <td>€8.000 / μήνα</td>
-            <td class="highlight">€320</td>
-            <td>€5.340 (incl. setup)</td>
-            <td class="green">~12–15 ώρες/μήνα</td>
+            <td>Pro</td>
+            <td class="highlight">€99</td>
+            <td>15–20 ώρες/μήνα</td>
+            <td class="green">€270–360</td>
+            <td class="green">+173%–264%</td>
           </tr>
           <tr>
-            <td>€12.000 / μήνα</td>
-            <td class="highlight">€480</td>
-            <td>€7.260 (incl. setup)</td>
-            <td class="green">~15–20 ώρες/μήνα</td>
-          </tr>
-          <tr>
-            <td>€20.000+ / μήνα</td>
-            <td class="highlight">€800+</td>
-            <td>€11.100+ (incl. setup)</td>
-            <td class="green">~20+ ώρες/μήνα</td>
+            <td>Elite</td>
+            <td class="highlight">€199</td>
+            <td>30+ ώρες/μήνα</td>
+            <td class="green">€540+</td>
+            <td class="green">+171%+</td>
           </tr>
         </tbody>
       </table>
 
       <div
         class="info-box"
-        style="
-          background: #1a1a1a;
-          border-color: var(--orange);
-          color: #aaa;
-          margin-top: 16px;
-        "
+        style="background: #1a1a1a; border-color: var(--orange); color: #aaa; margin-top: 16px;"
       >
-        <strong style="color: #fff">Σημείωση:</strong> Ο υπολογισμός ROI
-        βασίζεται στην εξοικονόμηση χρόνου προπονητών και διαχειριστή από
-        χειροκίνητη παρακολούθηση προγραμμάτων, check-ins και επικοινωνίας
-        (εκτίμηση: €15–20/ώρα).
+        <strong style="color: #fff">Σημείωση:</strong> Η εκτίμηση εξοικονόμησης
+        χρόνου βασίζεται στη μείωση χειροκίνητης επικοινωνίας (WhatsApp, email),
+        διαχείρισης check-ins, ενημέρωσης προγραμμάτων και παρακολούθησης
+        προόδου πελατών. Δεν συνυπολογίζεται η αύξηση διατηρησιμότητας πελατών
+        (+15–25% εκτίμηση για γυμναστήρια με ψηφιακό check-in σύστημα).
+      </div>
+
+      <!-- Option A -->
+      <h3 style="margin-top: 28px">Εναλλακτικά — Εφάπαξ Απόκτηση (White-Label)</h3>
+      <p style="margin-bottom: 16px; color: #aaa; font-size: 9pt">
+        Για γυμναστήρια που επιθυμούν πλήρη ιδιοκτησία της πλατφόρμας με branded
+        εμφάνιση και ανεξαρτησία από μηνιαία συνδρομή.
+      </p>
+      <div class="pricing-cards">
+        <div class="pricing-card no-break">
+          <div class="pricing-card-title">White-Label Εφάπαξ</div>
+          <div class="pricing-card-subtitle">Πλήρης ιδιοκτησία κώδικα & deployment</div>
+          <div class="pricing-amount">€14.500 <span>εφάπαξ</span></div>
+          <div style="margin-top: 20px">
+            <div class="price-row"><span class="label">Branded admin portal & mobile app</span><span class="value green">✓</span></div>
+            <div class="price-row"><span class="label">Εγκατάσταση & Configuration</span><span class="value green">✓</span></div>
+            <div class="price-row"><span class="label">Εκπαίδευση διαχειριστή</span><span class="value green">✓</span></div>
+            <div class="price-row"><span class="label">Εγγύηση bugs (6 μήνες)</span><span class="value green">✓</span></div>
+            <div class="price-row"><span class="label">Μηνιαία συντήρηση / updates</span><span class="value highlight">+ €300/μήνα</span></div>
+            <div class="price-row"><span class="label">Κόστος έτους 1</span><span class="value highlight">€18.100</span></div>
+            <div class="price-row"><span class="label">Κόστος από έτος 2+</span><span class="value">€3.600/έτος</span></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;padding:0 8px">
+          <div style="color:#555;font-size:9pt;line-height:1.7">
+            Κατάλληλο για:<br/>
+            ✦ Αλυσίδες γυμναστηρίων (3+)<br/>
+            ✦ Franchises που θέλουν δικό τους brand<br/>
+            ✦ Επιχειρήσεις με IT ομάδα που θα αναλάβει τη συντήρηση<br/><br/>
+            <span style="color:#666">Δεν περιλαμβάνει νέες λειτουργίες —
+            μόνο bug fixes και security updates.</span>
+          </div>
+        </div>
       </div>
 
       <!-- Recommendation -->
       <div class="recommendation-box no-break">
-        <div class="rec-title">✦ Σύσταση — Επιλογή Β: Ποσοστό Εσόδων</div>
+        <div class="rec-title">✦ Σύσταση — Πλάνο Pro SaaS</div>
         <div class="rec-text">
-          Το μοντέλο ποσοστού εσόδων εξυπηρετεί καλύτερα
-          <strong>και τα δύο μέρη</strong>. Για το γυμναστήριο, αντικαθιστά ένα
-          μεγάλο εφάπαξ κόστος με ένα προβλέψιμο, μικρό μηνιαίο ποσό — και το
-          κόστος δικαιολογείται πλήρως από την αξία που παράγει. Για τον
-          developer, δημιουργεί σταθερό, επαναλαμβανόμενο εισόδημα που
-          κινητοποιεί τη συνεχή βελτίωση της πλατφόρμας.<br /><br />
-          Το <strong>minimum των €150/μήνα</strong> εξασφαλίζει τη βιωσιμότητα
-          της συντήρησης ακόμα και σε δύσκολους μήνες, ενώ το ποσοστό
-          κλιμακώνεται φυσικά με την ανάπτυξη της επιχείρησης — χωρίς ανώτατο
-          όριο.<br /><br />
-          Πρακτικά: για ένα γυμναστήριο με €10.000 μηνιαία έσοδα, το κόστος της
-          πλατφόρμας ανέρχεται σε <strong>€400/μήνα</strong> — ποσό που
-          αντισταθμίζεται πλήρως από την εξοικονόμηση χρόνου και την αύξηση της
-          διατηρησιμότητας πελατών — αντί για εφάπαξ κόστος ανάπτυξης.
+          Για τη μεγάλη πλειοψηφία των γυμναστηρίων, το μοντέλο SaaS συνδρομής
+          είναι η <strong>έξυπνη επιλογή</strong>: μηδενικό κόστος εκκίνησης,
+          άμεση πρόσβαση σε όλες τις λειτουργίες, και το γυμναστήριο επωφελείται
+          αυτόματα από κάθε νέα λειτουργία που προστίθεται στην πλατφόρμα.<br /><br />
+          Το <strong>Pro πλάνο (€99/μήνα)</strong> καλύπτει άνετα ένα γυμναστήριο
+          με 3–8 trainers και 50–100 ενεργούς πελάτες — το τυπικό μέγεθος ενός
+          μεσαίου ελληνικού γυμναστηρίου. Το κόστος αντιστοιχεί σε λιγότερο από
+          <strong>€4/ημέρα</strong> και αποσβένεται πλήρως από την εξοικονόμηση
+          χρόνου 2–3 ωρών ανά εβδομάδα.<br /><br />
+          Η εφάπαξ επιλογή συνιστάται μόνο για αλυσίδες ή επιχειρήσεις που
+          επιθυμούν branded λύση με πλήρη ιδιοκτησία.
         </div>
       </div>
 
@@ -1131,7 +1386,7 @@
         <div style="text-align: right; color: #444">
           Η παρούσα αναφορά είναι εμπιστευτική<br />
           και απευθύνεται αποκλειστικά στον παραλήπτη.<br />
-          Μάιος 2026
+          Ιούνιος 2026 — Έκδοση 2.0
         </div>
       </div>
     </div>

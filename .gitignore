@@ -16,7 +16,8 @@ ios/
 # Docker local data — volumes contain generated secrets, never commit
 supabase/volumes/db/data/
 supabase/volumes/storage/
-supabase/volumes/api/kong.yml
+# Note: supabase/volumes/api/kong.yml IS tracked — it only holds ${VAR} placeholders,
+# resolved from real env vars inside the kong container at startup, never written to disk.
 
 # Claude Code local settings (contains API keys / allowlisted commands)
 .claude/
@@ -28,6 +29,10 @@ supabase/volumes/api/kong.yml
 .DS_Store
 
 .env*
+# .env.example / .env.*.example are placeholder-only templates, safe (and meant) to commit
+!.env.example
+!**/.env.example
+!.env*.example
 *.sql.bak
 
 # Supabase temp
@@ -43,3 +48,7 @@ test-results/
 
 # Generated reports
 MAX_FITNESS_REPORT.html
+GYM_ONBOARDING_REPORT.html
+
+# Local Postgres dumps from deploy/backup.sh
+deploy/backups/

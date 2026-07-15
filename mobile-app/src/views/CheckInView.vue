@@ -150,7 +150,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, reactive } from 'vue'
-import { useRouter }    from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { v4 as uuidv4 } from 'uuid'
 import { supabase }     from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
@@ -176,6 +176,7 @@ interface PastSubmission {
 
 const MAX_PHOTOS = 5
 const router      = useRouter()
+const route       = useRoute()
 const auth        = useAuthStore()
 const loading     = ref(true)
 const submitting  = ref(false)
@@ -267,6 +268,12 @@ onMounted(async () => {
         questionLabels,
       }
     })
+    // Deep-link from the dashboard's check-in banner: open a specific assignment directly
+    const targetId = route.query.assignment as string | undefined
+    if (targetId) {
+      const target = pendingAssignments.value.find(a => a.id === targetId)
+      if (target) openForm(target)
+    }
   } catch (err) {
     console.error('[CheckInView] load error:', err)
   } finally {

@@ -18,6 +18,14 @@
       </button>
     </section>
 
+    <!-- Check-in due card (nearest pending assignment) -->
+    <section v-if="nearestCheckin" class="checkin-card" @click="openNearestCheckin">
+      <div class="checkin-label">CHECK-IN DUE</div>
+      <div class="checkin-name">{{ nearestCheckin.template_name }}</div>
+      <div class="checkin-due">Due {{ formatCheckinDue(nearestCheckin.next_due_at) }}</div>
+      <i class="pi pi-chevron-right checkin-arrow" />
+    </section>
+
     <!-- Dialog A: active session conflict -->
     <Dialog v-model:visible="showConflictDialog" modal header="WORKOUT IN PROGRESS" :style="{ width: '88vw', maxWidth: '340px' }">
       <p class="dlg-body">You already have a workout in progress. Continue it or start the assigned session?</p>
@@ -81,7 +89,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
+import { format } from 'date-fns'
+import { supabase } from '@/lib/supabase'
 import { useAuthStore }    from '@/stores/authStore'
 import { useHistoryStore } from '@/stores/historyStore'
 import { useProfileStore } from '@/stores/profileStore'
@@ -96,6 +106,7 @@ import BodyweightChart  from '@/components/BodyweightChart.vue'
 import MuscleVolumeChart from '@/components/MuscleVolumeChart.vue'
 
 const router       = useRouter()
+const route        = useRoute()
 const auth         = useAuthStore()
 const history      = useHistoryStore()
 const profileStore = useProfileStore()
@@ -106,6 +117,9 @@ const recentWithMeta = ref<any[]>([])
 const launching          = ref(false)
 const showConflictDialog = ref(false)
 const showFinishDialog   = ref(false)
+
+interface NearestCheckin { id: string; template_name: string; next_due_at: string }
+const nearestCheckin = ref<NearestCheckin | null>(null)
 
 const greeting = computed(() => {
   const h = new Date().getHours()
@@ -180,13 +194,67 @@ async function enrichSessions() {
   recentWithMeta.value = await history.enrichSessions(history.sessions.slice(0, 5))
 }
 
+// ── Nearest pending check-in (banner shown below Today's Workout) ─────────
+function formatCheckinDue(iso: string) {
+  try { return format(new Date(iso), 'MMM d, yyyy') } catch { return '—' }
+}
+
+async function fetchNearestCheckin() {
+  if (!auth.user?.id) return
+  const endOfToday = new Date()
+  endOfToday.setUTCHours(23, 59, 59, 999)
+
+  const { data } = await supabase
+    .from('checkin_assignments')
+    .select('id, next_due_at, checkin_templates ( name )')
+    .eq('client_id', auth.user.id)
+    .eq('is_active', true)
+    .not('next_due_at', 'is', null)
+    .lte('next_due_at', endOfToday.toISOString())
+    .order('next_due_at', { ascending: true })
+    .limit(1)
+
+  const row = data?.[0] as any
+  nearestCheckin.value = row
+    ? { id: row.id, next_due_at: row.next_due_at, template_name: row.checkin_templates?.name ?? 'Check-in' }
+    : null
+}
+
+function openNearestCheckin() {
+  if (!nearestCheckin.value) return
+  router.push(`/checkin?assignment=${nearestCheckin.value.id}`)
+}
+
+async function verifyTrainerUpgradeIfNeeded() {
+  if (route.query.upgraded !== '1' || !auth.user?.id) return
+  const sessionId = route.query.session_id as string | undefined
+  router.replace('/dashboard')
+  if (!sessionId) { await auth.fetchProfile(auth.user.id); return }
+
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) return
+  try {
+    const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/verify-trainer-checkout`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+      body:    JSON.stringify({ session_id: sessionId }),
+    })
+    if (res.ok) await auth.fetchProfile(auth.user.id)
+  } catch (err) {
+    console.error('verify-trainer-checkout failed:', err)
+  }
+}
+
 onMounted(async () => {
+  await verifyTrainerUpgradeIfNeeded()
+
   if (auth.user?.id) {
     history.subscribeToSessions(auth.user.id)
     await profileStore.fetchBodyweightLog(auth.user.id)
-    // Only fetch today's plan template for non-trainer users (clients)
+    // Only fetch today's plan template + check-ins for non-trainer users (clients)
     if (auth.profile?.role === 'user') {
       await trainerStore.fetchTodayTemplate()
+      await fetchNearestCheckin()
     }
   }
   history.$subscribe(enrichSessions)
@@ -225,6 +293,23 @@ onMounted(async () => {
   transition: opacity 0.15s;
 }
 .today-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Check-in due card */
+.checkin-card {
+  background: linear-gradient(135deg, rgba(255,180,0,0.15), rgba(255,180,0,0.05));
+  border: 1px solid rgba(255,180,0,0.4);
+  padding: 1.25rem; margin-bottom: 1.25rem; cursor: pointer;
+  display: flex; flex-direction: column; gap: 0.25rem;
+  position: relative; transition: border-color 0.15s;
+}
+.checkin-card:hover { border-color: rgba(255,180,0,0.7); }
+.checkin-label { font-family: 'Barlow Condensed',sans-serif; font-size: 0.6rem; font-weight: 700; color: var(--gold); letter-spacing: 0.2em; }
+.checkin-name  { font-family: 'Barlow Condensed',sans-serif; font-size: 1.5rem; font-weight: 900; color: var(--text); line-height: 1; }
+.checkin-due   { font-size: 0.7rem; color: #AEAEB2; }
+.checkin-arrow {
+  position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%);
+  color: var(--gold); font-size: 0.9rem;
+}
 
 .dlg-body { font-size: 0.85rem; color: #AEAEB2; line-height: 1.55; }
 

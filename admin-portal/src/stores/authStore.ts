@@ -14,6 +14,8 @@ export interface AdminProfile {
   avatar_url: string | null
   bio: string | null
   gym_id: string | null
+  trainer_subscription_status: 'trialing' | 'active' | 'past_due' | 'canceled' | null
+  trainer_trial_ends_at: string | null
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -25,6 +27,30 @@ export const useAuthStore = defineStore('auth', () => {
   const isTrainer = computed(() => profile.value?.role === 'trainer')
   const isOwner   = computed(() => profile.value?.role === 'owner')
   const isStaff   = computed(() => ['admin', 'trainer', 'owner'].includes(profile.value?.role ?? ''))
+
+  // Standalone (gym-less) trainer trial/subscription state. NULL status means
+  // "not enrolled in self-serve billing" (gym-affiliated or owner/admin-promoted
+  // trainers) and is never trialing/locked.
+  const isStandaloneTrainer = computed(() => isTrainer.value && !profile.value?.gym_id)
+
+  const isTrainerTrialing = computed(() => profile.value?.trainer_subscription_status === 'trialing')
+
+  const isTrainerTrialExpired = computed(() =>
+    isTrainerTrialing.value &&
+    !!profile.value?.trainer_trial_ends_at &&
+    new Date(profile.value.trainer_trial_ends_at) < new Date()
+  )
+
+  const trainerTrialDaysLeft = computed<number | null>(() => {
+    if (!isTrainerTrialing.value || !profile.value?.trainer_trial_ends_at) return null
+    return Math.floor((new Date(profile.value.trainer_trial_ends_at).getTime() - Date.now()) / 86_400_000)
+  })
+
+  const isTrainerLocked = computed(() =>
+    isStandaloneTrainer.value &&
+    (profile.value?.trainer_subscription_status === 'canceled' || isTrainerTrialExpired.value)
+  )
+  const isTrainerPastDue = computed(() => profile.value?.trainer_subscription_status === 'past_due')
 
   async function init() {
     loading.value = true
@@ -52,7 +78,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function fetchProfile(authUser: User) {
     const { data } = await supabase
       .from('profiles')
-      .select('id, role, tier, full_name, avatar_url, bio, gym_id')
+      .select('id, role, tier, full_name, avatar_url, bio, gym_id, trainer_subscription_status, trainer_trial_ends_at')
       .eq('id', authUser.id)
       .single()
     if (data) {
@@ -100,5 +126,9 @@ export const useAuthStore = defineStore('auth', () => {
     useGymStore().clear()
   }
 
-  return { user, profile, loading, isAdmin, isTrainer, isOwner, isStaff, init, updateProfile, uploadAvatar, changePassword, signOut }
+  return {
+    user, profile, loading, isAdmin, isTrainer, isOwner, isStaff,
+    isStandaloneTrainer, isTrainerTrialing, isTrainerTrialExpired, trainerTrialDaysLeft, isTrainerLocked, isTrainerPastDue,
+    init, fetchProfile, updateProfile, uploadAvatar, changePassword, signOut,
+  }
 })

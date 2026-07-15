@@ -85,10 +85,10 @@
           />
         </div>
         <div class="field">
-          <label class="mf-label">CLIENT (ultra users only)</label>
+          <label class="mf-label">CLIENT</label>
           <Select
             v-model="assignForm.clientId"
-            :options="ultraUserOptions"
+            :options="clientOptions"
             option-label="label"
             option-value="value"
             placeholder="Select client..."
@@ -128,10 +128,10 @@ const showAssignPanel = ref(false)
 const assignError     = ref('')
 const assignForm      = reactive({ trainerId: '', clientId: '' })
 
-const ultraUsers = computed(() => allUsers.value.filter(u => u.tier === 'ultra' && u.role === 'user'))
+const clients = computed(() => allUsers.value.filter(u => u.role === 'user'))
 
-const trainerOptions  = computed(() => trainers.value.map(t => ({ label: t.full_name ?? t.email, value: t.id })))
-const ultraUserOptions = computed(() => ultraUsers.value.map(u => ({ label: `${u.full_name ?? u.email} — ${u.email}`, value: u.id })))
+const trainerOptions = computed(() => trainers.value.map(t => ({ label: t.full_name ?? t.email, value: t.id })))
+const clientOptions  = computed(() => clients.value.map(u => ({ label: `${u.full_name ?? u.email} — ${u.email} (${u.tier.toUpperCase()})`, value: u.id })))
 
 
 onMounted(async () => { await load() })

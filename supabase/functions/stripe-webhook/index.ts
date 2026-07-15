@@ -1,8 +1,8 @@
 /**
  * stripe-webhook — Supabase Edge Function
  *
- * Handles Stripe billing events for both gym subscriptions and individual
- * mobile user tier upgrades (free/paid/ultra).
+ * Handles Stripe billing events for gym subscriptions, individual mobile user
+ * tier upgrades (free/paid/ultra), and standalone trainer subscriptions.
  *
  * Deploy:  supabase functions deploy stripe-webhook --no-verify-jwt
  * Secrets to set:
@@ -10,6 +10,7 @@
  *   STRIPE_WEBHOOK_SECRET    — whsec_...  (from Stripe Dashboard → Webhooks)
  *   STRIPE_PRICE_USER_PAID   — price_... for Paid user tier
  *   STRIPE_PRICE_USER_ULTRA  — price_... for Ultra user tier
+ *   STRIPE_PRICE_TRAINER     — price_... for the standalone trainer plan
  *
  * Events to enable in Stripe Dashboard:
  *   checkout.session.completed
@@ -68,8 +69,8 @@ Deno.serve(async (req) => {
         const session = event.data.object as Stripe.Checkout.Session
         if (session.mode !== 'subscription') break
 
-        if (session.metadata?.type === 'user') {
-          // Store customer ID on the user profile so the portal can use it
+        if (session.metadata?.type === 'user' || session.metadata?.type === 'trainer') {
+          // Store customer ID on the profile so the portal can use it
           const userId     = session.metadata?.user_id
           const customerId = session.customer as string
           if (userId) {
@@ -99,6 +100,8 @@ Deno.serve(async (req) => {
 
         if (sub.metadata?.type === 'user') {
           await handleUserSubscription(supabase, sub)
+        } else if (sub.metadata?.type === 'trainer') {
+          await handleTrainerSubscription(supabase, sub)
         } else {
           const gymId = await gymIdByCustomer(supabase, sub.customer as string)
           if (!gymId) break
@@ -115,6 +118,11 @@ Deno.serve(async (req) => {
           const userId = sub.metadata?.user_id
           if (userId) {
             await supabase.from('profiles').update({ tier: 'free' }).eq('id', userId)
+          }
+        } else if (sub.metadata?.type === 'trainer') {
+          const userId = sub.metadata?.user_id
+          if (userId) {
+            await supabase.from('profiles').update({ trainer_subscription_status: 'canceled' }).eq('id', userId)
           }
         } else {
           const gymId = await gymIdByCustomer(supabase, sub.customer as string)
@@ -150,11 +158,13 @@ Deno.serve(async (req) => {
             .update({ subscription_status: 'active', updated_at: new Date().toISOString() })
             .eq('id', gymId)
         } else {
-          // Could be a user subscription renewal — re-fetch sub to get metadata
+          // Could be a user or trainer subscription renewal — re-fetch sub for metadata
           const subId = invoice.subscription as string
           const sub = await stripe.subscriptions.retrieve(subId)
           if (sub.metadata?.type === 'user') {
             await handleUserSubscription(supabase, sub)
+          } else if (sub.metadata?.type === 'trainer') {
+            await handleTrainerSubscription(supabase, sub)
           }
         }
         break
@@ -176,13 +186,18 @@ Deno.serve(async (req) => {
             .update({ subscription_status: 'past_due', updated_at: new Date().toISOString() })
             .eq('id', gymId)
         } else {
-          // User subscription payment failed — downgrade to free
+          // User/trainer subscription payment failed
           const subId = invoice.subscription as string
           const sub = await stripe.subscriptions.retrieve(subId)
           if (sub.metadata?.type === 'user') {
             const userId = sub.metadata?.user_id
             if (userId) {
               await supabase.from('profiles').update({ tier: 'free' }).eq('id', userId)
+            }
+          } else if (sub.metadata?.type === 'trainer') {
+            const userId = sub.metadata?.user_id
+            if (userId) {
+              await supabase.from('profiles').update({ trainer_subscription_status: 'past_due' }).eq('id', userId)
             }
           }
         }
@@ -228,6 +243,18 @@ async function handleUserSubscription(supabase: any, sub: Stripe.Subscription) {
   }
 
   await supabase.from('profiles').update({ tier }).eq('id', userId)
+}
+
+async function handleTrainerSubscription(supabase: any, sub: Stripe.Subscription) {
+  const userId = sub.metadata?.user_id
+  if (!userId) return
+
+  // profiles.trainer_subscription_status only allows trialing/active/past_due/canceled
+  // (no 'suspended') — collapse anything else Stripe reports into 'canceled'.
+  const status = STRIPE_STATUS_MAP[sub.status] ?? sub.status
+  const trainerStatus = ['trialing', 'active', 'past_due', 'canceled'].includes(status) ? status : 'canceled'
+
+  await supabase.from('profiles').update({ trainer_subscription_status: trainerStatus }).eq('id', userId)
 }
 
 async function upsertGymSubscription(

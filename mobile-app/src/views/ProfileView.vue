@@ -272,21 +272,21 @@ const ALL_PLATES  = [25, 20, 15, 10, 5, 2.5, 1.25, 0.5]
 
 const TIER_INFO: Record<string, { name: string; price: string }> = {
   free:  { name: 'Free',  price: '€0/mo'    },
-  paid:  { name: 'Paid',  price: '€9.99/mo' },
-  ultra: { name: 'Ultra', price: '€19.99/mo' },
+  paid:  { name: 'Paid',  price: '€4.99/mo' },
+  ultra: { name: 'Ultra', price: '€9.99/mo' },
 }
 
 const UPGRADE_OPTIONS = [
   {
     tier: 'paid',
     name: 'Paid',
-    price: '€9.99',
+    price: '€4.99',
     features: ['Access to all standard workouts', 'Progress tracking', 'Priority support'],
   },
   {
     tier: 'ultra',
     name: 'Ultra',
-    price: '€19.99',
+    price: '€9.99',
     features: ['Everything in Paid', 'Personal trainer assignment', 'Custom workout plans', 'Weekly check-ins'],
   },
 ]

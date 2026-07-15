@@ -1,35 +1,78 @@
 ###############################################################################
-#  MAX FITNESS — Local Dev Supabase Stack
-#  Custom docker-compose — no Supabase CLI required.
+#  FERRUM — Self-hosted Supabase stack (production + local dev)
+#  Custom docker-compose — no Supabase CLI required at runtime.
 #
-#  Start:   ./dev.sh start
-#  Stop:    ./dev.sh stop
-#  Reset:   ./dev.sh reset   ← WIPES all data
-#  Logs:    ./dev.sh logs [service]
-#  Verify:  ./dev.sh verify
+#  Local dev (CLI-based, ports 54321/54322/54323) is unaffected — that's a
+#  completely separate mechanism driven by `./dev.sh` / `npx supabase start`.
+#  This file is for the VPS go-live: `deploy/up.sh` brings it up together
+#  with `deploy/docker-compose.yml` (Caddy + the two frontend apps).
+#
+#  Every service here binds to 127.0.0.1 only — nothing in this file is meant
+#  to be reachable from the public internet directly. Caddy (in the sibling
+#  deploy/docker-compose.yml) is the only public listener, reaching Kong over
+#  the shared Docker network by service name. DB/Studio/pg-meta access when
+#  you need it goes through an SSH tunnel, e.g.:
+#    ssh -L 3001:127.0.0.1:3001 -L 5433:127.0.0.1:5433 you@your-vps
+#
+#  Start:   ../deploy/up.sh
+#  Stop:    ../deploy/down.sh
+#  Logs:    ../deploy/logs.sh [service]
 ###############################################################################
 
-name: max-fitness-supabase
+name: ferrum-supabase
 
 x-common-env: &common-env
   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
   JWT_SECRET: ${JWT_SECRET}
 
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
 
   # ── 1. PostgreSQL ─────────────────────────────────────────────────────────
+  # max_connections is left at the image default (100). With rest/auth/functions
+  # all opening direct connections (no pooler in this stack), watch connection
+  # counts under load — see the go-live guide's "connection pooling" note for
+  # when to introduce Supavisor/PgBouncer.
   db:
     image: supabase/postgres:15.6.1.117
     restart: unless-stopped
+    logging: *default-logging
     ports:
-      - "5433:5432"             # 5432 is taken by local postgres → mapped to 5433
+      - "127.0.0.1:5433:5432"
     environment:
       <<: *common-env
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
     volumes:
       - db_data:/var/lib/postgresql/data
-      - ./volumes/db/init:/docker-entrypoint-initdb.d:ro
+      # Mounted as an individual file INSIDE the image's own init-scripts/,
+      # not as a directory replacing /docker-entrypoint-initdb.d wholesale —
+      # the latter was the previous (broken) setup: it silently shadowed the
+      # base image's own init-scripts/ and migrations/, which are what
+      # actually create supabase_auth_admin, supabase_storage_admin, etc.
+      # Confirmed by verification: auth/rest/storage all failed with
+      # "role does not exist" until this was fixed.
+      - ./volumes/db/init/00-initial-roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-additional-roles.sql:ro
+      # roles.sql.template only has a ${POSTGRES_PASSWORD} placeholder (no
+      # real secret) — resolved into /etc/postgresql.schema.sql at container
+      # start via the entrypoint below, same pattern as Kong's kong.yml.
+      # migrate.sh (baked into the image) runs this file automatically as
+      # its last init step if present; without it, none of the internal
+      # service-role passwords match POSTGRES_PASSWORD and every dependent
+      # service (auth/rest/storage/meta) fails to connect.
+      - ./volumes/db/roles.sql.template:/etc/postgresql-schema.template.sql:ro
+    # sed, not the more common bash eval/echo trick — eval treats the whole
+    # file as shell input, so any backtick or literal quote in the template
+    # (harmless in plain SQL/YAML) gets executed or stripped. sed only
+    # touches the exact ${POSTGRES_PASSWORD} placeholder, nothing else.
+    entrypoint: >
+      bash -c 'sed "s#\$${POSTGRES_PASSWORD}#$$POSTGRES_PASSWORD#g" /etc/postgresql-schema.template.sql > /etc/postgresql.schema.sql &&
+      exec docker-entrypoint.sh postgres -D /etc/postgresql'
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
@@ -40,6 +83,7 @@ services:
   auth:
     image: supabase/gotrue:v2.158.1
     restart: unless-stopped
+    logging: *default-logging
     depends_on:
       db:
         condition: service_healthy
@@ -55,10 +99,16 @@ services:
       GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
       GOTRUE_SITE_URL: ${GOTRUE_SITE_URL}
       GOTRUE_URI_ALLOW_LIST: ${GOTRUE_ADDITIONAL_REDIRECT_URLS}
+      # Kept true in production: AuthView.vue's self-serve signup flow assumes
+      # an immediate session — no email-confirmation step is implemented
+      # client-side. Flip to "false" only after adding that flow.
       GOTRUE_MAILER_AUTOCONFIRM: ${GOTRUE_MAILER_AUTOCONFIRM}
       GOTRUE_SMTP_HOST: ${GOTRUE_SMTP_HOST}
       GOTRUE_SMTP_PORT: ${GOTRUE_SMTP_PORT}
+      GOTRUE_SMTP_USER: ${GOTRUE_SMTP_USER}
+      GOTRUE_SMTP_PASS: ${GOTRUE_SMTP_PASS}
       GOTRUE_SMTP_ADMIN_EMAIL: ${GOTRUE_SMTP_ADMIN_EMAIL}
+      GOTRUE_SMTP_SENDER_NAME: ${GOTRUE_SMTP_SENDER_NAME}
       GOTRUE_MAILER_URLPATHS_INVITE: ${GOTRUE_MAILER_URLPATHS_INVITE}
       GOTRUE_MAILER_URLPATHS_CONFIRMATION: ${GOTRUE_MAILER_URLPATHS_CONFIRMATION}
       GOTRUE_MAILER_URLPATHS_RECOVERY: ${GOTRUE_MAILER_URLPATHS_RECOVERY}
@@ -66,12 +116,13 @@ services:
       GOTRUE_DISABLE_SIGNUP: "false"
       GOTRUE_PASSWORD_MIN_LENGTH: 8
     ports:
-      - "9999:9999"
+      - "127.0.0.1:9999:9999"
 
   # ── 3. PostgREST ──────────────────────────────────────────────────────────
   rest:
     image: postgrest/postgrest:v12.2.0
     restart: unless-stopped
+    logging: *default-logging
     depends_on:
       db:
         condition: service_healthy
@@ -83,35 +134,15 @@ services:
       PGRST_DB_USE_LEGACY_GUCS: "false"
       PGRST_APP_SETTINGS_JWT_SECRET: ${JWT_SECRET}
       PGRST_APP_SETTINGS_JWT_EXP: ${JWT_EXPIRY}
+      # Conservative default pool so rest+auth+functions together don't
+      # exhaust Postgres's max_connections (100) on a modest VPS.
+      PGRST_DB_POOL: 10
 
-  # ── 4. Realtime ───────────────────────────────────────────────────────────
-  realtime:
-    image: supabase/realtime:v2.30.34
-    restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      PORT: 4000
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: supabase_replication_admin
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_NAME: ${POSTGRES_DB}
-      DB_AFTER_CONNECT_QUERY: "SET search_path TO _realtime"
-      DB_ENC_KEY: ${REALTIME_DB_ENC_KEY}
-      API_JWT_SECRET: ${JWT_SECRET}
-      FLY_ALLOC_ID: local-dev
-      FLY_APP_NAME: realtime
-      SECRET_KEY_BASE: ${REALTIME_SECRET_KEY_BASE}
-      ERL_AFLAGS: -proto_dist inet_tcp
-      ENABLE_TAILSCALE: "false"
-      DNS_NODES: "''"
-
-  # ── 5. Storage ────────────────────────────────────────────────────────────
+  # ── 4. Storage ────────────────────────────────────────────────────────────
   storage:
     image: supabase/storage-api:v1.11.13
     restart: unless-stopped
+    logging: *default-logging
     depends_on:
       db:
         condition: service_healthy
@@ -134,10 +165,11 @@ services:
     volumes:
       - storage_data:/var/lib/storage
 
-  # ── 6. Image Proxy ────────────────────────────────────────────────────────
+  # ── 5. Image Proxy ────────────────────────────────────────────────────────
   imgproxy:
     image: darthsim/imgproxy:v3.8.0
     restart: unless-stopped
+    logging: *default-logging
     environment:
       IMGPROXY_BIND: ":5001"
       IMGPROXY_LOCAL_FILESYSTEM_ROOT: /
@@ -146,18 +178,65 @@ services:
     volumes:
       - storage_data:/var/lib/storage:ro
 
-  # ── 7. Kong (API Gateway — port 8000) ─────────────────────────────────────
+  # ── 6. Edge Functions ─────────────────────────────────────────────────────
+  # supabase/functions/main/index.ts is the required request router — the
+  # edge-runtime image has nothing to dispatch through without it. It reads
+  # the first path segment (e.g. /functions/v1/stripe-webhook -> "stripe-webhook")
+  # and spins up a worker for that function directory.
+  functions:
+    image: supabase/edge-runtime:v1.58.2
+    restart: unless-stopped
+    logging: *default-logging
+    depends_on:
+      db:
+        condition: service_healthy
+    # edge-runtime has no --env-file flag; main/index.ts passes its OWN
+    # process env through to every worker it spawns (Deno.env.toObject()),
+    # so per-function secrets (Stripe, SMTP) must land in THIS container's
+    # environment via env_file, not just the shared SUPABASE_* below.
+    # Confirmed by verification: without this, stripe-webhook returned
+    # 500 "Server misconfiguration" (missing STRIPE_WEBHOOK_SECRET etc).
+    env_file:
+      - ./functions/.env
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      SUPABASE_URL: http://kong:8000
+      SUPABASE_ANON_KEY: ${ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+      SUPABASE_DB_URL: postgres://postgres:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      # Auth is enforced by Kong's key-auth plugin (see kong.yml) and, where
+      # needed, by each function reading its own Authorization header — not
+      # re-checked again at this layer.
+      VERIFY_JWT: "false"
+    volumes:
+      - ./functions:/home/deno/functions:ro
+    command: ["start", "--main-service", "/home/deno/functions/main"]
+
+  # ── 7. Kong (API Gateway) ─────────────────────────────────────────────────
+  # kong.yml on disk contains only ${VAR} placeholders (no real secrets) —
+  # the entrypoint below resolves them from this container's own env into an
+  # in-container copy at start time, so the resolved anon/service keys are
+  # never written back to the host filesystem.
   kong:
     image: kong:2.8.1
     restart: unless-stopped
+    logging: *default-logging
     depends_on:
       - auth
       - rest
-      - realtime
       - storage
+      - functions
+    # sed, not bash eval/echo — eval treats the whole file as shell input, so
+    # a stray backtick or quote in kong.yml's own comments gets executed or
+    # stripped (confirmed by verification — it broke _format_version and
+    # crashed on a backtick in a comment). sed only touches these two exact
+    # placeholders, nothing else, so free-form comments/quotes stay intact.
+    entrypoint: >
+      bash -c 'sed -e "s#\$${SUPABASE_ANON_KEY}#$$SUPABASE_ANON_KEY#g" -e "s#\$${SUPABASE_SERVICE_KEY}#$$SUPABASE_SERVICE_KEY#g" /home/kong/temp.yml > /home/kong/kong.yml &&
+      /docker-entrypoint.sh kong docker-start'
     environment:
       KONG_DATABASE: "off"
-      KONG_DECLARATIVE_CONFIG: /var/lib/kong/kong.yml
+      KONG_DECLARATIVE_CONFIG: /home/kong/kong.yml
       KONG_DNS_ORDER: LAST,A,CNAME
       KONG_PLUGINS: request-transformer,cors,key-auth,acl,basic-auth
       KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: 160k
@@ -165,15 +244,17 @@ services:
       SUPABASE_ANON_KEY: ${ANON_KEY}
       SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
     volumes:
-      - ./volumes/api/kong.yml:/var/lib/kong/kong.yml:ro
+      - ./volumes/api/kong.yml:/home/kong/temp.yml:ro
     ports:
-      - "8000:8000"
-      - "8443:8443"
+      - "127.0.0.1:8000:8000"
 
   # ── 8. Studio ─────────────────────────────────────────────────────────────
+  # SSH-tunnel only by design — Studio has no built-in login when self-hosted,
+  # so it is never given a Caddy route or a public port. See the go-live guide.
   studio:
     image: supabase/studio:20240729-ce42139
     restart: unless-stopped
+    logging: *default-logging
     depends_on:
       - kong
     environment:
@@ -186,12 +267,15 @@ services:
       SUPABASE_ANON_KEY: ${ANON_KEY}
       SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
     ports:
-      - "${STUDIO_PORT}:3000"
+      - "127.0.0.1:${STUDIO_PORT}:3000"
 
   # ── 9. pg-meta ────────────────────────────────────────────────────────────
+  # Internal only — no Kong route, no public exposure. Backs Studio's schema
+  # browser; reachable only from other containers on this network.
   meta:
     image: supabase/postgres-meta:v0.83.2
     restart: unless-stopped
+    logging: *default-logging
     depends_on:
       db:
         condition: service_healthy
@@ -203,16 +287,12 @@ services:
       PG_META_DB_USER: supabase_admin
       PG_META_DB_PASSWORD: ${POSTGRES_PASSWORD}
 
-  # ── 10. Inbucket (email trap) ─────────────────────────────────────────────
-  inbucket:
-    image: inbucket/inbucket:3.0.3
-    restart: unless-stopped
-    ports:
-      - "2500:2500"
-      - "9000:9000"
-
 volumes:
   db_data:
     driver: local
   storage_data:
     driver: local
+
+networks:
+  default:
+    name: ferrum-net

@@ -80,6 +80,7 @@
           <Column header="" style="width: 160px">
             <template #body="{ data }">
               <div style="display:flex;gap:0.4rem">
+                <Button severity="secondary" size="small" :loading="sendingId === data.id" @click="sendInviteEmail(data.id)" title="Resend email"><i class="pi pi-envelope" /></Button>
                 <Button severity="secondary" size="small" @click="copyTokenLink(data.token)" :label="copiedToken === data.token ? 'Copied!' : 'Copy Link'" />
                 <Button severity="danger" size="small" @click="revokeInvite(data.id)"><i class="pi pi-trash" /></Button>
               </div>
@@ -118,6 +119,40 @@ const copiedToken  = ref('')
 
 const loadingInvites = ref(false)
 const pendingInvites = ref<any[]>([])
+const sendingId = ref('')
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
+
+async function getAuthHeader(): Promise<string | null> {
+  const { data: { session } } = await supabase.auth.getSession()
+  return session ? `Bearer ${session.access_token}` : null
+}
+
+async function sendInviteEmail(inviteId: string) {
+  sendingId.value = inviteId
+  const authHeader = await getAuthHeader()
+  if (!authHeader) { sendingId.value = ''; return false }
+
+  try {
+    const res = await fetch(`${supabaseUrl}/functions/v1/send-invite-email`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: authHeader },
+      body:    JSON.stringify({ invite_id: inviteId }),
+    })
+    const json = await res.json()
+    if (!res.ok) {
+      toast.add({ severity: 'error', summary: 'Email not sent', detail: json.error ?? 'Failed to send invite email', life: 5000 })
+      return false
+    }
+    toast.add({ severity: 'success', summary: 'Invite emailed', life: 2500 })
+    return true
+  } catch (err: any) {
+    toast.add({ severity: 'error', summary: 'Email not sent', detail: err.message, life: 5000 })
+    return false
+  } finally {
+    sendingId.value = ''
+  }
+}
 
 const INVITE_ROLES = [
   { label: 'Trainer', value: 'trainer' },
@@ -160,23 +195,44 @@ async function createInvite() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) { creating.value = false; return }
 
-  const { data, error } = await supabase
+  const email = inviteEmail.value.trim().toLowerCase()
+
+  // A unique index blocks a second pending (accepted_at IS NULL) invite for
+  // the same gym+email — including one that's simply expired, since expiry
+  // isn't part of that condition. Renew it in place instead of inserting,
+  // so re-inviting (the whole point of this button) always works rather
+  // than surfacing a raw constraint-violation error.
+  const { data: existing } = await supabase
     .from('gym_invites')
-    .insert({
-      gym_id:     gymStore.gym.id,
-      email:      inviteEmail.value.trim().toLowerCase(),
-      role:       inviteRole.value,
-      invited_by: user.id,
-    })
-    .select('token')
-    .single()
+    .select('id')
+    .eq('gym_id', gymStore.gym.id)
+    .eq('email', email)
+    .is('accepted_at', null)
+    .maybeSingle()
+
+  const fields = { role: inviteRole.value, invited_by: user.id }
+
+  const { data, error } = existing
+    // Renewing a stale invite: give it a fresh token/expiry rather than
+    // reviving whatever old link may already be sitting in someone's inbox.
+    ? await supabase.from('gym_invites')
+        .update({ ...fields, token: crypto.randomUUID().replace(/-/g, ''), expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() })
+        .eq('id', existing.id).select('id, token').single()
+    : await supabase.from('gym_invites')
+        .insert({ gym_id: gymStore.gym.id, email, ...fields }) // token/expires_at use their DB defaults
+        .select('id, token').single()
 
   creating.value = false
-  if (error) { createError.value = error.message; return }
+  if (error) {
+    createError.value = error.message.includes('gym_invites_gym_email_pending_uniq')
+      ? 'An invite is already pending for this email — try again in a moment.'
+      : error.message
+    return
+  }
 
   newInviteLink.value = `${window.location.origin}/invite/${data.token}`
   inviteEmail.value = ''
-  toast.add({ severity: 'success', summary: 'Invite created', detail: 'Copy the link and share it', life: 3000 })
+  await sendInviteEmail(data.id)
   await loadInvites()
 }
 

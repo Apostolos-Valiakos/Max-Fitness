@@ -67,9 +67,9 @@
       <!-- ── REVENUE ─────────────────────────────────────────────────────── -->
       <div v-if="tabLoaded.revenue && activeTab === 'revenue'">
         <div class="kpi-row">
-          <div class="kpi-card card"><div class="kpi-val green">€{{ rv.mrr.toLocaleString() }}</div><div class="kpi-label">Est. MRR</div></div>
-          <div class="kpi-card card"><div class="kpi-val">{{ rv.ultraCount }}</div><div class="kpi-label">Ultra (€30/mo)</div></div>
-          <div class="kpi-card card"><div class="kpi-val">{{ rv.paidCount }}</div><div class="kpi-label">Paid (€5/mo)</div></div>
+          <div class="kpi-card card"><div class="kpi-val green">€{{ fmtMoney(rv.mrr) }}</div><div class="kpi-label">Est. MRR</div></div>
+          <div class="kpi-card card"><div class="kpi-val">{{ rv.ultraCount }}</div><div class="kpi-label">Ultra (€9.99/mo)</div></div>
+          <div class="kpi-card card"><div class="kpi-val">{{ rv.paidCount }}</div><div class="kpi-label">Paid (€4.99/mo)</div></div>
           <div class="kpi-card card"><div class="kpi-val">{{ rv.freeCount }}</div><div class="kpi-label">Free</div></div>
         </div>
         <div class="charts-row">
@@ -90,15 +90,15 @@
               <tr>
                 <td><span class="badge ultra">ULTRA</span></td>
                 <td class="td-val">{{ rv.ultraCount }}</td>
-                <td class="td-muted">€30</td>
-                <td class="td-val green">€{{ (rv.ultraCount * 30).toLocaleString() }}</td>
+                <td class="td-muted">€9.99</td>
+                <td class="td-val green">€{{ fmtMoney(rv.ultraCount * 9.99) }}</td>
                 <td class="td-muted">{{ pct(rv.ultraCount, ov.totalUsers) }}%</td>
               </tr>
               <tr>
                 <td><span class="badge paid">PAID</span></td>
                 <td class="td-val">{{ rv.paidCount }}</td>
-                <td class="td-muted">€5</td>
-                <td class="td-val green">€{{ (rv.paidCount * 5).toLocaleString() }}</td>
+                <td class="td-muted">€4.99</td>
+                <td class="td-val green">€{{ fmtMoney(rv.paidCount * 4.99) }}</td>
                 <td class="td-muted">{{ pct(rv.paidCount, ov.totalUsers) }}%</td>
               </tr>
               <tr>
@@ -229,16 +229,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { Bar, Line } from 'vue-chartjs'
 import {
   Chart as ChartJS, CategoryScale, LinearScale, BarElement,
   PointElement, LineElement, Tooltip, Filler,
 } from 'chart.js'
-import { adminSupabase } from '@/lib/adminSupabase'
-import { useAuthUsers } from '@/composables/useAuthUsers'
+import { callAdminFunction } from '@/lib/adminApi'
 import { useGymFilter } from '@/composables/useGymFilter'
-import { subDays, subMonths, format, startOfMonth, endOfMonth, eachWeekOfInterval, endOfWeek, eachMonthOfInterval, differenceInDays } from 'date-fns'
 import { fmtDate } from '@/lib/utils'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, Tooltip, Filler)
@@ -252,9 +250,6 @@ const barOptsThin = { ...barOpts, datasets: { bar: { borderRadius: 1 } } } as an
 const lineOpts  = { ...baseOpts, scales: { x: { ticks: tickStyle, grid: gridStyle }, y: { ticks: tickStyle, grid: gridStyle } } }
 const barOptsStacked = { ...baseOpts, scales: { x: { stacked: true, ticks: tickStyle, grid: gridStyle }, y: { stacked: true, ticks: tickStyle, grid: gridStyle } } }
 const barOptsH  = { ...baseOpts, indexAxis: 'y' as const, scales: { x: { ticks: tickStyle, grid: gridStyle }, y: { ticks: { ...tickStyle, font: { size: 8 } }, grid: gridStyle } } }
-
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-const HOURS = Array.from({ length: 24 }, (_, i) => `${i}:00`)
 
 // ── Tabs ────────────────────────────────────────────────────────────────────
 const TABS = [
@@ -270,24 +265,7 @@ const activeTab  = ref('overview')
 const tabLoading = ref(false)
 const tabLoaded  = reactive({ overview: false, growth: false, revenue: false, engagement: false, trainers: false, content: false })
 
-const { authUsers, fetchAuthUsers } = useAuthUsers()
 const { activeGymId } = useGymFilter()
-
-// IDs of users in the active gym (null = no filter, [] = empty gym)
-const gymUserIds = ref<string[] | null>(null)
-// authUsers filtered to the active gym
-const gymAuthUsers = computed(() => {
-  const ids = gymUserIds.value
-  if (ids === null) return authUsers.value
-  const set = new Set(ids)
-  return authUsers.value.filter(u => set.has(u.id))
-})
-
-// ── Shared data (loaded with overview) ──────────────────────────────────────
-const allProfiles  = ref<any[]>([])
-const sessions84   = ref<any[]>([])
-const sets84       = ref<any[]>([])
-const exMeta84     = ref<Record<string, { name: string; body_part: string }>>({})
 
 // ── Per-tab data ─────────────────────────────────────────────────────────────
 const ov = reactive({
@@ -329,377 +307,43 @@ const ct = reactive({
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 function pct(n: number, total: number) { return total ? Math.round(n / total * 100) : 0 }
+// Paid/Ultra prices (€4.99/€9.99) aren't whole numbers, so revenue totals
+// need fixed 2-decimal formatting (plain toLocaleString() would show a
+// ragged number of decimals depending on the multiple).
+function fmtMoney(n: number) { return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }
 
-function makeBar(labels: string[], data: number[], color: string) {
-  return { labels, datasets: [{ data, backgroundColor: color + 'aa', borderColor: color, borderWidth: 1, borderRadius: 3 }] }
-}
-function makeLine(labels: string[], data: number[], color: string) {
-  return { labels, datasets: [{ data, borderColor: color, backgroundColor: color + '22', tension: 0.4, fill: true, pointRadius: 2 }] }
+async function loadTab(tab: string) {
+  return callAdminFunction<Record<string, any>>('admin-analytics', { tab, gym_id: activeGymId.value })
 }
 
 // ── Load: OVERVIEW ───────────────────────────────────────────────────────────
 async function loadOverview() {
-  const now  = new Date()
-  const from = subDays(now, 84)
-  const weeks = eachWeekOfInterval({ start: from, end: now })
-  const weekLabels = weeks.map(w => format(w, 'MMM d'))
-  const gymId = activeGymId.value
-
-  // Round 1: profiles + authUsers in parallel (profiles filtered by gym_id)
-  let profilesQuery = adminSupabase.from('profiles').select('id, tier, role, created_at')
-  if (gymId) profilesQuery = profilesQuery.eq('gym_id', gymId)
-
-  const [profilesRes] = await Promise.all([
-    profilesQuery,
-    fetchAuthUsers().catch(() => {}),
-  ])
-
-  allProfiles.value = profilesRes.data ?? []
-  const userIds = allProfiles.value.map(p => p.id)
-  gymUserIds.value  = gymId ? userIds : null
-
-  // Round 2: sessions filtered by gym user IDs
-  let sessQuery = adminSupabase.from('workout_sessions')
-    .select('id, user_id, started_at, finished_at')
-    .gte('started_at', from.toISOString()).not('finished_at', 'is', null)
-  if (gymId) {
-    sessQuery = userIds.length
-      ? sessQuery.in('user_id', userIds)
-      : sessQuery.eq('user_id', '00000000-0000-0000-0000-000000000000')
-  }
-
-  const sessRes = await sessQuery
-  sessions84.value = sessRes.data ?? []
-
-  // Load sets for those sessions
-  const ids = sessions84.value.map(s => s.id)
-  if (ids.length) {
-    const { data: setsData } = await adminSupabase.from('sets')
-      .select('session_id, exercise_id, weight_kg, reps').in('session_id', ids)
-    sets84.value = setsData ?? []
-
-    const exIds = [...new Set(sets84.value.map(s => s.exercise_id))]
-    if (exIds.length) {
-      const { data: exData } = await adminSupabase.from('exercises').select('id, name, body_part').in('id', exIds)
-      for (const e of exData ?? []) exMeta84.value[e.id] = { name: e.name, body_part: e.body_part }
-    }
-  }
-
-  // Overview KPIs
-  ov.totalUsers    = allProfiles.value.length
-  ov.totalSessions = sessions84.value.length
-  const vol = sets84.value.reduce((a, s) => a + (s.weight_kg ?? 0) * (s.reps ?? 0), 0)
-  ov.totalVolume   = Math.round(vol).toLocaleString()
-  const from7 = subDays(now, 7).toISOString()
-  ov.activeThisWeek = new Set(sessions84.value.filter(s => s.started_at >= from7).map(s => s.user_id)).size
-
-  // Sessions per week
-  const sessWeekly = weeks.map(w => {
-    const end = endOfWeek(w)
-    return sessions84.value.filter(s => s.started_at >= w.toISOString() && s.started_at <= end.toISOString()).length
-  })
-  ov.sessionsChart = makeBar(weekLabels, sessWeekly, '#4A9EFF')
-
-  // Signups per week — use gymAuthUsers (filtered to this gym's users)
-  const signupWeekly = weeks.map(w => {
-    const end = endOfWeek(w).toISOString()
-    return gymAuthUsers.value.filter(u => u.created_at >= w.toISOString() && u.created_at <= end).length
-  })
-  ov.signupsChart = makeLine(weekLabels, signupWeekly, '#4A9EFF')
-
+  Object.assign(ov, await loadTab('overview'))
   tabLoaded.overview = true
 }
 
-// ── Load: GROWTH ─────────────────────────────────────────────────────────────
 async function loadGrowth() {
-  const now   = new Date()
-  const from7  = subDays(now, 7).toISOString()
-  const from30 = subDays(now, 30).toISOString()
-  const from90 = subDays(now, 90).toISOString()
-
-  // Apply gym user filter to session queries
-  const uids = gymUserIds.value
-  function gymSess(base: any) {
-    if (uids === null) return base
-    return uids.length ? base.in('user_id', uids) : base.eq('user_id', '00000000-0000-0000-0000-000000000000')
-  }
-
-  type SessRow = { data: { user_id: string }[] | null }
-  const [s7Res, s30Res, s90Res, everRes] = await Promise.all([
-    gymSess(adminSupabase.from('workout_sessions').select('user_id').gte('started_at', from7).not('finished_at', 'is', null)),
-    gymSess(adminSupabase.from('workout_sessions').select('user_id').gte('started_at', from30).not('finished_at', 'is', null)),
-    gymSess(adminSupabase.from('workout_sessions').select('user_id').gte('started_at', from90).not('finished_at', 'is', null)),
-    gymSess(adminSupabase.from('workout_sessions').select('user_id').lt('started_at', from30).not('finished_at', 'is', null)),
-  ]) as [SessRow, SessRow, SessRow, SessRow]
-
-  const active7Set  = new Set((s7Res.data ?? []).map(s => s.user_id))
-  const active30Set = new Set((s30Res.data ?? []).map(s => s.user_id))
-  const active90Set = new Set((s90Res.data ?? []).map(s => s.user_id))
-  const everSet     = new Set((everRes.data ?? []).map(s => s.user_id))
-
-  gr.active7  = active7Set.size
-  gr.active30 = active30Set.size
-  gr.active90 = active90Set.size
-  gr.churned  = [...everSet].filter(id => !active30Set.has(id)).length
-  gr.neverTrained = allProfiles.value.filter(p => !active90Set.has(p.id) && !everSet.has(p.id)).length
-
-  // Use gymAuthUsers (gym-filtered) for signup metrics
-  const thisMonth = startOfMonth(now)
-  gr.newThisMonth = gymAuthUsers.value.filter(u => u.created_at >= thisMonth.toISOString()).length
-
-  // Signups by month (last 12 months)
-  const months = eachMonthOfInterval({ start: subMonths(now, 11), end: now })
-  const monthLabels = months.map(m => format(m, 'MMM yy'))
-  const signupsByMonth = months.map(m => {
-    const end = endOfMonth(m).toISOString()
-    return gymAuthUsers.value.filter(u => u.created_at >= m.toISOString() && u.created_at <= end).length
-  })
-  gr.signupsByMonth = makeBar(monthLabels, signupsByMonth, '#4A9EFF')
-
-  // Tier distribution stacked bar (snapshot)
-  const freeCount  = allProfiles.value.filter(p => p.tier === 'free').length
-  const paidCount  = allProfiles.value.filter(p => p.tier === 'paid').length
-  const ultraCount = allProfiles.value.filter(p => p.tier === 'ultra').length
-  gr.tierChart = {
-    labels: ['Users'],
-    datasets: [
-      { label: 'Free',  data: [freeCount],  backgroundColor: '#3A3A3C', borderColor: '#636366', borderWidth: 1 },
-      { label: 'Paid',  data: [paidCount],  backgroundColor: 'rgba(77,166,255,0.7)', borderColor: '#4DA6FF', borderWidth: 1 },
-      { label: 'Ultra', data: [ultraCount], backgroundColor: 'rgba(255,215,0,0.7)',   borderColor: '#FFD700', borderWidth: 1 },
-    ],
-  }
-
+  Object.assign(gr, await loadTab('growth'))
   tabLoaded.growth = true
 }
 
-// ── Load: REVENUE ─────────────────────────────────────────────────────────────
-function loadRevenue() {
-  rv.freeCount  = allProfiles.value.filter(p => p.tier === 'free').length
-  rv.paidCount  = allProfiles.value.filter(p => p.tier === 'paid').length
-  rv.ultraCount = allProfiles.value.filter(p => p.tier === 'ultra').length
-  rv.mrr        = rv.paidCount * 5 + rv.ultraCount * 30
-
-  rv.tierChart = makeBar(
-    ['Free', 'Paid', 'Ultra'],
-    [rv.freeCount, rv.paidCount, rv.ultraCount],
-    '#4A9EFF',
-  )
-  rv.tierChart.datasets[0].backgroundColor = ['#3A3A3C', 'rgba(77,166,255,0.7)', 'rgba(255,215,0,0.7)'] as any
-  rv.tierChart.datasets[0].borderColor     = ['#636366', '#4DA6FF', '#FFD700'] as any
-
-  rv.revenueChart = makeBar(
-    ['Paid (€5)', 'Ultra (€30)'],
-    [rv.paidCount * 5, rv.ultraCount * 30],
-    '#34C759',
-  )
-
+async function loadRevenue() {
+  Object.assign(rv, await loadTab('revenue'))
   tabLoaded.revenue = true
 }
 
-// ── Load: ENGAGEMENT ─────────────────────────────────────────────────────────
-function loadEngagement() {
-  const now  = new Date()
-  const from = subDays(now, 84)
-  const weeks = eachWeekOfInterval({ start: from, end: now })
-  const weekLabels = weeks.map(w => format(w, 'MMM d'))
-
-  // Avg duration
-  const finished = sessions84.value.filter(s => s.finished_at)
-  if (finished.length) {
-    const totalMs = finished.reduce((a, s) =>
-      a + (new Date(s.finished_at).getTime() - new Date(s.started_at).getTime()), 0)
-    eg.avgDuration = Math.round(totalMs / finished.length / 60000).toString()
-  }
-
-  // Avg sets
-  if (sessions84.value.length) {
-    eg.avgSets = (sets84.value.length / sessions84.value.length).toFixed(1)
-  }
-
-  // Day of week
-  const dowCounts = Array(7).fill(0)
-  for (const s of sessions84.value) dowCounts[new Date(s.started_at).getDay()]++
-  const peakDowIdx = dowCounts.indexOf(Math.max(...dowCounts))
-  eg.peakDay = DAYS[peakDowIdx]
-  eg.dowChart = makeBar(DAYS, dowCounts, '#4A9EFF')
-
-  // Hour of day peak
-  const hourCounts = Array(24).fill(0)
-  for (const s of sessions84.value) hourCounts[new Date(s.started_at).getHours()]++
-  const peakHourIdx = hourCounts.indexOf(Math.max(...hourCounts))
-  eg.peakHour = `${peakHourIdx}:00`
-
-  // Sessions per day
-  const days: string[] = []
-  const dayCounts: number[] = []
-  const dayMap: Record<string, number> = {}
-  for (const s of sessions84.value) {
-    const d = s.started_at.slice(0, 10)
-    dayMap[d] = (dayMap[d] ?? 0) + 1
-  }
-  let cursor = new Date(from)
-  while (cursor <= now) {
-    const key = cursor.toISOString().slice(0, 10)
-    days.push(format(cursor, 'MMM d'))
-    dayCounts.push(dayMap[key] ?? 0)
-    cursor = new Date(cursor.getTime() + 86400000)
-  }
-  eg.dailyChart = makeBar(days, dayCounts, '#4A9EFF')
-
-  // Avg duration per week
-  const durationWeekly = weeks.map(w => {
-    const end = endOfWeek(w)
-    const wSess = sessions84.value.filter(s =>
-      s.finished_at && s.started_at >= w.toISOString() && s.started_at <= end.toISOString()
-    )
-    if (!wSess.length) return 0
-    const ms = wSess.reduce((a, s) =>
-      a + (new Date(s.finished_at).getTime() - new Date(s.started_at).getTime()), 0)
-    return Math.round(ms / wSess.length / 60000)
-  })
-  eg.durationChart = makeLine(weekLabels, durationWeekly, '#34C759')
-
+async function loadEngagement() {
+  Object.assign(eg, await loadTab('engagement'))
   tabLoaded.engagement = true
 }
 
-// ── Load: TRAINERS ────────────────────────────────────────────────────────────
 async function loadTrainers() {
-  const trainerProfiles = allProfiles.value.filter(p => p.role === 'trainer' || p.role === 'admin')
-  const trainerIds = trainerProfiles.map(p => p.id)
-  if (!trainerIds.length) {
-    tr.rows = []; tr.overdue = []; tabLoaded.trainers = true; return
-  }
-
-  const nameMap: Record<string, string> = {}
-  for (const p of allProfiles.value) if (p.role === 'trainer' || p.role === 'admin') nameMap[p.id] = p.full_name ?? '—'
-
-  // trainerIds comes from allProfiles which is already gym-scoped via loadOverview
-  const [assignRes, caRes, subRes] = await Promise.all([
-    adminSupabase.from('trainer_assignments').select('trainer_id, client_id').eq('is_active', true).in('trainer_id', trainerIds),
-    adminSupabase.from('checkin_assignments').select('id, trainer_id').eq('is_active', true).in('trainer_id', trainerIds),
-    adminSupabase.from('checkin_submissions').select('id, trainer_id, created_at, trainer_replied_at, trainer_reply').in('trainer_id', trainerIds),
-  ])
-
-  const assignments   = assignRes.data ?? []
-  const caAssignments = caRes.data ?? []
-  const submissions   = subRes.data ?? []
-
-  let totalSub = 0, totalAssigned = 0
-
-  tr.rows = trainerProfiles.map(p => {
-    const clientCount = assignments.filter(a => a.trainer_id === p.id).length
-    const assigned    = caAssignments.filter(a => a.trainer_id === p.id).length
-    const subs        = submissions.filter(s => s.trainer_id === p.id)
-    const submitted   = subs.length
-    const rate        = assigned ? Math.round(submitted / assigned * 100) : 0
-    totalSub     += submitted
-    totalAssigned += assigned
-
-    const replied  = subs.filter(s => s.trainer_replied_at)
-    let avgReply   = '—'
-    if (replied.length) {
-      const avgMs = replied.reduce((a, s) =>
-        a + (new Date(s.trainer_replied_at).getTime() - new Date(s.created_at).getTime()), 0) / replied.length
-      const mins = Math.round(avgMs / 60000)
-      avgReply = mins < 60 ? `${mins}m` : mins < 1440 ? `${Math.round(mins/60)}h` : `${Math.round(mins/1440)}d`
-    }
-
-    return { id: p.id, full_name: p.full_name, clientCount, assigned, submitted, rate, avgReply }
-  })
-
-  tr.totalTrainers         = trainerProfiles.length
-  tr.totalClients          = new Set(assignments.map(a => a.client_id)).size
-  tr.avgClientsPerTrainer  = trainerProfiles.length ? (tr.totalClients / trainerProfiles.length).toFixed(1) : '—'
-  tr.overallCompletionPct  = totalAssigned ? Math.round(totalSub / totalAssigned * 100) : 0
-
-  // Overdue: submissions without a reply, older than 24h
-  const cutoff = subDays(new Date(), 1)
-  tr.overdue = submissions
-    .filter(s => !s.trainer_reply && new Date(s.created_at) < cutoff)
-    .map(s => ({
-      id: s.id,
-      trainerName: nameMap[s.trainer_id] ?? '—',
-      created_at: s.created_at,
-      waitDays: differenceInDays(new Date(), new Date(s.created_at)),
-    }))
-    .sort((a, b) => b.waitDays - a.waitDays)
-
+  Object.assign(tr, await loadTab('trainers'))
   tabLoaded.trainers = true
 }
 
-// ── Load: CONTENT ─────────────────────────────────────────────────────────────
 async function loadContent() {
-  const gymId = activeGymId.value
-  const uids  = gymUserIds.value
-
-  let allSessQuery = adminSupabase.from('workout_sessions').select('template_id, user_id').not('template_id', 'is', null)
-  if (uids !== null) {
-    allSessQuery = uids.length
-      ? allSessQuery.in('user_id', uids)
-      : allSessQuery.eq('user_id', '00000000-0000-0000-0000-000000000000')
-  }
-
-  let templatesQuery = adminSupabase.from('workout_templates').select('id, name, owner_id, is_public')
-  if (gymId) templatesQuery = templatesQuery.eq('gym_id', gymId)
-
-  const [allSessRes, templatesRes, exercisesRes] = await Promise.all([
-    allSessQuery,
-    templatesQuery,
-    adminSupabase.from('exercises').select('id, name, body_part, created_by'),
-  ])
-
-  const allSess  = allSessRes.data ?? []
-  const templates = templatesRes.data ?? []
-  const exercises = exercisesRes.data ?? []
-
-  ct.totalSessionsAllTime = allSess.length + sessions84.value.filter(s => !s.template_id).length
-  ct.templateCount  = templates.length
-  ct.customExCount  = exercises.filter(e => e.created_by !== null).length
-  ct.globalExCount  = exercises.filter(e => e.created_by === null).length
-
-  // Template usage
-  const usageMap: Record<string, number> = {}
-  for (const s of allSess) usageMap[s.template_id] = (usageMap[s.template_id] ?? 0) + 1
-  ct.topTemplates = templates
-    .map(t => ({ id: t.id, name: t.name, count: usageMap[t.id] ?? 0 }))
-    .filter(t => t.count > 0)
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 10)
-
-  // Top exercises (from sets84)
-  const exMap: Record<string, { sets: number; volume: number }> = {}
-  for (const s of sets84.value) {
-    if (!exMap[s.exercise_id]) exMap[s.exercise_id] = { sets: 0, volume: 0 }
-    exMap[s.exercise_id].sets++
-    exMap[s.exercise_id].volume += (s.weight_kg ?? 0) * (s.reps ?? 0)
-  }
-  ct.topExercises = Object.entries(exMap)
-    .map(([id, stats]) => ({
-      id, ...stats,
-      name:      exMeta84.value[id]?.name      ?? 'Custom',
-      body_part: exMeta84.value[id]?.body_part ?? 'other',
-    }))
-    .sort((a, b) => b.sets - a.sets)
-    .slice(0, 15)
-
-  // Sets by muscle group (horizontal bar)
-  const muscleMap: Record<string, number> = {}
-  for (const s of sets84.value) {
-    const bp = exMeta84.value[s.exercise_id]?.body_part ?? 'other'
-    muscleMap[bp] = (muscleMap[bp] ?? 0) + 1
-  }
-  const muscleEntries = Object.entries(muscleMap).sort((a, b) => b[1] - a[1])
-  ct.muscleChart = {
-    labels: muscleEntries.map(([k]) => k.replace('_', ' ')),
-    datasets: [{
-      data: muscleEntries.map(([, v]) => v),
-      backgroundColor: 'rgba(74,158,255,0.6)',
-      borderColor: '#4A9EFF',
-      borderWidth: 1,
-      borderRadius: 3,
-    }],
-  }
-
+  Object.assign(ct, await loadTab('content'))
   tabLoaded.content = true
 }
 

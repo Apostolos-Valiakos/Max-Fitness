@@ -129,7 +129,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { Bar } from 'vue-chartjs'
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip } from 'chart.js'
-import { adminSupabase } from '@/lib/adminSupabase'
+import { callAdminFunction } from '@/lib/adminApi'
 import { format, subDays, eachWeekOfInterval, endOfWeek, differenceInDays } from 'date-fns'
 import { fmtDate } from '@/lib/utils'
 import type { BodyMeasurement } from '@/lib/database.types'
@@ -252,36 +252,21 @@ onMounted(async () => {
   loading.value = true
   const uid = userId.value
 
-  const [profileRes, authRes, sessRes, measRes] = await Promise.all([
-    adminSupabase.from('profiles').select('*').eq('id', uid).single(),
-    adminSupabase.auth.admin.getUserById(uid),
-    adminSupabase.from('workout_sessions')
-      .select('id, name, started_at, finished_at')
-      .eq('user_id', uid).not('finished_at', 'is', null)
-      .order('started_at', { ascending: false }).limit(100),
-    adminSupabase.from('body_measurements').select('*').eq('user_id', uid)
-      .order('measured_at', { ascending: false }).limit(20),
-  ])
+  const result = await callAdminFunction<{
+    profile: any
+    email: string
+    sessions: any[]
+    measurements: BodyMeasurement[]
+    sets: any[]
+    exercise_names: Record<string, string>
+  }>('admin-client-detail', { user_id: uid })
 
-  profile.value      = profileRes.data
-  email.value        = authRes.data.user?.email ?? ''
-  sessions.value     = sessRes.data ?? []
-  measurements.value = (measRes.data ?? []) as BodyMeasurement[]
-
-  const sessionIds = sessions.value.map(s => s.id)
-  if (sessionIds.length) {
-    const { data: setsData } = await adminSupabase.from('sets')
-      .select('id, session_id, exercise_id, set_type, weight_kg, reps')
-      .in('session_id', sessionIds)
-    sets.value = setsData ?? []
-
-    // Load exercise names for PR table
-    const exIds = [...new Set(sets.value.map(s => s.exercise_id))]
-    if (exIds.length) {
-      const { data: exData } = await adminSupabase.from('exercises').select('id, name').in('id', exIds)
-      for (const e of exData ?? []) exerciseNames.value[e.id] = e.name
-    }
-  }
+  profile.value       = result.profile
+  email.value         = result.email
+  sessions.value      = result.sessions
+  measurements.value  = result.measurements
+  sets.value          = result.sets
+  exerciseNames.value = result.exercise_names
 
   loading.value = false
 })
