@@ -57,7 +57,7 @@ services:
       # actually create supabase_auth_admin, supabase_storage_admin, etc.
       # Confirmed by verification: auth/rest/storage all failed with
       # "role does not exist" until this was fixed.
-      - ./volumes/db/init/00-initial-roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-additional-roles.sql:ro
+      - ./supabase/volumes/db/init/00-initial-roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-additional-roles.sql:ro
       # roles.sql.template only has a ${POSTGRES_PASSWORD} placeholder (no
       # real secret) — resolved into /etc/postgresql.schema.sql at container
       # start via the entrypoint below, same pattern as Kong's kong.yml.
@@ -65,7 +65,7 @@ services:
       # its last init step if present; without it, none of the internal
       # service-role passwords match POSTGRES_PASSWORD and every dependent
       # service (auth/rest/storage/meta) fails to connect.
-      - ./volumes/db/roles.sql.template:/etc/postgresql-schema.template.sql:ro
+      - ./supabase/volumes/db/roles.sql.template:/etc/postgresql-schema.template.sql:ro
     # sed, not the more common bash eval/echo trick — eval treats the whole
     # file as shell input, so any backtick or literal quote in the template
     # (harmless in plain SQL/YAML) gets executed or stripped. sed only
@@ -197,7 +197,7 @@ services:
     # Confirmed by verification: without this, stripe-webhook returned
     # 500 "Server misconfiguration" (missing STRIPE_WEBHOOK_SECRET etc).
     env_file:
-      - ./functions/.env
+      - ./supabase/functions/.env
     environment:
       JWT_SECRET: ${JWT_SECRET}
       SUPABASE_URL: http://kong:8000
@@ -209,7 +209,7 @@ services:
       # re-checked again at this layer.
       VERIFY_JWT: "false"
     volumes:
-      - ./functions:/home/deno/functions:ro
+      - ./supabase/functions:/home/deno/functions:ro
     command: ["start", "--main-service", "/home/deno/functions/main"]
 
   # ── 7. Kong (API Gateway) ─────────────────────────────────────────────────
@@ -244,7 +244,7 @@ services:
       SUPABASE_ANON_KEY: ${ANON_KEY}
       SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
     volumes:
-      - ./volumes/api/kong.yml:/home/kong/temp.yml:ro
+      - ./supabase/volumes/api/kong.yml:/home/kong/temp.yml:ro
     ports:
       - "127.0.0.1:8000:8000"
 

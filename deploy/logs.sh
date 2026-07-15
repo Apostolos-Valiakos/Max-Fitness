@@ -9,4 +9,4 @@ set -a
 [ -f deploy/.env ] && source deploy/.env
 set +a
 
-docker compose -f supabase/docker-compose.yml -f deploy/docker-compose.yml logs -f --tail=200 "$@"
+docker compose --project-directory . -f supabase/docker-compose.yml -f deploy/docker-compose.yml logs -f --tail=200 "$@"
