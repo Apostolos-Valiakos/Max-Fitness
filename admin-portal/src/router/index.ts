@@ -22,6 +22,7 @@ const router = createRouter({
         { path: '',       redirect: '/owner/gyms' },
         { path: 'gyms',    name: 'OwnerGyms',    component: () => import('@/views/owner/OwnerGymsView.vue')    },
         { path: 'revenue', name: 'OwnerRevenue', component: () => import('@/views/owner/OwnerRevenueView.vue') },
+        { path: 'users',   name: 'OwnerUsers',   component: () => import('@/views/owner/OwnerUsersView.vue')   },
       ],
     },
 

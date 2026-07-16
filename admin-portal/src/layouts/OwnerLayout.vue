@@ -48,6 +48,7 @@ const auth   = useAuthStore()
 const navItems = [
   { to: '/owner/gyms',    icon: 'pi pi-building',    label: 'Gyms'    },
   { to: '/owner/revenue', icon: 'pi pi-chart-line',  label: 'Revenue' },
+  { to: '/owner/users',   icon: 'pi pi-users',       label: 'Users'   },
 ]
 
 const initials = computed(() => {

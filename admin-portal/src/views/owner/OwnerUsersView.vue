@@ -2,7 +2,7 @@
   <div class="page">
     <div class="page-header">
       <h1 class="page-title">USERS</h1>
-      <div class="page-sub">{{ filtered.length }} of {{ users.length }} users</div>
+      <div class="page-sub">{{ filtered.length }} of {{ users.length }} users — all gyms</div>
     </div>
 
     <!-- Filters -->
@@ -12,7 +12,7 @@
         <InputText v-model="query" placeholder="Search by name or email..." />
       </IconField>
       <div class="filter-chips">
-        <button v-for="r in ['all','user','trainer','admin']" :key="r"
+        <button v-for="r in ['all','user','trainer','admin','owner']" :key="r"
           class="chip" :class="{ active: roleFilter === r }"
           @click="roleFilter = r">{{ r.toUpperCase() }}</button>
         <div class="divider" />
@@ -46,22 +46,21 @@
           </template>
         </Column>
 
-        <Column header="Role" style="width: 140px">
+        <Column header="Role" style="width: 120px">
           <template #body="{ data: u }">
-            <Select
-              :model-value="u.role"
-              :options="ROLE_OPTIONS"
-              option-label="label"
-              option-value="value"
-              :disabled="u.id === selfId"
-              @update:model-value="(v) => updateRole(u, v)"
-            />
+            <span class="badge role">{{ u.role.toUpperCase() }}</span>
           </template>
         </Column>
 
         <Column header="Tier" style="width: 140px">
           <template #body="{ data: u }">
-            <span class="badge" :class="u.tier">{{ u.tier.toUpperCase() }}</span>
+            <Select
+              :model-value="u.tier"
+              :options="TIER_OPTIONS"
+              option-label="label"
+              option-value="value"
+              @update:model-value="(v) => updateTier(u, v)"
+            />
           </template>
         </Column>
 
@@ -77,69 +76,30 @@
           </template>
         </Column>
 
-        <Column style="width: 80px">
-          <template #body="{ data: u }">
-            <div class="td-actions">
-              <router-link :to="`/clients/${u.id}`">
-                <Button icon="pi pi-chart-line" severity="secondary" text size="small" title="View progress" />
-              </router-link>
-              <Button
-                v-if="u.id !== selfId"
-                icon="pi pi-trash"
-                severity="danger"
-                text
-                size="small"
-                @click="confirmDelete(u)"
-              />
-            </div>
-          </template>
-        </Column>
-
         <template #empty>
           <div class="td-empty">No users found</div>
         </template>
       </DataTable>
     </div>
-
-    <!-- Delete confirm dialog -->
-    <Dialog v-model:visible="deleteDialogVisible" modal header="DELETE USER?" :style="{ width: '360px' }">
-      <p class="modal-body">
-        This will permanently delete <strong>{{ deleteTarget?.email }}</strong> and all their data. This cannot be undone.
-      </p>
-      <template #footer>
-        <Button label="Cancel" severity="secondary" text @click="deleteDialogVisible = false" />
-        <Button label="Delete" severity="danger" @click="handleDelete" />
-      </template>
-    </Dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
-import { callAdminFunction } from '@/lib/adminApi'
-import { useAuthStore } from '@/stores/authStore'
 import { useAuthUsers } from '@/composables/useAuthUsers'
-import { useGymFilter } from '@/composables/useGymFilter'
-import { useGymStore } from '@/stores/gymStore'
 import { useToast } from 'primevue/usetoast'
 import { initials, fmtDate } from '@/lib/utils'
-import type { UserRow, UserRole } from '@/lib/database.types'
+import type { UserRow, UserTier } from '@/lib/database.types'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import InputText from 'primevue/inputtext'
 import IconField from 'primevue/iconfield'
 import InputIcon from 'primevue/inputicon'
 import Select from 'primevue/select'
-import Button from 'primevue/button'
-import Dialog from 'primevue/dialog'
 
-const auth     = useAuthStore()
-const selfId   = computed(() => auth.user?.id)
 const { authMap, fetchAuthUsers } = useAuthUsers()
-const { activeGymId } = useGymFilter()
-const gymStore = useGymStore()
-const toast    = useToast()
+const toast   = useToast()
 const loading = ref(true)
 const users   = ref<UserRow[]>([])
 
@@ -147,13 +107,10 @@ const query      = ref('')
 const roleFilter = ref('all')
 const tierFilter = ref('all')
 
-const deleteTarget        = ref<UserRow | null>(null)
-const deleteDialogVisible = ref(false)
-
-const ROLE_OPTIONS = [
-  { label: 'user',    value: 'user' },
-  { label: 'trainer', value: 'trainer' },
-  { label: 'admin',   value: 'admin' },
+const TIER_OPTIONS = [
+  { label: 'free',  value: 'free' },
+  { label: 'paid',  value: 'paid' },
+  { label: 'ultra', value: 'ultra' },
 ]
 
 const filtered = computed(() => {
@@ -167,15 +124,13 @@ const filtered = computed(() => {
   return list
 })
 
-
 onMounted(async () => {
   loading.value = true
-  let profilesQuery = supabase.from('profiles').select('*').order('created_at', { ascending: false })
-  if (activeGymId.value) profilesQuery = profilesQuery.eq('gym_id', activeGymId.value)
-
+  // Owner has no gym restriction — this intentionally loads every profile,
+  // unlike the gym-scoped admin Users page.
   const [, { data: profiles }] = await Promise.all([
     fetchAuthUsers(),
-    profilesQuery,
+    supabase.from('profiles').select('*').order('created_at', { ascending: false }),
   ])
   users.value = (profiles ?? []).map(p => ({
     ...p,
@@ -185,40 +140,13 @@ onMounted(async () => {
   loading.value = false
 })
 
-async function updateRole(u: UserRow, role: UserRole) {
-  const STAFF_ROLES = ['trainer', 'admin']
-  const isPromotingToStaff = STAFF_ROLES.includes(role) && !STAFF_ROLES.includes(u.role)
-  if (isPromotingToStaff && activeGymId.value && gymStore.gym) {
-    const { count } = await supabase
-      .from('profiles')
-      .select('id', { count: 'exact', head: true })
-      .eq('gym_id', activeGymId.value)
-      .in('role', STAFF_ROLES)
-    if ((count ?? 0) >= gymStore.gym.max_trainers) {
-      toast.add({
-        severity: 'warn',
-        summary: 'Trainer limit reached',
-        detail: `Your plan allows a maximum of ${gymStore.gym.max_trainers} trainers/admins. Upgrade your plan to add more.`,
-        life: 6000,
-      })
-      return
-    }
-  }
-  const { error } = await supabase.from('profiles').update({ role }).eq('id', u.id)
+async function updateTier(u: UserRow, tier: UserTier) {
+  // Manual override only — doesn't touch Stripe. If the user has an active
+  // subscription, a future webhook event can still overwrite this later.
+  const { error } = await supabase.from('profiles').update({ tier }).eq('id', u.id)
   if (error) { toast.add({ severity: 'error', summary: 'Error', detail: error.message, life: 4000 }); return }
-  u.role = role
-  toast.add({ severity: 'success', summary: 'Role updated', life: 2500 })
-}
-function confirmDelete(u: UserRow) {
-  deleteTarget.value = u
-  deleteDialogVisible.value = true
-}
-async function handleDelete() {
-  if (!deleteTarget.value) return
-  await callAdminFunction('admin-users', { action: 'delete', user_id: deleteTarget.value.id })
-  users.value = users.value.filter(u => u.id !== deleteTarget.value!.id)
-  deleteDialogVisible.value = false
-  deleteTarget.value = null
+  u.tier = tier
+  toast.add({ severity: 'success', summary: 'Tier updated', life: 2500 })
 }
 </script>
 
@@ -239,7 +167,6 @@ async function handleDelete() {
 .user-email { font-size: 0.72rem; color: var(--muted); margin-top: 0.05rem; }
 .td-muted   { color: var(--muted); font-size: 0.78rem; }
 .td-empty   { color: var(--border); font-size: 0.8rem; text-align: center; padding: 2rem; }
-.td-actions { display: flex; gap: 0.25rem; }
-.modal-body { font-size: 0.85rem; color: #AEAEB2; line-height: 1.5; }
-.modal-body strong { color: var(--text); }
+
+.badge.role { font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.1em; background: var(--surface); border: 1px solid var(--border); color: var(--sub); padding: 0.2rem 0.55rem; display: inline-block; }
 </style>
