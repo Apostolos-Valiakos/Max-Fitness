@@ -4,9 +4,14 @@
       <h1 class="page-title">REVENUE</h1>
     </div>
 
+    <div class="tab-bar">
+      <button class="tab-btn" :class="{ active: activeTab === 'gyms' }" @click="activeTab = 'gyms'">GYMS</button>
+      <button class="tab-btn" :class="{ active: activeTab === 'users' }" @click="switchToUsers">USERS</button>
+    </div>
+
     <div v-if="loading" class="loading-state"><i class="pi pi-spin pi-spinner" /> Loading…</div>
 
-    <template v-else>
+    <template v-else-if="activeTab === 'gyms'">
       <!-- KPIs -->
       <div class="kpi-row">
         <div class="kpi-card card">
@@ -97,6 +102,65 @@
         </table>
       </div>
     </template>
+
+    <template v-else-if="activeTab === 'users'">
+      <div v-if="usersLoading" class="loading-state"><i class="pi pi-spin pi-spinner" /> Loading…</div>
+      <template v-else>
+        <!-- KPIs -->
+        <div class="kpi-row">
+          <div class="kpi-card card">
+            <div class="kpi-val green">€{{ fmtMoney(rv.mrr) }}</div>
+            <div class="kpi-label">Est. MRR</div>
+          </div>
+          <div class="kpi-card card">
+            <div class="kpi-val">{{ rv.ultraCount }}</div>
+            <div class="kpi-label">Ultra (€9.99/mo)</div>
+          </div>
+          <div class="kpi-card card">
+            <div class="kpi-val">{{ rv.paidCount }}</div>
+            <div class="kpi-label">Paid (€4.99/mo)</div>
+          </div>
+          <div class="kpi-card card">
+            <div class="kpi-val">{{ rv.trainerCount }}</div>
+            <div class="kpi-label">Trainer (€29/mo)</div>
+          </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="card chart-panel">
+          <div class="section-title">REVENUE BREAKDOWN</div>
+          <div class="chart-wrap"><Bar :data="rv.revenueChart" :options="barOpts" /></div>
+        </div>
+
+        <!-- Summary table -->
+        <div class="card table-panel">
+          <div class="section-title">SUBSCRIPTION SUMMARY</div>
+          <table class="data-table">
+            <thead><tr><th>Type</th><th>Subscribers</th><th>Price / mo</th><th>Total MRR</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><span class="plan-badge elite">ULTRA</span></td>
+                <td class="td-val">{{ rv.ultraCount }}</td>
+                <td class="td-muted">€9.99</td>
+                <td class="td-val green">€{{ fmtMoney(rv.ultraCount * 9.99) }}</td>
+              </tr>
+              <tr>
+                <td><span class="plan-badge pro">PAID</span></td>
+                <td class="td-val">{{ rv.paidCount }}</td>
+                <td class="td-muted">€4.99</td>
+                <td class="td-val green">€{{ fmtMoney(rv.paidCount * 4.99) }}</td>
+              </tr>
+              <tr>
+                <td><span class="plan-badge basic">TRAINER</span></td>
+                <td class="td-val">{{ rv.trainerCount }}</td>
+                <td class="td-muted">€29.00</td>
+                <td class="td-val green">€{{ fmtMoney(rv.trainerCount * 29) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </template>
+    </template>
   </div>
 </template>
 
@@ -124,9 +188,35 @@ const barOpts   = {
 }
 
 // ── State ────────────────────────────────────────────────────────────────────
-const loading = ref(true)
-const gyms    = ref<any[]>([])
-const counts  = ref<Record<string, { total: number; trainers: number; clients: number }>>({})
+const loading  = ref(true)
+const gyms     = ref<any[]>([])
+const counts   = ref<Record<string, { total: number; trainers: number; clients: number }>>({})
+
+// ── Users tab (member/trainer subscription revenue — platform-wide) ──────────
+const activeTab    = ref<'gyms' | 'users'>('gyms')
+const usersLoading = ref(true)
+const usersLoaded  = ref(false)
+const rv = ref({ mrr: 0, ultraCount: 0, paidCount: 0, trainerCount: 0,
+  revenueChart: { labels: [] as string[], datasets: [] as any[] },
+})
+
+// Paid/Ultra prices (€4.99/€9.99) aren't whole numbers, so revenue totals
+// need fixed 2-decimal formatting (plain toLocaleString() would show a
+// ragged number of decimals depending on the multiple).
+function fmtMoney(n: number) { return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }
+
+async function switchToUsers() {
+  activeTab.value = 'users'
+  if (usersLoaded.value) return
+  usersLoading.value = true
+  try {
+    // No gym_id — owner calling this gets platform-wide totals, not one gym's.
+    rv.value = await callAdminFunction('admin-analytics', { tab: 'revenue' })
+    usersLoaded.value = true
+  } finally {
+    usersLoading.value = false
+  }
+}
 
 // ── Derived ───────────────────────────────────────────────────────────────────
 const gymRows = computed(() =>
@@ -194,6 +284,16 @@ onMounted(load)
 </script>
 
 <style scoped>
+.tab-bar { display: flex; gap: 0; margin-bottom: 1.75rem; border-bottom: 1px solid var(--surface); }
+.tab-btn {
+  background: none; border: none; border-bottom: 2px solid transparent;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 0.15em; color: var(--muted); padding: 0.6rem 1rem; cursor: pointer;
+  transition: color 0.15s, border-color 0.15s; margin-bottom: -1px;
+}
+.tab-btn:hover  { color: #AEAEB2; }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
 .kpi-row  { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
 .kpi-card { padding: 1.25rem; }
 .kpi-val  { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 900; color: var(--text); line-height: 1; }

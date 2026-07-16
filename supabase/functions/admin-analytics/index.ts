@@ -65,6 +65,13 @@ Deno.serve(async (req) => {
   // An admin is always locked to their own gym regardless of what's passed.
   const gymId: string | null = callerProfile.role === 'admin' ? callerProfile.gym_id : (body.gym_id ?? null)
 
+  // Revenue from individual member/trainer subscriptions goes to the platform
+  // owner, not the gym — admins have no claim to it, unlike gym-plan revenue
+  // (which lives on the owner-only owner-gyms/owner-revenue surfaces anyway).
+  if (tab === 'revenue' && callerProfile.role !== 'owner') {
+    return jsonError('Forbidden', 403)
+  }
+
   try {
     switch (tab) {
       case 'overview':   return jsonOk(await loadOverview(adminClient, gymId))
@@ -84,7 +91,7 @@ Deno.serve(async (req) => {
 // ── Shared base data ─────────────────────────────────────────────────────────
 
 async function loadProfiles(adminClient: SupabaseClient, gymId: string | null) {
-  let q = adminClient.from('profiles').select('id, tier, role, full_name, created_at')
+  let q = adminClient.from('profiles').select('id, tier, role, full_name, created_at, trainer_subscription_status')
   if (gymId) q = q.eq('gym_id', gymId)
   const { data } = await q
   return data ?? []
@@ -225,20 +232,27 @@ async function loadGrowth(adminClient: SupabaseClient, gymId: string | null) {
 // ── REVENUE ───────────────────────────────────────────────────────────────────
 async function loadRevenue(adminClient: SupabaseClient, gymId: string | null) {
   const profiles = await loadProfiles(adminClient, gymId)
-  const freeCount  = profiles.filter(p => p.tier === 'free').length
-  const paidCount  = profiles.filter(p => p.tier === 'paid').length
-  const ultraCount = profiles.filter(p => p.tier === 'ultra').length
-  // €4.99/mo (paid) and €9.99/mo (ultra) — must match the live Stripe prices
-  // (STRIPE_PRICE_USER_PAID / STRIPE_PRICE_USER_ULTRA in supabase/functions/.env).
-  const mrr        = Math.round((paidCount * 4.99 + ultraCount * 9.99) * 100) / 100
+  const freeCount    = profiles.filter(p => p.tier === 'free').length
+  const paidCount    = profiles.filter(p => p.tier === 'paid').length
+  const ultraCount   = profiles.filter(p => p.tier === 'ultra').length
+  const trainerCount = profiles.filter(p => ['active', 'trialing'].includes(p.trainer_subscription_status)).length
+
+  // €4.99/mo (paid), €9.99/mo (ultra), €29/mo (trainer) — must match the live
+  // Stripe prices (STRIPE_PRICE_USER_PAID / STRIPE_PRICE_USER_ULTRA /
+  // STRIPE_PRICE_TRAINER in supabase/functions/.env).
+  const mrr = Math.round((paidCount * 4.99 + ultraCount * 9.99 + trainerCount * 29) * 100) / 100
 
   const tierChart = makeBar(['Free', 'Paid', 'Ultra'], [freeCount, paidCount, ultraCount], '#4A9EFF')
   tierChart.datasets[0].backgroundColor = ['#3A3A3C', 'rgba(77,166,255,0.7)', 'rgba(255,215,0,0.7)'] as any
   tierChart.datasets[0].borderColor     = ['#636366', '#4DA6FF', '#FFD700'] as any
 
-  const revenueChart = makeBar(['Paid (€4.99)', 'Ultra (€9.99)'], [paidCount * 4.99, ultraCount * 9.99], '#34C759')
+  const revenueChart = makeBar(
+    ['Paid (€4.99)', 'Ultra (€9.99)', 'Trainer (€29)'],
+    [paidCount * 4.99, ultraCount * 9.99, trainerCount * 29],
+    '#34C759',
+  )
 
-  return { mrr, ultraCount, paidCount, freeCount, tierChart, revenueChart }
+  return { mrr, ultraCount, paidCount, freeCount, trainerCount, tierChart, revenueChart }
 }
 
 // ── ENGAGEMENT ────────────────────────────────────────────────────────────────

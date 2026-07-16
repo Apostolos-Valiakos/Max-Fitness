@@ -64,55 +64,6 @@
         </div>
       </div>
 
-      <!-- ── REVENUE ─────────────────────────────────────────────────────── -->
-      <div v-if="tabLoaded.revenue && activeTab === 'revenue'">
-        <div class="kpi-row">
-          <div class="kpi-card card"><div class="kpi-val green">€{{ fmtMoney(rv.mrr) }}</div><div class="kpi-label">Est. MRR</div></div>
-          <div class="kpi-card card"><div class="kpi-val">{{ rv.ultraCount }}</div><div class="kpi-label">Ultra (€9.99/mo)</div></div>
-          <div class="kpi-card card"><div class="kpi-val">{{ rv.paidCount }}</div><div class="kpi-label">Paid (€4.99/mo)</div></div>
-          <div class="kpi-card card"><div class="kpi-val">{{ rv.freeCount }}</div><div class="kpi-label">Free</div></div>
-        </div>
-        <div class="charts-row">
-          <div class="card chart-panel">
-            <div class="section-title">USERS BY TIER</div>
-            <div class="chart-wrap"><Bar :data="rv.tierChart" :options="barOpts" /></div>
-          </div>
-          <div class="card chart-panel">
-            <div class="section-title">REVENUE BREAKDOWN</div>
-            <div class="chart-wrap"><Bar :data="rv.revenueChart" :options="barOpts" /></div>
-          </div>
-        </div>
-        <div class="card table-panel">
-          <div class="section-title">TIER SUMMARY</div>
-          <table class="data-table">
-            <thead><tr><th>Tier</th><th>Users</th><th>Price</th><th>Monthly Revenue</th><th>% of Users</th></tr></thead>
-            <tbody>
-              <tr>
-                <td><span class="badge ultra">ULTRA</span></td>
-                <td class="td-val">{{ rv.ultraCount }}</td>
-                <td class="td-muted">€9.99</td>
-                <td class="td-val green">€{{ fmtMoney(rv.ultraCount * 9.99) }}</td>
-                <td class="td-muted">{{ pct(rv.ultraCount, ov.totalUsers) }}%</td>
-              </tr>
-              <tr>
-                <td><span class="badge paid">PAID</span></td>
-                <td class="td-val">{{ rv.paidCount }}</td>
-                <td class="td-muted">€4.99</td>
-                <td class="td-val green">€{{ fmtMoney(rv.paidCount * 4.99) }}</td>
-                <td class="td-muted">{{ pct(rv.paidCount, ov.totalUsers) }}%</td>
-              </tr>
-              <tr>
-                <td><span class="badge free">FREE</span></td>
-                <td class="td-val">{{ rv.freeCount }}</td>
-                <td class="td-muted">€0</td>
-                <td class="td-val">€0</td>
-                <td class="td-muted">{{ pct(rv.freeCount, ov.totalUsers) }}%</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
       <!-- ── ENGAGEMENT ──────────────────────────────────────────────────── -->
       <div v-if="tabLoaded.engagement && activeTab === 'engagement'">
         <div class="kpi-row">
@@ -255,7 +206,6 @@ const barOptsH  = { ...baseOpts, indexAxis: 'y' as const, scales: { x: { ticks: 
 const TABS = [
   { id: 'overview',   label: 'OVERVIEW'   },
   { id: 'growth',     label: 'GROWTH'     },
-  { id: 'revenue',    label: 'REVENUE'    },
   { id: 'engagement', label: 'ENGAGEMENT' },
   { id: 'trainers',   label: 'TRAINERS'   },
   { id: 'content',    label: 'CONTENT'    },
@@ -263,7 +213,7 @@ const TABS = [
 
 const activeTab  = ref('overview')
 const tabLoading = ref(false)
-const tabLoaded  = reactive({ overview: false, growth: false, revenue: false, engagement: false, trainers: false, content: false })
+const tabLoaded  = reactive({ overview: false, growth: false, engagement: false, trainers: false, content: false })
 
 const { activeGymId } = useGymFilter()
 
@@ -278,11 +228,6 @@ const gr = reactive({
   newThisMonth: 0, active7: 0, active30: 0, active90: 0, churned: 0, neverTrained: 0,
   signupsByMonth: { labels: [] as string[], datasets: [] as any[] },
   tierChart:     { labels: [] as string[], datasets: [] as any[] },
-})
-
-const rv = reactive({ mrr: 0, ultraCount: 0, paidCount: 0, freeCount: 0,
-  tierChart:    { labels: [] as string[], datasets: [] as any[] },
-  revenueChart: { labels: [] as string[], datasets: [] as any[] },
 })
 
 const eg = reactive({
@@ -307,10 +252,6 @@ const ct = reactive({
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 function pct(n: number, total: number) { return total ? Math.round(n / total * 100) : 0 }
-// Paid/Ultra prices (€4.99/€9.99) aren't whole numbers, so revenue totals
-// need fixed 2-decimal formatting (plain toLocaleString() would show a
-// ragged number of decimals depending on the multiple).
-function fmtMoney(n: number) { return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }
 
 async function loadTab(tab: string) {
   return callAdminFunction<Record<string, any>>('admin-analytics', { tab, gym_id: activeGymId.value })
@@ -325,11 +266,6 @@ async function loadOverview() {
 async function loadGrowth() {
   Object.assign(gr, await loadTab('growth'))
   tabLoaded.growth = true
-}
-
-async function loadRevenue() {
-  Object.assign(rv, await loadTab('revenue'))
-  tabLoaded.revenue = true
 }
 
 async function loadEngagement() {
@@ -354,7 +290,6 @@ async function switchTab(id: string) {
   tabLoading.value = true
   try {
     if (id === 'growth')     await loadGrowth()
-    if (id === 'revenue')    await loadRevenue()
     if (id === 'engagement') await loadEngagement()
     if (id === 'trainers')   await loadTrainers()
     if (id === 'content')    await loadContent()
@@ -422,8 +357,4 @@ onMounted(async () => {
 
 .chip-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; background: var(--surface); border: 1px solid var(--border); color: var(--sub); padding: 0.15rem 0.4rem; text-transform: uppercase; }
 
-.badge { font-family: 'Barlow Condensed', sans-serif; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em; padding: 0.1rem 0.4rem; border: 1px solid; }
-.badge.free  { color: var(--muted); border-color: var(--border); }
-.badge.paid  { color: #4DA6FF; border-color: rgba(77,166,255,0.4); background: rgba(77,166,255,0.08); }
-.badge.ultra { color: #FFD700; border-color: rgba(255,215,0,0.4); background: rgba(255,215,0,0.08); }
 </style>
