@@ -48,7 +48,10 @@ async function buildDatabase() {
     name: "maxfitnes_v1",
     storage,
     multiInstance: false,
-    ignoreDuplicate: true,
+    // RxDB throws DB9 if this is true without the dev-mode plugin loaded —
+    // only enabled in dev, where hot-reload can otherwise re-create the
+    // database in the same tab.
+    ignoreDuplicate: import.meta.env.DEV,
     hashFunction,
   });
 
