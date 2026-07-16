@@ -70,6 +70,11 @@
           </div>
         </div>
 
+        <!-- Add (picker context only) -->
+        <button v-if="showAddButton" class="add-btn" @click="$emit('add')">
+          <i class="pi pi-plus" /> ADD EXERCISE
+        </button>
+
         <!-- Open full detail -->
         <button class="detail-btn" @click="openDetail">
           VIEW FULL STATS <i class="pi pi-arrow-right" />
@@ -89,10 +94,12 @@ import ExerciseAnimation from "@/components/ExerciseAnimation.vue";
 const props = defineProps<{
   visible: boolean;
   exerciseId: string | null;
+  showAddButton?: boolean;
 }>();
 
 const emit = defineEmits<{
   (e: "close"): void;
+  (e: "add"): void;
 }>();
 
 const router = useRouter();
@@ -335,5 +342,29 @@ function openDetail() {
 
 .detail-btn:active {
   color: #4a9eff;
+}
+
+.add-btn {
+  width: calc(100% - 2rem);
+  margin: 0 1rem 0.75rem;
+  background: #4a9eff;
+  border: none;
+  color: #fff;
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  padding: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.add-btn:active {
+  background: #3b8eef;
 }
 </style>

@@ -17,10 +17,19 @@
         v-for="ex in filtered" :key="ex.id"
         :exercise="ex"
         :showAdd="true"
+        @click="openInfo(ex)"
         @add="handleAdd(ex)"
       />
       <div v-if="filtered.length === 0" class="empty">No exercises found</div>
     </div>
+
+    <ExerciseInfoSheet
+      :visible="infoSheetFor !== null"
+      :exerciseId="infoSheetFor"
+      showAddButton
+      @close="infoSheetFor = null"
+      @add="handleAddFromSheet"
+    />
   </div>
 </template>
 
@@ -32,6 +41,7 @@ import { useWorkoutStore }  from '@/stores/workoutStore'
 import { useExerciseStore } from '@/stores/exerciseStore'
 import ExerciseCard from '@/components/ExerciseCard.vue'
 import ExerciseSearchBar from '@/components/ExerciseSearchBar.vue'
+import ExerciseInfoSheet from '@/components/ExerciseInfoSheet.vue'
 import type { ExerciseDocument } from '@/lib/rxdb/schemas'
 
 const router    = useRouter()
@@ -41,6 +51,7 @@ const exercises = useExerciseStore()
 
 const query           = ref('')
 const selectedBodyPart = ref<string | null>(null)
+const infoSheetFor     = ref<string | null>(null)
 
 // Replace mode: replaceId query param means swap instead of add
 const replaceId = computed(() => route.query.replaceId as string | undefined)
@@ -63,6 +74,16 @@ async function handleAdd(ex: ExerciseDocument) {
     workout.addExercise(ex.id, ex.name)
   }
   router.back()
+}
+
+function openInfo(ex: ExerciseDocument) {
+  infoSheetFor.value = ex.id
+}
+
+async function handleAddFromSheet() {
+  const ex = exercises.exercises.find(e => e.id === infoSheetFor.value)
+  infoSheetFor.value = null
+  if (ex) await handleAdd(ex)
 }
 </script>
 
