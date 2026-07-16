@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
         } else if (sub.metadata?.type === 'trainer') {
           const userId = sub.metadata?.user_id
           if (userId) {
-            await supabase.from('profiles').update({ trainer_subscription_status: 'canceled' }).eq('id', userId)
+            await supabase.from('profiles').update({ trainer_subscription_status: 'canceled', tier: 'free' }).eq('id', userId)
           }
         } else {
           const gymId = await gymIdByCustomer(supabase, sub.customer as string)
@@ -197,7 +197,7 @@ Deno.serve(async (req) => {
           } else if (sub.metadata?.type === 'trainer') {
             const userId = sub.metadata?.user_id
             if (userId) {
-              await supabase.from('profiles').update({ trainer_subscription_status: 'past_due' }).eq('id', userId)
+              await supabase.from('profiles').update({ trainer_subscription_status: 'past_due', tier: 'free' }).eq('id', userId)
             }
           }
         }
@@ -254,7 +254,12 @@ async function handleTrainerSubscription(supabase: any, sub: Stripe.Subscription
   const status = STRIPE_STATUS_MAP[sub.status] ?? sub.status
   const trainerStatus = ['trialing', 'active', 'past_due', 'canceled'].includes(status) ? status : 'canceled'
 
-  await supabase.from('profiles').update({ trainer_subscription_status: trainerStatus }).eq('id', userId)
+  // A trainer's own client-side tier follows their trainer subscription — active/
+  // trialing grants the Paid member tier, anything else reverts to Free. Same
+  // active/trialing-grants convention as handleUserSubscription() above.
+  const tier = (trainerStatus === 'active' || trainerStatus === 'trialing') ? 'paid' : 'free'
+
+  await supabase.from('profiles').update({ trainer_subscription_status: trainerStatus, tier }).eq('id', userId)
 }
 
 async function upsertGymSubscription(

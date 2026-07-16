@@ -61,7 +61,13 @@
 
         <Column header="Tier" style="width: 140px">
           <template #body="{ data: u }">
-            <span class="badge" :class="u.tier">{{ u.tier.toUpperCase() }}</span>
+            <Select
+              :model-value="u.tier"
+              :options="TIER_OPTIONS"
+              option-label="label"
+              option-value="value"
+              @update:model-value="(v) => updateTier(u, v)"
+            />
           </template>
         </Column>
 
@@ -124,7 +130,7 @@ import { useGymFilter } from '@/composables/useGymFilter'
 import { useGymStore } from '@/stores/gymStore'
 import { useToast } from 'primevue/usetoast'
 import { initials, fmtDate } from '@/lib/utils'
-import type { UserRow, UserRole } from '@/lib/database.types'
+import type { UserRow, UserRole, UserTier } from '@/lib/database.types'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import InputText from 'primevue/inputtext'
@@ -154,6 +160,12 @@ const ROLE_OPTIONS = [
   { label: 'user',    value: 'user' },
   { label: 'trainer', value: 'trainer' },
   { label: 'admin',   value: 'admin' },
+]
+
+const TIER_OPTIONS = [
+  { label: 'free',  value: 'free' },
+  { label: 'paid',  value: 'paid' },
+  { label: 'ultra', value: 'ultra' },
 ]
 
 const filtered = computed(() => {
@@ -208,6 +220,14 @@ async function updateRole(u: UserRow, role: UserRole) {
   if (error) { toast.add({ severity: 'error', summary: 'Error', detail: error.message, life: 4000 }); return }
   u.role = role
   toast.add({ severity: 'success', summary: 'Role updated', life: 2500 })
+}
+async function updateTier(u: UserRow, tier: UserTier) {
+  // Manual override only — doesn't touch Stripe. If the user has an active
+  // subscription, a future webhook event can still overwrite this later.
+  const { error } = await supabase.from('profiles').update({ tier }).eq('id', u.id)
+  if (error) { toast.add({ severity: 'error', summary: 'Error', detail: error.message, life: 4000 }); return }
+  u.tier = tier
+  toast.add({ severity: 'success', summary: 'Tier updated', life: 2500 })
 }
 function confirmDelete(u: UserRow) {
   deleteTarget.value = u
