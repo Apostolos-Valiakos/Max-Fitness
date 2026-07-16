@@ -7,7 +7,9 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY ?? 'eyJhbGciOiJ
 // reach the dev machine. In a desktop browser (dev, E2E tests) requests from
 // localhost to a LAN IP are blocked by Chromium's Private Network Access (PNA)
 // policy, so we rewrite to 127.0.0.1 at runtime to avoid the restriction.
+// Dev-only: in production this must never rewrite a real domain to 127.0.0.1.
 function resolveUrl(raw: string): string {
+  if (!import.meta.env.DEV) return raw
   const isNative = typeof window !== 'undefined' && !!(window as any).Capacitor?.isNativePlatform?.()
   if (isNative) return raw
   try {
