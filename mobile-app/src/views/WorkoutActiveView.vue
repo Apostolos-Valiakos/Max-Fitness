@@ -60,12 +60,13 @@
           {{ stickyNoteMap.get(ex.exerciseId) }}
         </div>
 
-        <!-- Set column headers — matches SetRow grid: 28px 52px 1fr 1fr 36px -->
+        <!-- Set column headers — matches SetRow grid: 28px 52px 1fr 1fr 36px (+28px delete on pointer devices) -->
         <div class="set-headers">
           <span>SET</span>
           <span>PREV</span>
           <span>WEIGHT</span>
           <span>REPS</span>
+          <span></span>
           <span></span>
         </div>
 
@@ -538,7 +539,7 @@ async function handleDiscard() {
 .ctx-item:active .ctx-icon { color: inherit; }
 .ctx-divider { height: 1px; background: var(--border); margin: 0.25rem 0; }
 
-/* Headers grid matches SetRow: 28px 52px 1fr 1fr 36px */
+/* Headers grid matches SetRow: 28px 52px 1fr 1fr 36px (+28px delete col on pointer devices) */
 .set-headers {
   display: grid;
   grid-template-columns: 28px 52px 1fr 1fr 36px;
@@ -548,6 +549,11 @@ async function handleDiscard() {
   margin-bottom: 0.2rem;
 }
 .set-headers span { font-family: 'Barlow Condensed',sans-serif; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; color: var(--sub); text-align: center; }
+.set-headers span:last-child { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .set-headers { grid-template-columns: 28px 52px 1fr 1fr 36px 28px; }
+  .set-headers span:last-child { display: block; }
+}
 
 .ex-hint {
   display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;

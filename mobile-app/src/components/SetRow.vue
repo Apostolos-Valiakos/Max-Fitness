@@ -70,6 +70,11 @@
             </svg>
           </button>
         </div>
+
+        <!-- Delete button — pointer/hover devices only (touch uses swipe) -->
+        <button class="set-delete-btn" @click="showConfirm = true" aria-label="Delete set">
+          <i class="pi pi-trash" />
+        </button>
       </div>
 
       <!-- ── Delete zone (off-screen to the right at rest) ─────────── -->
@@ -393,6 +398,21 @@ function onTouchEnd() {
   border-color: #34C759;
   background: #34C759;
   color: #fff;
+}
+
+/* Delete button — hidden on touch devices, which use swipe-to-delete instead */
+.set-delete-btn { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .row-content { grid-template-columns: 28px 52px 1fr 1fr 36px 28px; }
+  .set-delete-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px;
+    background: none; border: none; cursor: pointer;
+    color: var(--muted); font-size: 0.9rem;
+    transition: color 0.15s;
+    flex-shrink: 0;
+  }
+  .set-delete-btn:hover { color: #FF4444; }
 }
 
 /* Delete confirm dialog */
